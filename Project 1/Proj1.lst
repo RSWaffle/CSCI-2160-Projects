@@ -1,0 +1,85 @@
+Microsoft (R) Macro Assembler Version 6.11		    09/16/19 15:55:50
+Proj1.asm						     Page 1 - 1
+
+
+				;******************************************************************************************
+				;*  Program Name: proj1.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160
+				;*  Lab:          Proj1
+				;*  Date:         9/23/2019
+				;*  Purpose:      give a secription here of what the program DOES
+				;******************************************************************************************
+					.486				;tells assembler to generate 32-bit code
+					.model flat			;tells assembler that all addresses are real addresses
+					.stack 100h			;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+				;  List all necessary prototypes for methods to be called here
+					
+					ExitProcess PROTO Near32 stdcall, dwExitCode:DWORD  ;executes "normal" termination
+					
+				;******************************************************************************************
+ 00000000				.DATA				;declare all data identifiers after this directive
+
+ 00000000			iResult DWORD  0 dup(?)			;memory to hold the resulting value of calculation
+ 00000000 007F			sVal1 WORD 127			;sets the variable sVal1 to 127 decimal for calculation
+ 00000002 FFE7			sVal2 WORD -25			;sets the variable sVal2 to -25 decimal for calculation
+ 00000004 000131AD		iVal3 DWORD 78253		;sets the variable iVal3 to 78,253 decimal for calculation
+ 00000008 4E			bVal BYTE 78		;sets the variable of BVal to 78, 200 decimal for calculation
+
+				;******************************************************************************************
+ 00000000				.CODE
+ 00000000			_start:					;entry point for this program (needed for debugger)
+ 00000000
+ 00000000  B8 00000000			MOV EAX, 0			;aids in debugging and initalizes the program
+					
+				;************************************* the instruction below calls for "normal termination"	
+					INVOKE ExitProcess,0
+ 0000000C				PUBLIC _start
+					END					;signals assembler that there are no instructions after this stmt
+Microsoft (R) Macro Assembler Version 6.11		    09/16/19 15:55:50
+Proj1.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000009 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000C Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+bVal . . . . . . . . . . . . . .	Byte	 00000008 _DATA	
+iResult  . . . . . . . . . . . .	DWord	 00000000 _DATA	
+iVal3  . . . . . . . . . . . . .	DWord	 00000004 _DATA	
+sVal1  . . . . . . . . . . . . .	Word	 00000000 _DATA	
+sVal2  . . . . . . . . . . . . .	Word	 00000002 _DATA	
+
+	   0 Warnings
+	   0 Errors

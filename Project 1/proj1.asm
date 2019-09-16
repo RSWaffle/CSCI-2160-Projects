@@ -17,11 +17,11 @@
 ;******************************************************************************************
 	.DATA				;declare all data identifiers after this directive
 
-iResult DWORD 			;memory to hold the resulting value of calculation
+iResult DWORD  0 dup(?)			;memory to hold the resulting value of calculation
 sVal1 WORD 127			;sets the variable sVal1 to 127 decimal for calculation
 sVal2 WORD -25			;sets the variable sVal2 to -25 decimal for calculation
-iVal3 DWORD 78, 253		;sets the variable iVal3 to 78, 253 decimal for calculation
-bVal BYTE 78, 200		;sets the variable of BVal to 78, 200 decimal for calculation
+iVal3 DWORD 78253		;sets the variable iVal3 to 78,253 decimal for calculation
+bVal BYTE 78		;sets the variable of BVal to 78, 200 decimal for calculation
 
 ;******************************************************************************************
 	.CODE

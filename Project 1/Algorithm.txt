@@ -1,0 +1,37 @@
+Move sVal1 127 to a register
+move sVal2 -25 to a register
+add two registers
+subtract 20 from the result
+move result into memory. as sTemp
+
+move iVal3 into register 78253
+move bVal4 into register using dword pointer?
+subtract the two values in register 
+move result to memory iTemp
+
+Intitiate loop for multiplication
+
+move into ECX 15
+lpMuliply1:
+Move sTemp to register
+add register sTemp into different register
+loop lpMultiply1
+
+Move different register to sTemp
+
+
+Intitiate loop for multiplication
+
+move into ECX sTemp
+lpMuliply2:
+Move iTemp to register
+add register iTemp into different register
+loop lpMultiply2
+
+Move different register to iResult
+
+
+
+
+
+

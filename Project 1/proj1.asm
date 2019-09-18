@@ -25,7 +25,7 @@ iResult DWORD  ?				;memory to hold the resulting value of calculation
 sVal1 WORD 127					;sets the variable sVal1 to 127 decimal for calculation
 sVal2 WORD -25					;sets the variable sVal2 to -25 decimal for calculation
 iVal3 DWORD 78253				;sets the variable iVal3 to 78,253 decimal for calculation
-bVal4 BYTE 78					;sets the variable of BVal to 78, 200 decimal for calculation
+bVal4 BYTE 78					;sets the variable of BVal to 78 decimal for calculation
 
 sTemp WORD ?					;sets aside memory for a future value for calculation
 iTemp DWORD ?					;sets aside memory for a future value for calculation
@@ -48,7 +48,7 @@ _start:							;This is the entry point for this program (needed for debugger)
 	MOV EAX, 0					;This aids in debugging and initializes the program, EAX = 00000000
 	
 	MOV EBX, 0					;initialize EBX to 0 to avoid calculation error, EBX = 00000000
-	MOV AX ,sVal1				;move the first value of calculation to AX register, EAX = 0000007F
+	MOV AX , sVal1				;move the first value of calculation to AX register, EAX = 0000007F
 	MOV BX, sVal2				;move the second value of calculation to the BX register, EBX = 0000FFE7
 	ADD AX, BX					;add the two registers and store in AX register, EAX = 00000066
 	MOV sTemp, AX				;store the value in AX into memory for later calculation, sTemp = 0066 stored as 6600
@@ -56,7 +56,7 @@ _start:							;This is the entry point for this program (needed for debugger)
 	MOV EBX, 0					;reset the EBX register to 0 to avoid calculation error, EBX = 00000000
 	MOV EAX, iVal3				;move the first value of calculation to the EAX register, EAX = 000131AD
 	MOV BL,  bVal4				;move the second value of calculation to the EBX register making sure to match the byte size, BL = 4E
-	SUB EAX, EBX				;preform the subtract calculation and store into the EAX register, EAX = 0001315F
+	SUB EAX, EBX				;perform the subtract calculation and store into the EAX register, EAX = 0001315F
 	MOV iTemp, EAX				;store the result in EAX to memory as iTemp, iTemp = 0001315F stored as 5F310100
 	
 	MOV ECX, 15					;set the loop counter to 15 so the loop knows when to terminate, ECX = 0000000F
@@ -70,7 +70,7 @@ lpMultiply1:					;loop header for first multiplication operation
 	SUB AX, 20					;subtracts 20 from AX and stores back into AX, EAX = 000005E6
 	MOV sTemp, AX				;moves the result from the loop (stored in AX register) into the sTemp variable
 	
-	MOV CX, sTemp				;moves into the loop counter register the value of sTemp so the upcoming loop knows when to terminate, ECX = 000005E6
+	MOV CX, sTemp				;moves the value of sTemp into the loop counter register  so the upcoming loop knows when to terminate, ECX = 000005E6
 	MOV EAX, 0					;sets EAX register to 0 to avoid any calculation error, EAX = 00000000
 	MOV EBX, iTemp				;set the value of EBX to iTemp for multiple additions to the same number, EBX = 0001315F
 	

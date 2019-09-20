@@ -4,7 +4,7 @@
 ;*  Class:        CSCI 2160-001
 ;*  Lab:          Proj1
 ;*  Date:         9/23/2019
-;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 - sVal2) * (iVal3 - bVal4), 
+;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 - sVal2) - 20 * (iVal3 - bVal4), 
 ;*				  with all arithmetic being completed in registers and loops for multiplication operations.  
 ;*				  The program then displays the project information on the screen properly formatted, 
 ;*				  also displaying the result of the computed equation.
@@ -81,7 +81,7 @@ lpMultiply2:					;loop header for the second multiplication operation
 	MOV iTemp, EAX				;move the multiplication result into memory as iResult, iResult = 0017DB6C
 	
 	MOVSX EAX, sTemp			;Moves the value of sTemp into EAX with its sign extended, EAX = 000005FA
-	MOV EBX, iTemp				;moves the value of iTemp into EBX, EBX = 0017DB6C
+	MOV EBX, iTemp				;Moves the value of iTemp into EBX, EBX = 0017DB6C
 	SUB EAX, EBX				;Subtracts the two registers and stores result into EAX, EAX = FFE82A8E
 	MOV iResult, EAX			;Moves the result of EAX into the variable iResult
 	

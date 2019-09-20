@@ -4,14 +4,14 @@
 ;*  Class:        CSCI 2160-001
 ;*  Lab:          Proj1
 ;*  Date:         9/23/2019
-;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 = sVal2) * (iVal3 - bVal4), 
+;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 - sVal2) * (iVal3 - bVal4), 
 ;*				  with all arithmetic being completed in registers and loops for multiplication operations.  
 ;*				  The program then displays the project information on the screen properly formatted, 
 ;*				  also displaying the result of the computed equation.
 ;******************************************************************************************
-	.486				;This tells assembler to generate 32-bit code
-	.model flat			;This tells assembler that all addresses are real addresses
-	.stack 100h			;EVERY program needs to have a stack allocated
+	.486						;This tells assembler to generate 32-bit code
+	.model flat					;This tells assembler that all addresses are real addresses
+	.stack 100h					;EVERY program needs to have a stack allocated
 ;******************************************************************************************
 ;  List all necessary prototypes for methods to be called here
 	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  					;executes "normal" termination
@@ -30,16 +30,17 @@ bVal4 BYTE 78					;sets the variable of BVal to 78 decimal for calculation
 sTemp WORD ?					;sets aside memory for a future value for calculation
 iTemp DWORD ?					;sets aside memory for a future value for calculation
 
-strInput byte  11 dup(?)						;holds input string. Allow room for NULL
-strResult   byte  12 dup(?)     				;memory to hold the ASCII value of any 4-byte value
-crlf byte  10,13,0								;null-terminated string to skip to new line
+strResult   byte  12 dup(?)     ;memory to hold the ASCII value of any 4-byte value
+crlf byte  10,13,0				;null-terminated string to skip to new line
+
+
 strResultIs byte  10,13,9,"Result = ",0
 					
 strInfoIs byte  10,13,9,
- "Name: Ryan Shupe",10,20,20,20,20,20,20,20,
-"Class: CSCI 2160-001",10,20,20,20,20,20,20,20,20,
- "Date: 9/23/2019",10,20,20,20,20,20,20,20,20,20
-   "Lab: Project1",0
+ "Name: Ryan Shupe",10,32,32,32,32,32,32,32,
+"Class: CSCI 2160-001",10,32,32,32,32,32,32,32,32,
+ "Date: 9/23/2019",10,32,32,32,32,32,32,32,32,32,
+   "Lab: Project 1",0
 
 ;******************************************************************************************
 	.CODE
@@ -66,11 +67,10 @@ _start:							;This is the entry point for this program (needed for debugger)
 lpMultiply1:					;loop header for first multiplication operation
 	ADD AX, BX					;add the two values together and store into AX, looping this simulates multiplication
 	loop lpMultiply1			;decrement the ECX register to eventually stop the loop, and jump to the top
-	
-	SUB AX, 20					;subtracts 20 from AX and stores back into AX, EAX = 000005E6
+							
 	MOV sTemp, AX				;moves the result from the loop (stored in AX register) into the sTemp variable
 	
-	MOV CX, sTemp				;moves the value of sTemp into the loop counter register  so the upcoming loop knows when to terminate, ECX = 000005E6
+	MOV ECX, 20					;moves the value 20 into the loop counter register  so the upcoming loop knows when to terminate, ECX = 00000014
 	MOV EAX, 0					;sets EAX register to 0 to avoid any calculation error, EAX = 00000000
 	MOV EBX, iTemp				;set the value of EBX to iTemp for multiple additions to the same number, EBX = 0001315F
 	
@@ -78,8 +78,12 @@ lpMultiply2:					;loop header for the second multiplication operation
 	ADD EAX, EBX				;add the two registers together in the loop simulating multiplication
 	loop lpMultiply2			;decrement the ECX register to eventually end the loop
 	
-	MOV iResult, EAX			;move the multiplication result into memory as iResult, iResult = 0709365A, stored as 5A360907
+	MOV iTemp, EAX				;move the multiplication result into memory as iResult, iResult = 0017DB6C
 	
+	MOVSX EAX, sTemp			;Moves the value of sTemp into EAX with its sign extended, EAX = 000005FA
+	MOV EBX, iTemp				;moves the value of iTemp into EBX, EBX = 0017DB6C
+	SUB EAX, EBX				;Subtracts the two registers and stores result into EAX, EAX = FFE82A8E
+	MOV iResult, EAX			;Moves the result of EAX into the variable iResult
 	
 	INVOKE putstring, ADDR strInfoIs      		;skip to new line, tab, and display Project information "Name: Ryan Shupe" etc. 
 	INVOKE putstring, ADDR crlf					;display the characters to skip to a new line	

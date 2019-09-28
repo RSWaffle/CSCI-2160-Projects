@@ -1,0 +1,191 @@
+Microsoft (R) Macro Assembler Version 6.11		    09/20/19 12:44:42
+proj1.asm						     Page 1 - 1
+
+
+				;******************************************************************************************
+				;*  Program Name: proj1.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160-001
+				;*  Lab:          Proj1
+				;*  Date:         9/23/2019
+				;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 - sVal2) * (iVal3 - bVal4), 
+				;*				  with all arithmetic being completed in registers and loops for multiplication operations.  
+				;*				  The program then displays the project information on the screen properly formatted, 
+				;*				  also displaying the result of the computed equation.
+				;******************************************************************************************
+					.486						;This tells assembler to generate 32-bit code
+					.model flat					;This tells assembler that all addresses are real addresses
+					.stack 100h					;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+				;  List all necessary prototypes for methods to be called here
+					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  					;executes "normal" termination
+					intasc32 PROTO NEAR32 stdcall, lpStringToHold:dword, dval:dword			;will convert any D-Word number into ACSII characters
+					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;will display ;characters until the NULL character is found
+					
+				;******************************************************************************************
+ 00000000				.DATA						;declare all data identifiers after this directive
+
+ 00000000 00000000		iResult DWORD  ?				;memory to hold the resulting value of calculation
+ 00000004 007F			sVal1 WORD 127					;sets the variable sVal1 to 127 decimal for calculation
+ 00000006 FFE7			sVal2 WORD -25					;sets the variable sVal2 to -25 decimal for calculation
+ 00000008 000131AD		iVal3 DWORD 78253				;sets the variable iVal3 to 78,253 decimal for calculation
+ 0000000C 4E			bVal4 BYTE 78					;sets the variable of BVal to 78 decimal for calculation
+
+ 0000000D 0000			sTemp WORD ?					;sets aside memory for a future value for calculation
+ 0000000F 00000000		iTemp DWORD ?					;sets aside memory for a future value for calculation
+
+ 00000013  0000000C [		strResult   byte  12 dup(?)     ;memory to hold the ASCII value of any 4-byte value
+	    00
+	   ]
+ 0000001F 0A 0D 00		crlf byte  10,13,0				;null-terminated string to skip to new line
+
+
+ 00000022 0A 0D 09 52 65	strResultIs byte  10,13,9,"Result = ",0
+	   73 75 6C 74 20
+	   3D 20 00
+									
+ 0000002F 0A 0D 09 4E 61	strInfoIs byte  10,13,9,
+	   6D 65 3A 20 52
+	   79 61 6E 20 53
+	   68 75 70 65 0A
+	   20 20 20 20 20
+	   20 20 43 6C 61
+	   73 73 3A 20 43
+	   53 43 49 20 32
+	   31 36 30 2D 30
+	   30 31 0A 20 20
+	   20 20 20 20 20
+	   20 44 61 74 65
+	   3A 20 39 2F 32
+	   33 2F 32 30 31
+	   39 0A 20 20 20
+	   20 20 20 20 20
+	   20 4C 61 62 3A
+	   20 50 72 6F 6A
+	   65 63 74 20 31
+	   00
+				 "Name: Ryan Shupe",10,32,32,32,32,32,32,32,
+				"Class: CSCI 2160-001",10,32,32,32,32,32,32,32,32,
+				 "Date: 9/23/2019",10,32,32,32,32,32,32,32,32,32,
+				   "Lab: Project 1",0
+
+				;******************************************************************************************
+ 00000000				.CODE
+ 00000000			_start:							;This is the entry point for this program (needed for debugger)
+ 00000000
+ 00000000  B8 00000000			MOV EAX, 0					;This aids in debugging and initializes the program, EAX = 00000000
+					
+ 00000005  BB 00000000			MOV EBX, 0					;initialize EBX to 0 to avoid calculation error, EBX = 00000000
+ 0000000A  66| A1			MOV AX , sVal1				;move the first value of calculation to AX register, EAX = 0000007F
+	   00000004 R
+ 00000010  66| 8B 1D			MOV BX, sVal2				;move the second value of calculation to the BX register, EBX = 0000FFE7
+	   00000006 R
+ 00000017  66| 03 C3			ADD AX, BX					;add the two registers and store in AX register, EAX = 00000066
+ 0000001A  66| A3			MOV sTemp, AX				;store the value in AX into memory for later calculation, sTemp = 0066 stored as 6600
+	   0000000D R
+					
+ 00000020  BB 00000000			MOV EBX, 0					;reset the EBX register to 0 to avoid calculation error, EBX = 00000000
+ 00000025  A1 00000008 R		MOV EAX, iVal3				;move the first value of calculation to the EAX register, EAX = 000131AD
+ 0000002A  8A 1D 0000000C R		MOV BL,  bVal4				;move the second value of calculation to the EBX register making sure to match the byte size, BL = 4E
+ 00000030  2B C3			SUB EAX, EBX				;perform the subtract calculation and store into the EAX register, EAX = 0001315F
+ 00000032  A3 0000000F R		MOV iTemp, EAX				;store the result in EAX to memory as iTemp, iTemp = 0001315F stored as 5F310100
+					
+ 00000037  B9 0000000F			MOV ECX, 15					;set the loop counter to 15 so the loop knows when to terminate, ECX = 0000000F
+ 0000003C  B8 00000000			MOV EAX, 0					;set the EAX register to 0 to avoid any calculation error, EAX = 00000000
+ 00000041  66| 8B 1D			MOV BX, sTemp				;move the variable sTemp into a register so calculation can be done via register to register, BL = 66
+	   0000000D R
+					
+ 00000048			lpMultiply1:					;loop header for first multiplication operation
+ 00000048  66| 03 C3			ADD AX, BX					;add the two values together and store into AX, looping this simulates multiplication
+ 0000004B  E2 FB			loop lpMultiply1			;decrement the ECX register to eventually stop the loop, and jump to the top
+											
+ 0000004D  66| A3			MOV sTemp, AX				;moves the result from the loop (stored in AX register) into the sTemp variable
+	   0000000D R
+					
+ 00000053  B9 00000014			MOV ECX, 20					;moves the value 20 into the loop counter register  so the upcoming loop knows when to terminate, ECX = 00000014
+ 00000058  B8 00000000			MOV EAX, 0					;sets EAX register to 0 to avoid any calculation error, EAX = 00000000
+ 0000005D  8B 1D 0000000F R		MOV EBX, iTemp				;set the value of EBX to iTemp for multiple additions to the same number, EBX = 0001315F
+					
+ 00000063			lpMultiply2:					;loop header for the second multiplication operation
+ 00000063  03 C3			ADD EAX, EBX				;add the two registers together in the loop simulating multiplication
+ 00000065  E2 FC			loop lpMultiply2			;decrement the ECX register to eventually end the loop
+					
+ 00000067  A3 0000000F R		MOV iTemp, EAX				;move the multiplication result into memory as iResult, iResult = 0017DB6C
+					
+ 0000006C  0F BF 05			MOVSX EAX, sTemp			;Moves the value of sTemp into EAX with its sign extended, EAX = 000005FA
+	   0000000D R
+ 00000073  8B 1D 0000000F R		MOV EBX, iTemp				;moves the value of iTemp into EBX, EBX = 0017DB6C
+ 00000079  2B C3			SUB EAX, EBX				;Subtracts the two registers and stores result into EAX, EAX = FFE82A8E
+ 0000007B  A3 00000000 R		MOV iResult, EAX			;Moves the result of EAX into the variable iResult
+					
+					INVOKE putstring, ADDR strInfoIs      		;skip to new line, tab, and display Project information "Name: Ryan Shupe" etc. 
+					INVOKE putstring, ADDR crlf					;display the characters to skip to a new line	
+					
+					INVOKE putstring, ADDR strResultIs      	;skip to new line, tab, and display "Result = "
+					INVOKE intasc32, ADDR strResult, iResult    ;convert the D-WORD IResult to ASCII characters
+					INVOKE putstring, ADDR strResult         	;display the numeric string
+					INVOKE putstring, ADDR crlf					;display the characters to skip to a new line
+					
+					
+				;************************************* the instruction below calls for "normal termination"	
+					INVOKE ExitProcess,0
+ 000000C9				PUBLIC _start
+					END							;signals assembler that there are no instructions after this statement
+Microsoft (R) Macro Assembler Version 6.11		    09/20/19 12:44:42
+proj1.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000008F DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000C9 DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000C9 Private
+  lpMultiply1  . . . . . . . . .	L Near	 00000048 _TEXT	
+  lpMultiply2  . . . . . . . . .	L Near	 00000063 _TEXT	
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+bVal4  . . . . . . . . . . . . .	Byte	 0000000C _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 0000001F _DATA	
+iResult  . . . . . . . . . . . .	DWord	 00000000 _DATA	
+iTemp  . . . . . . . . . . . . .	DWord	 0000000F _DATA	
+iVal3  . . . . . . . . . . . . .	DWord	 00000008 _DATA	
+lpMultiply1  . . . . . . . . . .	L Near	 00000048 _TEXT	
+lpMultiply2  . . . . . . . . . .	L Near	 00000063 _TEXT	
+sTemp  . . . . . . . . . . . . .	Word	 0000000D _DATA	
+sVal1  . . . . . . . . . . . . .	Word	 00000004 _DATA	
+sVal2  . . . . . . . . . . . . .	Word	 00000006 _DATA	
+strInfoIs  . . . . . . . . . . .	Byte	 0000002F _DATA	
+strResultIs  . . . . . . . . . .	Byte	 00000022 _DATA	
+strResult  . . . . . . . . . . .	Byte	 00000013 _DATA	
+
+	   0 Warnings
+	   0 Errors

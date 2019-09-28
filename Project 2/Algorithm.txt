@@ -14,6 +14,9 @@ divide the sum variable by x
 display the resulting value with whole number average message
 
 Euclidean division, store in varible, display
+keep subtracting
+compare number to see if the number being divided is less than x, if it is that is the remainder
+if not, keep dividing.
 
 use cmp and jp for comparing the values for least and greatest. Refer to dataVlasCMP.asm
 

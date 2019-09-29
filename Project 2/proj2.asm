@@ -26,21 +26,22 @@
 	strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
 	strMaxAmount byte "Maximum amount is 10 numbers.", 0
 	strMaxNumber byte "Maximum number you can enter is 4,294,967,295.", 0
+	strSum byte "The sum of all the numbers is: ", 0
 	strProjInfo byte  10,13,9,
         "Name: Ryan Shupe",10,
 "       Class: CSCI 2160-001",10,
 "        Date: 10/04/2019",10,
 "         Lab: Project 2",0
+	strSumResult byte 10 dup (?)
     crlf byte  10,13,0				;Null-terminated string to skip to new line
 	strInput byte 60 dup (?)		;Set aside 60 bytes of memory for strInput
 	sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
 	sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
-	bOffset word 0					;This is going to hold the offset into the numbers variable.
 	iNumOfNums dword ?				;Number of numbers to be input/calculated
 	iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
 	iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
 	iTempNum dword ?				;Temporary variable to be used for comparing later
-	
+	iResult dword ?					;Temporary variable to store results before displaying
 	
 	
 ;******************************************************************************************
@@ -98,7 +99,7 @@ getNums:
 			
 	loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
 	
-JMP calculation										;Jump to the calculation section to preform the required calculation
+JMP sumCalc											;Jump to the calculation section to preform the required calculation
 	
 maxAmountMessage:
 	MOV ECX, 100									;Set ECX to 100 to let the loop know when to terminate and how many lines to skip
@@ -108,8 +109,21 @@ maxAmountMessage:
 	INVOKE putstring, ADDR strMaxAmount				;Display a message letting the user know that the maximum amount of numbers to enter is 10
 	JMP getNumofNums								;Jump back up to the getNumofNums section and it will repeat until the user enters a value less than or equal to 10
 	
-	calculation:
-	jmp finished
+sumCalc:
+	MOV EDX, 0										;Move 0 into EAX to prevent calculation errors
+	SUB EDI, 4										;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
+	MOV ECX, iNumOfNums								;Put the amount of numbers in ECX so the loop runs that amount of times.
+	lpSum:
+		MOV EAX, iNumbers[EDI]						;Moves the value offset EDI in iNumbers into EAX
+		ADD EDX, EAX								;Add the two registers to eventually get the sum in EAX
+		SUB EDI, 4									;Subtract 4 from EDI so we get the next number in the array
+	loop lpSum										;Decrement ECX to eventually terminate the loop
+	
+	MOV iResult, EDX								;Moves the result into a variable so it can be set up for display
+	INVOKE putstring, ADDR crlf						;Skips to a new line
+	INVOKE putstring, ADDR strSum					;display the string "The sum of the values is:"
+	INVOKE intasc32, ADDR strSumResult, iResult     ;convert the D-WORD IResult to ASCII characters
+	INVOKE putstring, ADDR strSumResult             ;display the numeric string
 	
 	
 ;************************************* the instructions below calls for "normal termination"	

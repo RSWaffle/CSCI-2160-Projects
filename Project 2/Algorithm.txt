@@ -1,14 +1,14 @@
-display the project info with putstring
-putstring how many values
-getstring to convert into value? - put into variable
-display each value message anter after each one
-getstring loop  x times into values array
+display the project info with putstring;
+putstring how many values;
+getstring to convert into value? - put into variable;
+display each value message anter after each one;
+getstring loop  x times into values array;
 
-loop:
-sum all values
+loop:;
+sum all values;
 
-store into a variable
-display information
+store into a variable;
+display information;
 
 divide the sum variable by x
 display the resulting value with whole number average message

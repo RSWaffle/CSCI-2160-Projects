@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    09/29/19 03:26:34
+Microsoft (R) Macro Assembler Version 6.11		    09/29/19 19:28:33
 proj2.asm						     Page 1 - 1
 
 
@@ -32,7 +32,15 @@ proj2.asm						     Page 1 - 1
 	   65 73 20 74 6F
 	   20 69 6E 70 75
 	   74 3A 20 00
- 00000021 0A 0A 54 79 70		strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
+ 00000021 0A 0A 4C 69 73		strReverse byte 10,10, "List of numbers in reverse order: ", 0
+	   74 20 6F 66 20
+	   6E 75 6D 62 65
+	   72 73 20 69 6E
+	   20 72 65 76 65
+	   72 73 65 20 6F
+	   72 64 65 72 3A
+	   20 00
+ 00000046 0A 0A 54 79 70		strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
 	   65 20 65 61 63
 	   68 20 76 61 6C
 	   75 65 20 61 6E
@@ -43,28 +51,28 @@ proj2.asm						     Page 1 - 1
 	   65 61 63 68 20
 	   6F 6E 65 3A 20
 	   00
- 00000054 4D 61 78 69 6D		strMaxAmount byte "Maximum amount is 10 numbers.", 0
+ 00000079 4D 61 78 69 6D		strMaxAmount byte "Maximum amount is 10 numbers.", 0
 	   75 6D 20 61 6D
 	   6F 75 6E 74 20
 	   69 73 20 31 30
 	   20 6E 75 6D 62
 	   65 72 73 2E 00
- 00000072 54 68 65 20 4A		strMod byte "The Java modulo is: ", 0
+ 00000097 54 68 65 20 4A		strMod byte "The Java modulo is: ", 0
 	   61 76 61 20 6D
 	   6F 64 75 6C 6F
 	   20 69 73 3A 20
 	   00
- 00000087 54 68 65 20 73		strLess byte "The smallest number is: ", 0
+ 000000AC 54 68 65 20 73		strLess byte "The smallest number is: ", 0
 	   6D 61 6C 6C 65
 	   73 74 20 6E 75
 	   6D 62 65 72 20
 	   69 73 3A 20 00
- 000000A0 54 68 65 20 67		strGtr byte "The greatest number is: ", 0
+ 000000C5 54 68 65 20 67		strGtr byte "The greatest number is: ", 0
 	   72 65 61 74 65
 	   73 74 20 6E 75
 	   6D 62 65 72 20
 	   69 73 3A 20 00
- 000000B9 54 68 65 20 4A		strAverage byte "The Java answer to the whole number average is: ", 0
+ 000000DE 54 68 65 20 4A		strAverage byte "The Java answer to the whole number average is: ", 0
 	   61 76 61 20 61
 	   6E 73 77 65 72
 	   20 74 6F 20 74
@@ -74,7 +82,7 @@ proj2.asm						     Page 1 - 1
 	   20 61 76 65 72
 	   61 67 65 20 69
 	   73 3A 20 00
- 000000EA 4D 61 78 69 6D		strMaxNumber byte "Maximum number you can enter is 4,294,967,295.", 0
+ 0000010F 4D 61 78 69 6D		strMaxNumber byte "Maximum number you can enter is 4,294,967,295.", 0
 	   75 6D 20 6E 75
 	   6D 62 65 72 20
 	   79 6F 75 20 63
@@ -84,14 +92,14 @@ proj2.asm						     Page 1 - 1
 	   39 34 2C 39 36
 	   37 2C 32 39 35
 	   2E 00
- 00000119 54 68 65 20 73		strSum byte "The sum of all the numbers is: ", 0
+ 0000013E 54 68 65 20 73		strSum byte "The sum of all the numbers is: ", 0
 	   75 6D 20 6F 66
 	   20 61 6C 6C 20
 	   74 68 65 20 6E
 	   75 6D 62 65 72
 	   73 20 69 73 3A
 	   20 00
- 00000139 0A 0D 09 4E 61		strProjInfo byte  10,13,9,
+ 0000015E 0A 0D 09 4E 61		strProjInfo byte  10,13,9,
 	   6D 65 3A 20 52
 	   79 61 6E 20 53
 	   68 75 70 65 0A
@@ -115,23 +123,24 @@ proj2.asm						     Page 1 - 1
 				"       Class: CSCI 2160-001",10,
 				"        Date: 10/04/2019",10,
 				"         Lab: Project 2",0
- 0000019A  0000000A [			strCalcResult byte 10 dup (?)
+ 000001BF  0000000A [			strCalcResult byte 10 dup (?)
 	    00
 	   ]
- 000001A4 0A 0D 00		    crlf byte  10,13,0				;Null-terminated string to skip to new line
- 000001A7  0000003C [			strInput byte 60 dup (?)		;Set aside 60 bytes of memory for strInput
+ 000001C9 0A 0D 00		    crlf byte  10,13,0				;Null-terminated string to skip to new line
+ 000001CC  0000003C [			strInput byte 60 dup (?)		;Set aside 60 bytes of memory for strInput
 	    00
 	   ]
- 000001E3 0002				sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
- 000001E5 000A				sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
- 000001E7 00				bNumOfNums byte ?				;Number of numbers to be input/calculated
- 000001E8  0000000A [			iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
+ 00000208 0002				sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
+ 0000020A 000A				sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
+ 0000020C 00				bNumOfNums byte ?				;Number of numbers to be input/calculated
+ 0000020D  0000000A [			iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
 	    00000000
 	   ]
- 00000210 FFFFFFFF			iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
- 00000214 00000000			iTempNum dword ?				;Temporary variable to be used for comparing later
- 00000218 00000000			iResult dword ?					;Temporary variable to store results before displaying
- 0000021C 00				bNumRemainder byte ?
+ 00000235 FFFFFFFF			iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
+ 00000239 00000000			iTempNum dword ?				;Temporary variable to be used for comparing later
+ 0000023D 00000000			iTemp dword ?
+ 00000241 00000000			iResult dword ?					;Temporary variable to store results before displaying
+ 00000245 00				bNumRemainder byte ?
 					
 					
 				;******************************************************************************************
@@ -148,18 +157,18 @@ proj2.asm						     Page 1 - 1
 					INVOKE putstring, ADDR strEnterAmtNumbers  	    ;Display the "Enter amount of numbers" message
 					INVOKE getstring, ADDR strInput, sNumNumbers	;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 					INVOKE ascint32, ADDR strInput					;Convert the ASCII value to its true decimal number
- 00000040  A2 000001E7 R		MOV bNumOfNums, AL								;Move the result of above method stored in EAX into variable so it isnt lost.
+ 00000040  A2 0000020C R		MOV bNumOfNums, AL								;Move the result of above method stored in EAX into variable so it isnt lost.
  00000045  0F B6 0D			MOVZX ECX, bNumOfNums								;Put the value of bNumOfNums into ECX so we can use it to loop later
-	   000001E7 R
+	   0000020C R
  0000004C  BF 00000000			MOV EDI, 0										;Put 0 into EDI so we can start at a 0 offset into iNumbers
 						
- 00000051  80 3D 000001E7 R		CMP bNumOfNums, 0								;Compare bNumOfNums to 0 to see if the user typed null character
+ 00000051  80 3D 0000020C R		CMP bNumOfNums, 0								;Compare bNumOfNums to 0 to see if the user typed null character
 	   00
- 00000058  0F 84 00000093		JE maxAmountMessage								;If it is null then jump to maxAmountMessage
- 0000005E  80 3D 000001E7 R		CMP bNumOfNums, 10								;Compare bNumOfNums to 10 to see if the user typed a number greater than 10.
+ 00000058  0F 84 00000099		JE maxAmountMessage								;If it is null then jump to maxAmountMessage
+ 0000005E  80 3D 0000020C R		CMP bNumOfNums, 10								;Compare bNumOfNums to 10 to see if the user typed a number greater than 10.
 	   0A
- 00000065  0F 8F 00000086		JG maxAmountMessage								;If greater than, jump to maxAmountMessage
- 0000006B  80 3D 000001E7 R		CMP bNumOfNums, 10								;Compare bNumOfNums to 10 to see if it is less than or equal to 10	
+ 00000065  0F 8F 0000008C		JG maxAmountMessage								;If greater than, jump to maxAmountMessage
+ 0000006B  80 3D 0000020C R		CMP bNumOfNums, 10								;Compare bNumOfNums to 10 to see if it is less than or equal to 10	
 	   0A
  00000072  7E 00			JLE getNums										;If so, jump to getNums so we can get the numbers for calculation 
 
@@ -171,15 +180,15 @@ proj2.asm						     Page 1 - 1
 				 
 						INVOKE getstring, ADDR strInput, sNum		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 						INVOKE ascint32, ADDR strInput				;Convert the ASCII value to its true decimal number
- 000000AA  A3 00000214 R			MOV iTempNum, EAX							;Move the EAX value into a variable so it isnt lost. 
- 000000AF  8B 15 00000210 R			MOV EDX, iMaxNumber							;Moves into EBX the max dword value to compare 
+ 000000AA  A3 00000239 R			MOV iTempNum, EAX							;Move the EAX value into a variable so it isnt lost. 
+ 000000AF  8B 15 00000235 R			MOV EDX, iMaxNumber							;Moves into EBX the max dword value to compare 
 					
- 000000B5  83 3D 00000214 R			CMP iTempNum, 0								;Compare EAX to 0 to see if the user typed null character
+ 000000B5  83 3D 00000239 R			CMP iTempNum, 0								;Compare EAX to 0 to see if the user typed null character
 	   00
  000000BC  74 10				JE invalidNum							    ;If it is null then jump to maxAmountMessage
- 000000BE  3B 15 00000214 R			CMP EDX, iTempNum							;Compare EDX to maximum dWord value
+ 000000BE  3B 15 00000239 R			CMP EDX, iTempNum							;Compare EDX to maximum dWord value
  000000C4  7F 08				JG invalidNum								;If it is greater than, jump to invalidNum section
- 000000C6  3B 15 00000214 R			CMP EDX, iTempNum							;Compare EDX to maximum dWord value
+ 000000C6  3B 15 00000239 R			CMP EDX, iTempNum							;Compare EDX to maximum dWord value
  000000CC  7E 16				JLE validNum								;If the number complies, jump to the validNum section
 
  000000CE					invalidNum:
@@ -188,57 +197,58 @@ proj2.asm						     Page 1 - 1
  000000E2  EB 90					JMP getNums								;Jump to the top and repeat until complied
 					
  000000E4					validNum:
- 000000E4  89 87 000001E8 R				MOV iNumbers[EDI], EAX					;Move EBX into iNumbers to be saved for later
+ 000000E4  89 87 0000020D R				MOV iNumbers[EDI], EAX					;Move EBX into iNumbers to be saved for later
  000000EA  83 C7 04					ADD EDI, 4								;Add 4 to EDI to put the number into the correct place in iNumbers
+ 000000ED  89 3D 0000023D R				MOV iTemp, EDI							;
 							
- 000000ED  E2 8F			loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
+ 000000F3  E2 89			loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
 					
- 000000EF  EB 20		JMP calculation										;Jump to the calculation section to preform the required calculation
+ 000000F5  EB 20		JMP calculation										;Jump to the calculation section to preform the required calculation
 					
- 000000F1			maxAmountMessage:
- 000000F1  B9 00000064			MOV ECX, 100									;Set ECX to 100 to let the loop know when to terminate and how many lines to skip
- 000000F6				lpClearSc:										;Loop to simulate a clear screen
+ 000000F7			maxAmountMessage:
+ 000000F7  B9 00000064			MOV ECX, 100									;Set ECX to 100 to let the loop know when to terminate and how many lines to skip
+ 000000FC				lpClearSc:										;Loop to simulate a clear screen
 						INVOKE putstring, ADDR crlf					;Display the characters to skip to a new line
- 00000100  E2 F4				loop lpClearSc								;Decrement ECX so the loop knows when to terminate
+ 00000106  E2 F4				loop lpClearSc								;Decrement ECX so the loop knows when to terminate
 					INVOKE putstring, ADDR strMaxAmount				;Display a message letting the user know that the maximum amount of numbers to enter is 10
- 0000010C  E9 FFFFFEF4			JMP getNumofNums								;Jump back up to the getNumofNums section and it will repeat until the user enters a value less than or equal to 10
+ 00000112  E9 FFFFFEEE			JMP getNumofNums								;Jump back up to the getNumofNums section and it will repeat until the user enters a value less than or equal to 10
 					
- 00000111			calculation:
- 00000111  BA 00000000			MOV EDX, 0										;Move 0 into EAX to prevent calculation errors
- 00000116  83 EF 04			SUB EDI, 4										;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
- 00000119  0F B6 0D			MOVZX ECX, bNumOfNums							;Put the amount of numbers in ECX so the loop runs that amount of times.
-	   000001E7 R
- 00000120				lpSum:
- 00000120  8B 87 000001E8 R			MOV EAX, iNumbers[EDI]						;Moves the value offset EDI in iNumbers into EAX
- 00000126  03 D0				ADD EDX, EAX								;Add the two registers to eventually get the sum in EAX
- 00000128  83 EF 04				SUB EDI, 4									;Subtract 4 from EDI so we get the next number in the array
- 0000012B  E2 F3			loop lpSum										;Decrement ECX to eventually terminate the loop
+ 00000117			calculation:
+ 00000117  BA 00000000			MOV EDX, 0										;Move 0 into EAX to prevent calculation errors
+ 0000011C  83 EF 04			SUB EDI, 4										;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
+ 0000011F  0F B6 0D			MOVZX ECX, bNumOfNums							;Put the amount of numbers in ECX so the loop runs that amount of times.
+	   0000020C R
+ 00000126				lpSum:
+ 00000126  8B 87 0000020D R			MOV EAX, iNumbers[EDI]						;Moves the value offset EDI in iNumbers into EAX
+ 0000012C  03 D0				ADD EDX, EAX								;Add the two registers to eventually get the sum in EAX
+ 0000012E  83 EF 04				SUB EDI, 4									;Subtract 4 from EDI so we get the next number in the array
+ 00000131  E2 F3			loop lpSum										;Decrement ECX to eventually terminate the loop
 					
- 0000012D  89 15 00000218 R		MOV iResult, EDX								;Moves the result into a variable so it can be set up for display
+ 00000133  89 15 00000241 R		MOV iResult, EDX								;Moves the result into a variable so it can be set up for display
 					INVOKE putstring, ADDR crlf						;Skips to a new line
 					INVOKE putstring, ADDR strSum					;display the string "The sum of the values is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    ;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            ;display the numeric string
 					
- 00000161  A1 00000218 R		MOV EAX, iResult								;Moves the current sum of all the numbers into EAX for subtraction
- 00000166  0F B6 15			MOVZX EDX, bNumOfNums							;moves the value of bNumOfNums into EDX for calculation
-	   000001E7 R
- 0000016D  BB 00000001			MOV EBX, 1										;set EBX to 1 because it has to go through atleast once
+ 00000167  A1 00000241 R		MOV EAX, iResult								;Moves the current sum of all the numbers into EAX for subtraction
+ 0000016C  0F B6 15			MOVZX EDX, bNumOfNums							;moves the value of bNumOfNums into EDX for calculation
+	   0000020C R
+ 00000173  BB 00000001			MOV EBX, 1										;set EBX to 1 because it has to go through atleast once
 
- 00000172			wlpDivide:
- 00000172  2B C2				SUB EAX, EDX								;Subtract the two registers to sumulate division
- 00000174  3B C2				CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
- 00000176  7C 07				JL resultNums								;If the number is less than, jump to resultNums
- 00000178  3B C2				CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
- 0000017A  7D 00				JGE nextNum									;If it is greater than or equal to, jump to the next num section
+ 00000178			wlpDivide:
+ 00000178  2B C2				SUB EAX, EDX								;Subtract the two registers to sumulate division
+ 0000017A  3B C2				CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
+ 0000017C  7C 07				JL resultNums								;If the number is less than, jump to resultNums
+ 0000017E  3B C2				CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
+ 00000180  7D 00				JGE nextNum									;If it is greater than or equal to, jump to the next num section
 						
- 0000017C			nextNum:
- 0000017C  43					INC EBX										;Increments the number to eventually get our average
- 0000017D  EB F3				JMP wlpDivide								;jump back up to the while loop
+ 00000182			nextNum:
+ 00000182  43					INC EBX										;Increments the number to eventually get our average
+ 00000183  EB F3				JMP wlpDivide								;jump back up to the while loop
 							
- 0000017F			resultNums:					
- 0000017F  A2 0000021C R			MOV BnumRemainder, AL						;moves the value in AL into the bnumremainder variable, this is our remainder. 
- 00000184  89 1D 00000218 R			MOV iResult, EBX							;moves the value of EBX into iResult, this is the average number.
+ 00000185			resultNums:					
+ 00000185  A2 00000245 R			MOV BnumRemainder, AL						;moves the value in AL into the bnumremainder variable, this is our remainder. 
+ 0000018A  89 1D 00000241 R			MOV iResult, EBX							;moves the value of EBX into iResult, this is the average number.
 						
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strAverage					 			;display the string "The average of the values is:"
@@ -249,55 +259,64 @@ proj2.asm						     Page 1 - 1
 					INVOKE intasc32, ADDR strCalcResult, dWord ptr BnumRemainder    ;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 000001E6  BF 00000000			MOV EDI, 0
+ 000001EC  BF 00000000			MOV EDI, 0
 
 					 
- 000001EB			compare:	
- 000001EB  0F B6 0D			MOVZX ECX, bNumOfNums
-	   000001E7 R
- 000001F2				lpgetPos:
- 000001F2  83 C7 04			Add EDI, 4
- 000001F5  E2 FB			loop lpgetPos
- 000001F7  83 EF 04			SUB EDI, 4
- 000001FA  0F B6 0D			MOVZX ECX, bNumOfNums	
-	   000001E7 R
- 00000201  8B 87 000001E8 R		MOV EAX, iNumbers[EDI]
- 00000207				lpCompare:
- 00000207  83 FF F8				CMP EDI, -8
- 0000020A  74 16				JE numFinsished
- 0000020C  8B 87 000001E8 R			MOV EAX, iNumbers[EDI]
- 00000212  3B 87 000001E8 R			CMP EAX, iNumbers[EDI]
- 00000218  7C 18				JL lessThan
- 0000021A  3B 87 000001E8 R			CMP EAX, iNumbers[EDI]
- 00000220  7D 17				JGE greaterThan
- 00000222				numFinsished:	
- 00000222  83 C7 08				ADD EDI, 8
- 00000225  83 E9 01				SUB ECX, 1
- 00000228  83 F9 00				CMP ECX, 0
- 0000022B  74 13				JE displayNumbers
- 0000022D  83 F9 00				CMP ECX, 0
- 00000230  7F D5				JG lpCompare
- 00000232				lessThan:
- 00000232  8B D8				MOV EBX, EAX
- 00000234  83 EF 04				SUB EDI, 4
- 00000237  EB CE				JMP lpCompare
- 00000239				greaterThan:
- 00000239  8B D0				MOV EDX, EAX
- 0000023B  83 EF 04				SUB EDI, 4
- 0000023E  EB C7				JMP lpCompare
+ 000001F1			compare:	
 					
- 00000240				displayNumbers:
- 00000240  89 1D 00000218 R		MOV iResult, EBX
+ 000001F1  89 1D 00000241 R		MOV iResult, EBX
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strLess					 				;display the string "The smallest value is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 00000274  89 15 00000218 R		MOV iResult, EDX
+ 00000225  89 15 00000241 R		MOV iResult, EDX
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strGtr					 				;display the string "The greatest value is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+					
+ 00000259  EB 00			JMP reverse
+					
+					
+					
+ 0000025B			reverse:
+ 0000025B  83 2D 0000023D R		SUB iTemp, 4
+	   04
+ 00000262  8B 3D 0000023D R		MOV EDI, iTemp
+					
+ 00000268  55				PUSH EBP
+ 00000269  8B EC			MOV EBP, ESP
+ 0000026B  0F B6 0D			MOVZX ECX, bNumOfNums
+	   0000020C R
+ 00000272				lpLoadStack:
+ 00000272  FF B7 0000020D R			PUSH iNumbers[EDI]
+ 00000278  83 EF 04				SUB EDI, 4
+ 0000027B  E2 F5			loop lpLoadStack
+					
+ 0000027D  0F B6 0D			MOVZX ECX, bNumOfNums
+	   0000020C R
+ 00000284  BF 00000000			MOV EDI, 0
+ 00000289				lpUnloadStack:
+ 00000289  8F 87 0000020D R			POP iNumbers[EDI]
+ 0000028F  83 C7 04				ADD EDI, 4
+ 00000292  E2 F5			loop lpUnloadStack
+					
+ 00000294  5D				POP EBP
+ 00000295  03 25 0000023D R		ADD ESP, iTemp
+					
+ 0000029B  8B 3D 0000023D R		MOV EDI, iTemp
+ 000002A1  0F B6 0D			MOVZX ECX, bNumOfNums
+	   0000020C R
+					INVOKE putstring, ADDR strReverse					 				;display the string "The greatest value is:"
+ 000002B2				lpDisplayNumbers:
+ 000002B2  8B 87 0000020D R			MOV EAX, iNumbers[EDI]
+ 000002B8  A3 00000241 R			MOV iResult, EAX
+ 000002BD  83 EF 04				SUB EDI, 4
+						INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
+						INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+						INVOKE putstring, ADDR crlf	;Skips to a new line
+ 000002E4  E2 CC			loop lpDisplayNumbers
 					
 					
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
@@ -307,14 +326,14 @@ proj2.asm						     Page 1 - 1
 
 					
 				;************************************* the instructions below calls for "normal termination"	
- 000002BC			finished:
+ 000002FA			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 000002C3			main ENDP
+ 00000301			main ENDP
 					END												;Signals assembler that there are no instructions after this statement
 					
-Microsoft (R) Macro Assembler Version 6.11		    09/29/19 03:26:34
+Microsoft (R) Macro Assembler Version 6.11		    09/29/19 19:28:33
 proj2.asm						     Symbols 2 - 1
 
 
@@ -326,8 +345,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000021D DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000002C3 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000246 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000301 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -339,27 +358,25 @@ ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000002BE Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000002FC Public
   getNumofNums . . . . . . . . .	L Near	 00000005 _TEXT	
   getNums  . . . . . . . . . . .	L Near	 00000074 _TEXT	
   lpGetNums  . . . . . . . . . .	L Near	 0000007E _TEXT	
   invalidNum . . . . . . . . . .	L Near	 000000CE _TEXT	
   validNum . . . . . . . . . . .	L Near	 000000E4 _TEXT	
-  maxAmountMessage . . . . . . .	L Near	 000000F1 _TEXT	
-  lpClearSc  . . . . . . . . . .	L Near	 000000F6 _TEXT	
-  calculation  . . . . . . . . .	L Near	 00000111 _TEXT	
-  lpSum  . . . . . . . . . . . .	L Near	 00000120 _TEXT	
-  wlpDivide  . . . . . . . . . .	L Near	 00000172 _TEXT	
-  nextNum  . . . . . . . . . . .	L Near	 0000017C _TEXT	
-  resultNums . . . . . . . . . .	L Near	 0000017F _TEXT	
-  compare  . . . . . . . . . . .	L Near	 000001EB _TEXT	
-  lpgetPos . . . . . . . . . . .	L Near	 000001F2 _TEXT	
-  lpCompare  . . . . . . . . . .	L Near	 00000207 _TEXT	
-  numFinsished . . . . . . . . .	L Near	 00000222 _TEXT	
-  lessThan . . . . . . . . . . .	L Near	 00000232 _TEXT	
-  greaterThan  . . . . . . . . .	L Near	 00000239 _TEXT	
-  displayNumbers . . . . . . . .	L Near	 00000240 _TEXT	
-  finished . . . . . . . . . . .	L Near	 000002BC _TEXT	
+  maxAmountMessage . . . . . . .	L Near	 000000F7 _TEXT	
+  lpClearSc  . . . . . . . . . .	L Near	 000000FC _TEXT	
+  calculation  . . . . . . . . .	L Near	 00000117 _TEXT	
+  lpSum  . . . . . . . . . . . .	L Near	 00000126 _TEXT	
+  wlpDivide  . . . . . . . . . .	L Near	 00000178 _TEXT	
+  nextNum  . . . . . . . . . . .	L Near	 00000182 _TEXT	
+  resultNums . . . . . . . . . .	L Near	 00000185 _TEXT	
+  compare  . . . . . . . . . . .	L Near	 000001F1 _TEXT	
+  reverse  . . . . . . . . . . .	L Near	 0000025B _TEXT	
+  lpLoadStack  . . . . . . . . .	L Near	 00000272 _TEXT	
+  lpUnloadStack  . . . . . . . .	L Near	 00000289 _TEXT	
+  lpDisplayNumbers . . . . . . .	L Near	 000002B2 _TEXT	
+  finished . . . . . . . . . . .	L Near	 000002FA _TEXT	
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
@@ -377,27 +394,29 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
-bNumOfNums . . . . . . . . . . .	Byte	 000001E7 _DATA	
-bNumRemainder  . . . . . . . . .	Byte	 0000021C _DATA	
-crlf . . . . . . . . . . . . . .	Byte	 000001A4 _DATA	
-iMaxNumber . . . . . . . . . . .	DWord	 00000210 _DATA	
-iNumbers . . . . . . . . . . . .	DWord	 000001E8 _DATA	
-iResult  . . . . . . . . . . . .	DWord	 00000218 _DATA	
-iTempNum . . . . . . . . . . . .	DWord	 00000214 _DATA	
-sNumNumbers  . . . . . . . . . .	Word	 000001E3 _DATA	
-sNum . . . . . . . . . . . . . .	Word	 000001E5 _DATA	
-strAverage . . . . . . . . . . .	Byte	 000000B9 _DATA	
-strCalcResult  . . . . . . . . .	Byte	 0000019A _DATA	
+bNumOfNums . . . . . . . . . . .	Byte	 0000020C _DATA	
+bNumRemainder  . . . . . . . . .	Byte	 00000245 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 000001C9 _DATA	
+iMaxNumber . . . . . . . . . . .	DWord	 00000235 _DATA	
+iNumbers . . . . . . . . . . . .	DWord	 0000020D _DATA	
+iResult  . . . . . . . . . . . .	DWord	 00000241 _DATA	
+iTempNum . . . . . . . . . . . .	DWord	 00000239 _DATA	
+iTemp  . . . . . . . . . . . . .	DWord	 0000023D _DATA	
+sNumNumbers  . . . . . . . . . .	Word	 00000208 _DATA	
+sNum . . . . . . . . . . . . . .	Word	 0000020A _DATA	
+strAverage . . . . . . . . . . .	Byte	 000000DE _DATA	
+strCalcResult  . . . . . . . . .	Byte	 000001BF _DATA	
 strEnterAmtNumbers . . . . . . .	Byte	 00000004 _DATA	
-strEnterNumbers  . . . . . . . .	Byte	 00000021 _DATA	
-strGtr . . . . . . . . . . . . .	Byte	 000000A0 _DATA	
-strInput . . . . . . . . . . . .	Byte	 000001A7 _DATA	
-strLess  . . . . . . . . . . . .	Byte	 00000087 _DATA	
-strMaxAmount . . . . . . . . . .	Byte	 00000054 _DATA	
-strMaxNumber . . . . . . . . . .	Byte	 000000EA _DATA	
-strMod . . . . . . . . . . . . .	Byte	 00000072 _DATA	
-strProjInfo  . . . . . . . . . .	Byte	 00000139 _DATA	
-strSum . . . . . . . . . . . . .	Byte	 00000119 _DATA	
+strEnterNumbers  . . . . . . . .	Byte	 00000046 _DATA	
+strGtr . . . . . . . . . . . . .	Byte	 000000C5 _DATA	
+strInput . . . . . . . . . . . .	Byte	 000001CC _DATA	
+strLess  . . . . . . . . . . . .	Byte	 000000AC _DATA	
+strMaxAmount . . . . . . . . . .	Byte	 00000079 _DATA	
+strMaxNumber . . . . . . . . . .	Byte	 0000010F _DATA	
+strMod . . . . . . . . . . . . .	Byte	 00000097 _DATA	
+strProjInfo  . . . . . . . . . .	Byte	 0000015E _DATA	
+strReverse . . . . . . . . . . .	Byte	 00000021 _DATA	
+strSum . . . . . . . . . . . . .	Byte	 0000013E _DATA	
 strTest  . . . . . . . . . . . .	Byte	 00000000 _DATA	
 
 	   0 Warnings

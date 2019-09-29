@@ -23,6 +23,7 @@
 	.DATA							;declare all data identifiers after this directive
 	strTest byte ":^)", 0
 	strEnterAmtNumbers byte 10,10, "How many values to input: ", 0
+	strReverse byte 10,10, "List of numbers in reverse order: ", 0
 	strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
 	strMaxAmount byte "Maximum amount is 10 numbers.", 0
 	strMod byte "The Java modulo is: ", 0
@@ -45,6 +46,7 @@
 	iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
 	iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
 	iTempNum dword ?				;Temporary variable to be used for comparing later
+	iTemp dword ?
 	iResult dword ?					;Temporary variable to store results before displaying
 	bNumRemainder byte ?
 	
@@ -100,6 +102,7 @@ getNums:
 		validNum:
 			MOV iNumbers[EDI], EAX					;Move EBX into iNumbers to be saved for later
 			ADD EDI, 4								;Add 4 to EDI to put the number into the correct place in iNumbers
+			MOV iTemp, EDI							;
 			
 	loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
 	
@@ -173,6 +176,44 @@ compare:
 	INVOKE putstring, ADDR strGtr					 				;display the string "The greatest value is:"
 	INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+	
+	JMP reverse														;Jump to the reverse section of our code. 
+	
+	
+	
+reverse:
+	SUB iTemp, 4													;Subtract 4 from iTemp so we dont start outside the iNumbers zone. 
+	MOV EDI, iTemp													;Move into EDI the value of iTemp which should be the amount of numbers * 4 - 4.
+	
+	PUSH EBP														;Preserve our current base pointer
+	MOV EBP, ESP													;Move our stack pointer into the base pointer
+	MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
+	lpLoadStack:
+		PUSH iNumbers[EDI]											;Push onto the stack the value iNumbers offset EDI
+		SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
+	loop lpLoadStack		
+	
+	MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
+	MOV EDI, 0														;Move 0 into EDI so we have a starting point
+	lpUnloadStack:			
+		POP iNumbers[EDI]											;Pop out of the stack into iNumbers offset EDI (should be in reverse)	
+		ADD EDI, 4													;Add 4 to EDI to get the next number in INumbers.
+	loop lpUnloadStack
+	
+	POP EBP															;Pop EBP out of the stack so we are  fully cleared
+	ADD ESP, iTemp												    ;Add to ESP iTemp so we get the bytes we used back
+
+	MOV EDI, iTemp													;Move into EDi ITemp, which should be the amount of numbers * 4 - 4.
+	MOVZX ECX, bNumOfNums										    ;Move the amount of numbers into ECX so the loop knows when to terminate
+	INVOKE putstring, ADDR strReverse					 			;display the string "The greatest value is:"
+	lpDisplayNumbers:
+		MOV EAX, iNumbers[EDI]										;Move the value at iNumbers[EDI] into EAX to be put in another variable, cant do mem to mem 
+		MOV iResult, EAX											;Move into iResult the value of EAX for displaying
+		SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
+		INVOKE putstring, ADDR crlf						 	 		;Skips to a new line
+		INVOKE intasc32, ADDR strCalcResult, iResult    	 		;convert the D-WORD IResult to ASCII characters
+		INVOKE putstring, ADDR strCalcResult            	 		;display the numeric string
+	loop lpDisplayNumbers
 	
 	
 	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line

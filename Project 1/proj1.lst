@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    09/20/19 12:44:42
+Microsoft (R) Macro Assembler Version 6.11		    09/20/19 15:53:47
 proj1.asm						     Page 1 - 1
 
 
@@ -8,7 +8,7 @@ proj1.asm						     Page 1 - 1
 				;*  Class:        CSCI 2160-001
 				;*  Lab:          Proj1
 				;*  Date:         9/23/2019
-				;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 - sVal2) * (iVal3 - bVal4), 
+				;*  Purpose:      This program computes the following equation: iResult = 15 * (sVal1 - sVal2) - 20 * (iVal3 - bVal4), 
 				;*				  with all arithmetic being completed in registers and loops for multiplication operations.  
 				;*				  The program then displays the project information on the screen properly formatted, 
 				;*				  also displaying the result of the computed equation.
@@ -114,7 +114,7 @@ proj1.asm						     Page 1 - 1
 					
  0000006C  0F BF 05			MOVSX EAX, sTemp			;Moves the value of sTemp into EAX with its sign extended, EAX = 000005FA
 	   0000000D R
- 00000073  8B 1D 0000000F R		MOV EBX, iTemp				;moves the value of iTemp into EBX, EBX = 0017DB6C
+ 00000073  8B 1D 0000000F R		MOV EBX, iTemp				;Moves the value of iTemp into EBX, EBX = 0017DB6C
  00000079  2B C3			SUB EAX, EBX				;Subtracts the two registers and stores result into EAX, EAX = FFE82A8E
  0000007B  A3 00000000 R		MOV iResult, EAX			;Moves the result of EAX into the variable iResult
 					
@@ -131,7 +131,7 @@ proj1.asm						     Page 1 - 1
 					INVOKE ExitProcess,0
  000000C9				PUBLIC _start
 					END							;signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    09/20/19 12:44:42
+Microsoft (R) Macro Assembler Version 6.11		    09/20/19 15:53:47
 proj1.asm						     Symbols 2 - 1
 
 

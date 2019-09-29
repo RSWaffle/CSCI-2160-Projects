@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    09/28/19 19:15:31
+Microsoft (R) Macro Assembler Version 6.11		    09/28/19 21:42:52
 proj2.asm						     Page 1 - 1
 
 
@@ -32,13 +32,34 @@ proj2.asm						     Page 1 - 1
 	   65 73 20 74 6F
 	   20 69 6E 70 75
 	   74 3A 20 00
- 0000001D 4D 61 78 69 6D		strMaxAmount byte "Maximum amount is 10 numbers.", 0
+ 0000001D 0A 0A 54 79 70		strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
+	   65 20 65 61 63
+	   68 20 76 61 6C
+	   75 65 20 61 6E
+	   64 20 70 72 65
+	   73 73 20 45 4E
+	   54 45 52 20 61
+	   66 74 65 72 20
+	   65 61 63 68 20
+	   6F 6E 65 3A 20
+	   00
+ 00000050 4D 61 78 69 6D		strMaxAmount byte "Maximum amount is 10 numbers.", 0
 	   75 6D 20 61 6D
 	   6F 75 6E 74 20
 	   69 73 20 31 30
 	   20 6E 75 6D 62
 	   65 72 73 2E 00
- 0000003B 0A 0D 09 4E 61		strProjInfo byte  10,13,9,
+ 0000006E 4D 61 78 69 6D		strMaxNumber byte "Maximum number you can enter is 4,294,967,295.", 0
+	   75 6D 20 6E 75
+	   6D 62 65 72 20
+	   79 6F 75 20 63
+	   61 6E 20 65 6E
+	   74 65 72 20 69
+	   73 20 34 2C 32
+	   39 34 2C 39 36
+	   37 2C 32 39 35
+	   2E 00
+ 0000009D 0A 0D 09 4E 61		strProjInfo byte  10,13,9,
 	   6D 65 3A 20 52
 	   79 61 6E 20 53
 	   68 75 70 65 0A
@@ -62,16 +83,20 @@ proj2.asm						     Page 1 - 1
 				"       Class: CSCI 2160-001",10,
 				"        Date: 10/04/2019",10,
 				"         Lab: Project 2",0
- 0000009C 0A 0D 00		    crlf byte  10,13,0				;null-terminated string to skip to new line
- 0000009F  0000001E [			strInput byte 30 dup (?)		;set aside 30 bytes of memory for strInput
+ 000000FE 0A 0D 00		    crlf byte  10,13,0				;null-terminated string to skip to new line
+ 00000101  0000003C [			strInput byte 60 dup (?)		;set aside 60 bytes of memory for strInput
 	    00
 	   ]
- 000000BD 0002				sNumNumbers word 2				;Maximum number of chars that can be typed in the console. 
-					
- 000000BF 00000000			iNumOfNums dword ?				;number of numbers to be input/calculated
- 000000C3  0000000A [			iNumbers dword 10 dup (?)		;set aside 10 dwords in memory to hold future numbers. 
+ 0000013D 0002				sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
+ 0000013F 000A				sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
+ 00000141 0000				bOffset word 0					;This is going to hold the offset into the numbers variable.
+ 00000143 00000000			iNumOfNums dword ?				;number of numbers to be input/calculated
+ 00000147  0000000A [			iNumbers dword 10 dup (?)		;set aside 10 dwords in memory to hold future numbers.
 	    00000000
 	   ]
+ 0000016F FFFFFFFF			iMaxNumber dword 4294967295		;maximum number for a dword for reference later
+ 00000173 00000000			iTempNum dword ?				;temporary variable to be used for comparing later
+					
 					
 					
 				;******************************************************************************************
@@ -81,46 +106,81 @@ proj2.asm						     Page 1 - 1
  00000000  B8 00000000			MOV EAX, 0									;statement to help in debugging
 					
  00000005 00000005		main PROC
-
+					
  00000005			getNumofNums:
 					INVOKE putstring, ADDR strProjInfo     		;skip to new line, tab, and display Project information "Name: Ryan Shupe" etc. 
 					INVOKE putstring, ADDR crlf					;display the characters to skip to a new line
 					INVOKE putstring, ADDR strEnterAmtNumbers   ;display the "Enter amount of numbers" message
 					INVOKE getstring, ADDR strInput, sNumNumbers;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 					INVOKE ascint32, ADDR strInput				;Convert the ASCII value to its true decimal number
- 00000040  A3 000000BF R		MOV iNumOfNums, EAX							;Move the result of above method stored in EAX into variable so it isnt lost.
+ 00000040  A3 00000143 R		MOV iNumOfNums, EAX							;Move the result of above method stored in EAX into variable so it isnt lost.
+ 00000045  8B 0D 00000143 R		MOV ECX, iNumOfNums	
+ 0000004B  BF 00000000			MOV EDI, 0
 					
- 00000045  83 3D 000000BF R		CMP iNumOfNums, 0							;Compare iNumOfNums to 0 to see if the user typed null character
+ 00000050  83 3D 00000143 R		CMP iNumOfNums, 0							;Compare iNumOfNums to 0 to see if the user typed null character
 	   00
- 0000004C  74 14			JE maxAmountMessage							;If it is null then jump to maxAmountMessage
- 0000004E  83 3D 000000BF R		CMP iNumOfNums, 10							;Compare iNumOfNums to 10 to see if the user typed a number greater than 10.
+ 00000057  0F 84 00000093		JE maxAmountMessage							;If it is null then jump to maxAmountMessage
+ 0000005D  83 3D 00000143 R		CMP iNumOfNums, 10							;Compare iNumOfNums to 10 to see if the user typed a number greater than 10.
 	   0A
- 00000055  7F 0B			JG maxAmountMessage							;If greater than, jump to maxAmountMessage
- 00000057  83 3D 000000BF R		CMP iNumOfNums, 10
+ 00000064  0F 8F 00000086		JG maxAmountMessage							;If greater than, jump to maxAmountMessage
+ 0000006A  83 3D 00000143 R		CMP iNumOfNums, 10							;Compare iNumOfNums to 10 to see if it is less than or equal to 10	
 	   0A
- 0000005E  7E 00			JLE testing
+ 00000071  7E 00			JLE getNums									;If so, jump to getNums so we can get the numbers for calculation 
 
- 00000060			testing:
- 00000060  EB 1D			jmp finished
+ 00000073			getNums:
 					
- 00000062			maxAmountMessage:
- 00000062  B9 00000064			MOV ECX, 100								;set ECX to 100 to let the loop know when to terminate and how many lines to skip
- 00000067				lpClearSc:									;loop to simulate a clear screen
-						INVOKE putstring, ADDR crlf				;display the characters to skip to a new line
- 00000071  E2 F4				loop lpClearSc							;decrement ECX so the loop knows when to terminate
-					INVOKE putstring, ADDR strMaxAmount			;display a message letting the user know that the maximum amount of numbers to enter is 10
- 0000007D  EB 86			JMP getNumofNums							;jump back up to the getNumofNums section and it will repeat until the user enters a value less than or equal to 10
+					INVOKE putstring, ADDR strEnterNumbers   		;display the "Type each value and press ENTER after each one:" message
+ 0000007D				lpGetNums:
+ 0000007D  B8 00000000				MOV EAX, 0									;reset EAX to 0 to prevent errors
+						INVOKE putstring, ADDR crlf					;display the characters to skip to a new line
+				 
+						INVOKE getstring, ADDR strInput, sNum		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+						INVOKE ascint32, ADDR strInput				;Convert the ASCII value to its true decimal number
+ 000000A9  A3 00000173 R			MOV iTempNum, EAX							;Move the EAX value into a variable so it isnt lost. 
+ 000000AE  8B 15 0000016F R			MOV EDX, iMaxNumber							;Moves into EBX the max dword value to compare 
+					
+ 000000B4  83 3D 00000173 R			CMP iTempNum, 0								;Compare EAX to 0 to see if the user typed null character
+	   00
+ 000000BB  74 10				JE invalidNum							    ;If it is null then jump to maxAmountMessage
+ 000000BD  3B 15 00000173 R			CMP EDX, iTempNum							;Compare EDX to maximum dWord value
+ 000000C3  7F 08				JG invalidNum								;if it is greater than, jump to invalidNum section
+ 000000C5  3B 15 00000173 R			CMP EDX, iTempNum							;Compare EDX to maximum dWord value
+ 000000CB  7E 16				JLE validNum								;if the number complies, jump to the validNum section
+
+ 000000CD					invalidNum:
+							INVOKE putstring, ADDR crlf				;display the characters to skip to a new line
+							INVOKE putstring, ADDR strMaxNumber		;display the max possible dword value string
+ 000000E1  EB 90					JMP getNums								;jump to the top and repeat until complied
+					
+ 000000E3					validNum:
+ 000000E3  89 87 00000147 R				MOV iNumbers[EDI], EAX					;move EBX into iNumbers to be saved for later
+ 000000E9  83 C7 04					ADD EDI, 4
+							
+ 000000EC  E2 8F			loop lpgetNums									;keep looping this until all of the numbers to be entered are filled.
+					
+ 000000EE  EB 20		JMP calculation										;Jump to the calculation section to preform the required calculation
+					
+ 000000F0			maxAmountMessage:
+ 000000F0  B9 00000064			MOV ECX, 100									;set ECX to 100 to let the loop know when to terminate and how many lines to skip
+ 000000F5				lpClearSc:										;loop to simulate a clear screen
+						INVOKE putstring, ADDR crlf					;display the characters to skip to a new line
+ 000000FF  E2 F4				loop lpClearSc								;decrement ECX so the loop knows when to terminate
+					INVOKE putstring, ADDR strMaxAmount				;display a message letting the user know that the maximum amount of numbers to enter is 10
+ 0000010B  E9 FFFFFEF5			JMP getNumofNums								;jump back up to the getNumofNums section and it will repeat until the user enters a value less than or equal to 10
+					
+ 00000110				calculation:
+ 00000110  EB 00			jmp finished
 					
 					
 				;************************************* the instruction below calls for "normal termination"	
- 0000007F			finished:
+ 00000112			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 00000086			main ENDP
-					END											;signals assembler that there are no instructions after this statement
+ 00000119			main ENDP
+					END												;signals assembler that there are no instructions after this statement
 					
-Microsoft (R) Macro Assembler Version 6.11		    09/28/19 19:15:31
+Microsoft (R) Macro Assembler Version 6.11		    09/28/19 21:42:52
 proj2.asm						     Symbols 2 - 1
 
 
@@ -132,8 +192,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000EB DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000086 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000177 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000119 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -145,12 +205,16 @@ ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000081 Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000114 Public
   getNumofNums . . . . . . . . .	L Near	 00000005 _TEXT	
-  testing  . . . . . . . . . . .	L Near	 00000060 _TEXT	
-  maxAmountMessage . . . . . . .	L Near	 00000062 _TEXT	
-  lpClearSc  . . . . . . . . . .	L Near	 00000067 _TEXT	
-  finished . . . . . . . . . . .	L Near	 0000007F _TEXT	
+  getNums  . . . . . . . . . . .	L Near	 00000073 _TEXT	
+  lpGetNums  . . . . . . . . . .	L Near	 0000007D _TEXT	
+  invalidNum . . . . . . . . . .	L Near	 000000CD _TEXT	
+  validNum . . . . . . . . . . .	L Near	 000000E3 _TEXT	
+  maxAmountMessage . . . . . . .	L Near	 000000F0 _TEXT	
+  lpClearSc  . . . . . . . . . .	L Near	 000000F5 _TEXT	
+  calculation  . . . . . . . . .	L Near	 00000110 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000112 _TEXT	
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
@@ -168,14 +232,20 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
-crlf . . . . . . . . . . . . . .	Byte	 0000009C _DATA	
-iNumOfNums . . . . . . . . . . .	DWord	 000000BF _DATA	
-iNumbers . . . . . . . . . . . .	DWord	 000000C3 _DATA	
-sNumNumbers  . . . . . . . . . .	Word	 000000BD _DATA	
+bOffset  . . . . . . . . . . . .	Word	 00000141 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 000000FE _DATA	
+iMaxNumber . . . . . . . . . . .	DWord	 0000016F _DATA	
+iNumOfNums . . . . . . . . . . .	DWord	 00000143 _DATA	
+iNumbers . . . . . . . . . . . .	DWord	 00000147 _DATA	
+iTempNum . . . . . . . . . . . .	DWord	 00000173 _DATA	
+sNumNumbers  . . . . . . . . . .	Word	 0000013D _DATA	
+sNum . . . . . . . . . . . . . .	Word	 0000013F _DATA	
 strEnterAmtNumbers . . . . . . .	Byte	 00000000 _DATA	
-strInput . . . . . . . . . . . .	Byte	 0000009F _DATA	
-strMaxAmount . . . . . . . . . .	Byte	 0000001D _DATA	
-strProjInfo  . . . . . . . . . .	Byte	 0000003B _DATA	
+strEnterNumbers  . . . . . . . .	Byte	 0000001D _DATA	
+strInput . . . . . . . . . . . .	Byte	 00000101 _DATA	
+strMaxAmount . . . . . . . . . .	Byte	 00000050 _DATA	
+strMaxNumber . . . . . . . . . .	Byte	 0000006E _DATA	
+strProjInfo  . . . . . . . . . .	Byte	 0000009D _DATA	
 
 	   0 Warnings
 	   0 Errors

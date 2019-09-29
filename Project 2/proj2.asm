@@ -41,7 +41,6 @@
 	strInput byte 60 dup (?)		;Set aside 60 bytes of memory for strInput
 	sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
 	sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
-	sOffset word ?
 	bNumOfNums byte ?				;Number of numbers to be input/calculated
 	iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
 	iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
@@ -158,30 +157,11 @@ resultNums:
 	INVOKE intasc32, ADDR strCalcResult, dWord ptr BnumRemainder    ;convert the D-WORD IResult to ASCII characters
 	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 	
+	MOV EDI, 0
+
+	 
 compare:	
-	MOVZX ECX, bNumOfNums
-	MOV EDX, 0
-	lpOffset:
-		ADD EAX, ECX
-		loop lpOffset	
-	MOV sOffset, AX
-	MOVZX ECX, bNumOfNums
-	lpCompare:
-		MOV EAX, ECX
-		MOV EDI, DWORD ptr sOffset - 4
-		MOV EAX, iNumbers[EDI]
-		CMP EAX, iNumbers[EDI]
-		JL lessThan
-		CMP EAX, iNumbers[EDI]
-		JGE gtrThan
-	loop lpCompare
 	
-	lessThan:
-	MOV EBX, EAX
-	gtrThan:
-	MOV EDX, EAX
-	
-	displayNumbers:
 	MOV iResult, EBX
 	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 	INVOKE putstring, ADDR strLess					 				;display the string "The smallest value is:"

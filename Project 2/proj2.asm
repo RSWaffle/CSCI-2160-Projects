@@ -21,10 +21,12 @@
 	
 ;******************************************************************************************
 	.DATA							;declare all data identifiers after this directive
-	
+	strTest byte ":^)", 0
 	strEnterAmtNumbers byte 10,10, "How many values to input: ", 0
 	strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
 	strMaxAmount byte "Maximum amount is 10 numbers.", 0
+	strMod byte "The Java modulo is: ", 0
+	strAverage byte "The Java answer to the whole number average is: ", 0
 	strMaxNumber byte "Maximum number you can enter is 4,294,967,295.", 0
 	strSum byte "The sum of all the numbers is: ", 0
 	strProjInfo byte  10,13,9,
@@ -32,16 +34,17 @@
 "       Class: CSCI 2160-001",10,
 "        Date: 10/04/2019",10,
 "         Lab: Project 2",0
-	strSumResult byte 10 dup (?)
+	strCalcResult byte 10 dup (?)
     crlf byte  10,13,0				;Null-terminated string to skip to new line
 	strInput byte 60 dup (?)		;Set aside 60 bytes of memory for strInput
 	sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
 	sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
-	iNumOfNums dword ?				;Number of numbers to be input/calculated
+	bNumOfNums byte ?				;Number of numbers to be input/calculated
 	iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
 	iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
 	iTempNum dword ?				;Temporary variable to be used for comparing later
 	iResult dword ?					;Temporary variable to store results before displaying
+	bNumRemainder byte ?
 	
 	
 ;******************************************************************************************
@@ -58,15 +61,15 @@ getNumofNums:
 	INVOKE putstring, ADDR strEnterAmtNumbers  	    ;Display the "Enter amount of numbers" message
 	INVOKE getstring, ADDR strInput, sNumNumbers	;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 	INVOKE ascint32, ADDR strInput					;Convert the ASCII value to its true decimal number
-	MOV iNumOfNums, EAX								;Move the result of above method stored in EAX into variable so it isnt lost.
-	MOV ECX, iNumOfNums								;Put the value of iNumOfNums into ECX so we can use it to loop later
+	MOV bNumOfNums, AL								;Move the result of above method stored in EAX into variable so it isnt lost.
+	MOVSX ECX, bNumOfNums								;Put the value of bNumOfNums into ECX so we can use it to loop later
 	MOV EDI, 0										;Put 0 into EDI so we can start at a 0 offset into iNumbers
 		
-	CMP iNumOfNums, 0								;Compare iNumOfNums to 0 to see if the user typed null character
+	CMP bNumOfNums, 0								;Compare bNumOfNums to 0 to see if the user typed null character
 	JE maxAmountMessage								;If it is null then jump to maxAmountMessage
-	CMP iNumOfNums, 10								;Compare iNumOfNums to 10 to see if the user typed a number greater than 10.
+	CMP bNumOfNums, 10								;Compare bNumOfNums to 10 to see if the user typed a number greater than 10.
 	JG maxAmountMessage								;If greater than, jump to maxAmountMessage
-	CMP iNumOfNums, 10								;Compare iNumOfNums to 10 to see if it is less than or equal to 10	
+	CMP bNumOfNums, 10								;Compare bNumOfNums to 10 to see if it is less than or equal to 10	
 	JLE getNums										;If so, jump to getNums so we can get the numbers for calculation 
 
 getNums:
@@ -99,7 +102,7 @@ getNums:
 			
 	loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
 	
-JMP sumCalc											;Jump to the calculation section to preform the required calculation
+JMP calculation										;Jump to the calculation section to preform the required calculation
 	
 maxAmountMessage:
 	MOV ECX, 100									;Set ECX to 100 to let the loop know when to terminate and how many lines to skip
@@ -109,10 +112,10 @@ maxAmountMessage:
 	INVOKE putstring, ADDR strMaxAmount				;Display a message letting the user know that the maximum amount of numbers to enter is 10
 	JMP getNumofNums								;Jump back up to the getNumofNums section and it will repeat until the user enters a value less than or equal to 10
 	
-sumCalc:
+calculation:
 	MOV EDX, 0										;Move 0 into EAX to prevent calculation errors
 	SUB EDI, 4										;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
-	MOV ECX, iNumOfNums								;Put the amount of numbers in ECX so the loop runs that amount of times.
+	MOVSX ECX, bNumOfNums							;Put the amount of numbers in ECX so the loop runs that amount of times.
 	lpSum:
 		MOV EAX, iNumbers[EDI]						;Moves the value offset EDI in iNumbers into EAX
 		ADD EDX, EAX								;Add the two registers to eventually get the sum in EAX
@@ -122,9 +125,43 @@ sumCalc:
 	MOV iResult, EDX								;Moves the result into a variable so it can be set up for display
 	INVOKE putstring, ADDR crlf						;Skips to a new line
 	INVOKE putstring, ADDR strSum					;display the string "The sum of the values is:"
-	INVOKE intasc32, ADDR strSumResult, iResult     ;convert the D-WORD IResult to ASCII characters
-	INVOKE putstring, ADDR strSumResult             ;display the numeric string
+	INVOKE intasc32, ADDR strCalcResult, iResult    ;convert the D-WORD IResult to ASCII characters
+	INVOKE putstring, ADDR strCalcResult            ;display the numeric string
 	
+	MOV EAX, iResult								;Moves the current sum of all the numbers into EAX for subtraction
+	MOVSX EDX, bNumOfNums							;moves the value of bNumOfNums into EDX for calculation
+	MOV EBX, 1										;set EBX to 1 because it has to go through atleast once
+
+	wlpDivide:
+		SUB EAX, EDX								;Subtract the two registers to sumulate division
+		CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
+		JL resultNums								;If the number is less than, jump to resultNums
+		CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
+		JGE nextNum									;If it is greater than or equal to, jump to the next num section
+		
+	nextNum:
+		INC EBX										;Increments the number to eventually get our average
+		JMP wlpDivide								;jump back up to the while loop
+			
+	resultNums:					
+		MOV BnumRemainder, AL						;moves the value in AL into the bnumremainder variable, this is our remainder. 
+		MOV iResult, EBX							;moves the value of EBX into iResult, this is the average number.
+		
+	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
+	INVOKE putstring, ADDR strAverage					 			;display the string "The average of the values is:"
+	INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
+	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+	INVOKE putstring, ADDR crlf							 			;Skips to a new line
+	INVOKE putstring, ADDR strMod						 			;display the string "The remainder:"
+	INVOKE intasc32, ADDR strCalcResult, dWord ptr BnumRemainder    ;convert the D-WORD IResult to ASCII characters
+	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+	
+	
+	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
+	INVOKE putstring, ADDR strTest					 				;test string"
+	
+	
+
 	
 ;************************************* the instructions below calls for "normal termination"	
 finished:

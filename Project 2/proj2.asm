@@ -26,6 +26,8 @@
 	strEnterNumbers byte 10,10, "Type each value and press ENTER after each one: ", 0
 	strMaxAmount byte "Maximum amount is 10 numbers.", 0
 	strMod byte "The Java modulo is: ", 0
+	strLess byte "The smallest number is: ", 0
+	strGtr byte "The greatest number is: ", 0
 	strAverage byte "The Java answer to the whole number average is: ", 0
 	strMaxNumber byte "Maximum number you can enter is 4,294,967,295.", 0
 	strSum byte "The sum of all the numbers is: ", 0
@@ -39,6 +41,7 @@
 	strInput byte 60 dup (?)		;Set aside 60 bytes of memory for strInput
 	sNumNumbers word 2				;Maximum number of chars that can be typed in the console for specifying how many numbers. 
 	sNum word 10					;Maximum number of chars that can be typed in the console for entering a number.
+	sOffset word ?
 	bNumOfNums byte ?				;Number of numbers to be input/calculated
 	iNumbers dword 10 dup (?)		;Set aside 10 dwords in memory to hold future numbers.
 	iMaxNumber dword 4294967295		;Maximum number for a dword for reference later
@@ -62,7 +65,7 @@ getNumofNums:
 	INVOKE getstring, ADDR strInput, sNumNumbers	;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 	INVOKE ascint32, ADDR strInput					;Convert the ASCII value to its true decimal number
 	MOV bNumOfNums, AL								;Move the result of above method stored in EAX into variable so it isnt lost.
-	MOVSX ECX, bNumOfNums								;Put the value of bNumOfNums into ECX so we can use it to loop later
+	MOVZX ECX, bNumOfNums								;Put the value of bNumOfNums into ECX so we can use it to loop later
 	MOV EDI, 0										;Put 0 into EDI so we can start at a 0 offset into iNumbers
 		
 	CMP bNumOfNums, 0								;Compare bNumOfNums to 0 to see if the user typed null character
@@ -73,7 +76,6 @@ getNumofNums:
 	JLE getNums										;If so, jump to getNums so we can get the numbers for calculation 
 
 getNums:
-	
 	INVOKE putstring, ADDR strEnterNumbers   		;Display the "Type each value and press ENTER after each one:" message
 	lpGetNums:
 		MOV EAX, 0									;Reset EAX to 0 to prevent errors
@@ -115,7 +117,7 @@ maxAmountMessage:
 calculation:
 	MOV EDX, 0										;Move 0 into EAX to prevent calculation errors
 	SUB EDI, 4										;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
-	MOVSX ECX, bNumOfNums							;Put the amount of numbers in ECX so the loop runs that amount of times.
+	MOVZX ECX, bNumOfNums							;Put the amount of numbers in ECX so the loop runs that amount of times.
 	lpSum:
 		MOV EAX, iNumbers[EDI]						;Moves the value offset EDI in iNumbers into EAX
 		ADD EDX, EAX								;Add the two registers to eventually get the sum in EAX
@@ -129,21 +131,21 @@ calculation:
 	INVOKE putstring, ADDR strCalcResult            ;display the numeric string
 	
 	MOV EAX, iResult								;Moves the current sum of all the numbers into EAX for subtraction
-	MOVSX EDX, bNumOfNums							;moves the value of bNumOfNums into EDX for calculation
+	MOVZX EDX, bNumOfNums							;moves the value of bNumOfNums into EDX for calculation
 	MOV EBX, 1										;set EBX to 1 because it has to go through atleast once
 
-	wlpDivide:
+wlpDivide:
 		SUB EAX, EDX								;Subtract the two registers to sumulate division
 		CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
 		JL resultNums								;If the number is less than, jump to resultNums
 		CMP EAX, EDX								;Compare the numbers to see if the number is too small to keep subtracting
 		JGE nextNum									;If it is greater than or equal to, jump to the next num section
 		
-	nextNum:
+nextNum:
 		INC EBX										;Increments the number to eventually get our average
 		JMP wlpDivide								;jump back up to the while loop
 			
-	resultNums:					
+resultNums:					
 		MOV BnumRemainder, AL						;moves the value in AL into the bnumremainder variable, this is our remainder. 
 		MOV iResult, EBX							;moves the value of EBX into iResult, this is the average number.
 		
@@ -154,6 +156,42 @@ calculation:
 	INVOKE putstring, ADDR crlf							 			;Skips to a new line
 	INVOKE putstring, ADDR strMod						 			;display the string "The remainder:"
 	INVOKE intasc32, ADDR strCalcResult, dWord ptr BnumRemainder    ;convert the D-WORD IResult to ASCII characters
+	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+	
+compare:	
+	MOVZX ECX, bNumOfNums
+	MOV EDX, 0
+	lpOffset:
+		ADD EAX, ECX
+		loop lpOffset	
+	MOV sOffset, AX
+	MOVZX ECX, bNumOfNums
+	lpCompare:
+		MOV EAX, ECX
+		MOV EDI, DWORD ptr sOffset - 4
+		MOV EAX, iNumbers[EDI]
+		CMP EAX, iNumbers[EDI]
+		JL lessThan
+		CMP EAX, iNumbers[EDI]
+		JGE gtrThan
+	loop lpCompare
+	
+	lessThan:
+	MOV EBX, EAX
+	gtrThan:
+	MOV EDX, EAX
+	
+	displayNumbers:
+	MOV iResult, EBX
+	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
+	INVOKE putstring, ADDR strLess					 				;display the string "The smallest value is:"
+	INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
+	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
+	
+	MOV iResult, EDX
+	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
+	INVOKE putstring, ADDR strGtr					 				;display the string "The greatest value is:"
+	INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 	
 	

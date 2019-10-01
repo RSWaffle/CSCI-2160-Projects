@@ -171,22 +171,48 @@ compare:
 	lpGetLess:
 		MOV EAX, iNumbers[EDI]
 		CMP EBX, EAX
-		JGE gtrThan
+		JGE gtrThanLss
 		
 		CMP EBX, EAX
-		JL lessThan
+		JL lessThanLss
 	
-	gtrThan:	
+	gtrThanLss:	
 		MOV EBX, EAX
 		SUB EDI, 4
-		JMP loopFinish
+		JMP loopFinishLss
 		
-	lessThan:
+	lessThanLss:
 		SUB EDI, 4
-		JMP loopFinish
+		JMP loopFinishLss
 		
-	loopFinish:
+	loopFinishLss:
 		loop lpGetLess
+		
+	MOV EDI, iTemp
+	SUB EDI, 4
+	MOVZX ECX, bNumOfNums
+	MOV EDX, 0
+	MOV EDX, iNumbers[EDI]
+	
+	lpGetGtr:
+		MOV EAX, iNumbers[EDI]
+		CMP EDX, EAX
+		JGE gtrThanGtr
+		
+		CMP EDX, EAX
+		JL lessThanGtr
+	
+	gtrThanGtr:	
+		SUB EDI, 4
+		JMP loopFinishGtr
+		
+	lessThanGtr:
+		MOV EDX, EAX
+		SUB EDI, 4
+		JMP loopFinishGtr
+		
+	loopFinishGtr:
+		loop lpGetGtr
 		
 	
 	MOV iResult, EBX

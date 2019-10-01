@@ -160,10 +160,34 @@ resultNums:
 	INVOKE intasc32, ADDR strCalcResult, dWord ptr BnumRemainder    ;convert the D-WORD IResult to ASCII characters
 	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 	
-	MOV EDI, 0
-
-	 
 compare:	
+	
+	MOV EDI, iTemp
+	SUB EDI, 4
+	MOVZX ECX, bNumOfNums
+	MOV EDX, 0
+	MOV EBX, iNumbers[EDI]
+	
+	lpGetLess:
+		MOV EAX, iNumbers[EDI]
+		CMP EBX, EAX
+		JGE gtrThan
+		
+		CMP EBX, EAX
+		JL lessThan
+	
+	gtrThan:	
+		MOV EBX, EAX
+		SUB EDI, 4
+		JMP loopFinish
+		
+	lessThan:
+		SUB EDI, 4
+		JMP loopFinish
+		
+	loopFinish:
+		loop lpGetLess
+		
 	
 	MOV iResult, EBX
 	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line

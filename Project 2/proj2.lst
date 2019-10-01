@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    09/29/19 19:28:33
+Microsoft (R) Macro Assembler Version 6.11		    09/30/19 20:59:32
 proj2.asm						     Page 1 - 1
 
 
@@ -259,64 +259,90 @@ proj2.asm						     Page 1 - 1
 					INVOKE intasc32, ADDR strCalcResult, dWord ptr BnumRemainder    ;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 000001EC  BF 00000000			MOV EDI, 0
-
-					 
- 000001F1			compare:	
+ 000001EC			compare:	
 					
- 000001F1  89 1D 00000241 R		MOV iResult, EBX
+ 000001EC  8B 3D 0000023D R		MOV EDI, iTemp
+ 000001F2  83 EF 04			SUB EDI, 4
+ 000001F5  0F B6 0D			MOVZX ECX, bNumOfNums
+	   0000020C R
+ 000001FC  BA 00000000			MOV EDX, 0
+ 00000201  8B 9F 0000020D R		MOV EBX, iNumbers[EDI]
+					
+ 00000207				lpGetLess:
+ 00000207  8B 87 0000020D R			MOV EAX, iNumbers[EDI]
+ 0000020D  3B D8				CMP EBX, EAX
+ 0000020F  7D 04				JGE gtrThan
+						
+ 00000211  3B D8				CMP EBX, EAX
+ 00000213  7C 07				JL lessThan
+					
+ 00000215				gtrThan:	
+ 00000215  8B D8				MOV EBX, EAX
+ 00000217  83 EF 04				SUB EDI, 4
+ 0000021A  EB 07				JMP loopFinish
+						
+ 0000021C				lessThan:
+ 0000021C  8B D0				MOV EDX, EAX
+ 0000021E  83 EF 04				SUB EDI, 4
+ 00000221  EB 00				JMP loopFinish
+						
+ 00000223				loopFinish:
+ 00000223  E2 E2				loop lpGetLess
+						
+					
+ 00000225  89 1D 00000241 R		MOV iResult, EBX
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strLess					 				;display the string "The smallest value is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 00000225  89 15 00000241 R		MOV iResult, EDX
+ 00000259  89 15 00000241 R		MOV iResult, EDX
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strGtr					 				;display the string "The greatest value is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 00000259  EB 00			JMP reverse
+ 0000028D  EB 00			JMP reverse														;Jump to the reverse section of our code. 
 					
 					
 					
- 0000025B			reverse:
- 0000025B  83 2D 0000023D R		SUB iTemp, 4
+ 0000028F			reverse:
+ 0000028F  83 2D 0000023D R		SUB iTemp, 4													;Subtract 4 from iTemp so we dont start outside the iNumbers zone. 
 	   04
- 00000262  8B 3D 0000023D R		MOV EDI, iTemp
+ 00000296  8B 3D 0000023D R		MOV EDI, iTemp													;Move into EDI the value of iTemp which should be the amount of numbers * 4 - 4.
 					
- 00000268  55				PUSH EBP
- 00000269  8B EC			MOV EBP, ESP
- 0000026B  0F B6 0D			MOVZX ECX, bNumOfNums
+ 0000029C  55				PUSH EBP														;Preserve our current base pointer
+ 0000029D  8B EC			MOV EBP, ESP													;Move our stack pointer into the base pointer
+ 0000029F  0F B6 0D			MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
 	   0000020C R
- 00000272				lpLoadStack:
- 00000272  FF B7 0000020D R			PUSH iNumbers[EDI]
- 00000278  83 EF 04				SUB EDI, 4
- 0000027B  E2 F5			loop lpLoadStack
+ 000002A6				lpLoadStack:
+ 000002A6  FF B7 0000020D R			PUSH iNumbers[EDI]											;Push onto the stack the value iNumbers offset EDI
+ 000002AC  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
+ 000002AF  E2 F5			loop lpLoadStack		
 					
- 0000027D  0F B6 0D			MOVZX ECX, bNumOfNums
+ 000002B1  0F B6 0D			MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
 	   0000020C R
- 00000284  BF 00000000			MOV EDI, 0
- 00000289				lpUnloadStack:
- 00000289  8F 87 0000020D R			POP iNumbers[EDI]
- 0000028F  83 C7 04				ADD EDI, 4
- 00000292  E2 F5			loop lpUnloadStack
+ 000002B8  BF 00000000			MOV EDI, 0														;Move 0 into EDI so we have a starting point
+ 000002BD				lpUnloadStack:			
+ 000002BD  8F 87 0000020D R			POP iNumbers[EDI]											;Pop out of the stack into iNumbers offset EDI (should be in reverse)	
+ 000002C3  83 C7 04				ADD EDI, 4													;Add 4 to EDI to get the next number in INumbers.
+ 000002C6  E2 F5			loop lpUnloadStack
 					
- 00000294  5D				POP EBP
- 00000295  03 25 0000023D R		ADD ESP, iTemp
-					
- 0000029B  8B 3D 0000023D R		MOV EDI, iTemp
- 000002A1  0F B6 0D			MOVZX ECX, bNumOfNums
+ 000002C8  5D				POP EBP															;Pop EBP out of the stack so we are  fully cleared
+ 000002C9  03 25 0000023D R		ADD ESP, iTemp												    ;Add to ESP iTemp so we get the bytes we used back
+
+ 000002CF  8B 3D 0000023D R		MOV EDI, iTemp													;Move into EDi ITemp, which should be the amount of numbers * 4 - 4.
+ 000002D5  0F B6 0D			MOVZX ECX, bNumOfNums										    ;Move the amount of numbers into ECX so the loop knows when to terminate
 	   0000020C R
-					INVOKE putstring, ADDR strReverse					 				;display the string "The greatest value is:"
- 000002B2				lpDisplayNumbers:
- 000002B2  8B 87 0000020D R			MOV EAX, iNumbers[EDI]
- 000002B8  A3 00000241 R			MOV iResult, EAX
- 000002BD  83 EF 04				SUB EDI, 4
-						INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
-						INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
-						INVOKE putstring, ADDR crlf	;Skips to a new line
- 000002E4  E2 CC			loop lpDisplayNumbers
+					INVOKE putstring, ADDR strReverse					 			;display the string "The greatest value is:"
+ 000002E6				lpDisplayNumbers:
+ 000002E6  8B 87 0000020D R			MOV EAX, iNumbers[EDI]										;Move the value at iNumbers[EDI] into EAX to be put in another variable, cant do mem to mem 
+ 000002EC  A3 00000241 R			MOV iResult, EAX											;Move into iResult the value of EAX for displaying
+ 000002F1  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
+						INVOKE putstring, ADDR crlf						 	 		;Skips to a new line
+						INVOKE intasc32, ADDR strCalcResult, iResult    	 		;convert the D-WORD IResult to ASCII characters
+						INVOKE putstring, ADDR strCalcResult            	 		;display the numeric string
+ 00000318  E2 CC			loop lpDisplayNumbers
 					
 					
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
@@ -326,14 +352,14 @@ proj2.asm						     Page 1 - 1
 
 					
 				;************************************* the instructions below calls for "normal termination"	
- 000002FA			finished:
+ 0000032E			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 00000301			main ENDP
+ 00000335			main ENDP
 					END												;Signals assembler that there are no instructions after this statement
 					
-Microsoft (R) Macro Assembler Version 6.11		    09/29/19 19:28:33
+Microsoft (R) Macro Assembler Version 6.11		    09/30/19 20:59:32
 proj2.asm						     Symbols 2 - 1
 
 
@@ -346,7 +372,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000246 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000301 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000335 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -358,7 +384,7 @@ ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000002FC Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000330 Public
   getNumofNums . . . . . . . . .	L Near	 00000005 _TEXT	
   getNums  . . . . . . . . . . .	L Near	 00000074 _TEXT	
   lpGetNums  . . . . . . . . . .	L Near	 0000007E _TEXT	
@@ -371,12 +397,16 @@ main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000002FC Public
   wlpDivide  . . . . . . . . . .	L Near	 00000178 _TEXT	
   nextNum  . . . . . . . . . . .	L Near	 00000182 _TEXT	
   resultNums . . . . . . . . . .	L Near	 00000185 _TEXT	
-  compare  . . . . . . . . . . .	L Near	 000001F1 _TEXT	
-  reverse  . . . . . . . . . . .	L Near	 0000025B _TEXT	
-  lpLoadStack  . . . . . . . . .	L Near	 00000272 _TEXT	
-  lpUnloadStack  . . . . . . . .	L Near	 00000289 _TEXT	
-  lpDisplayNumbers . . . . . . .	L Near	 000002B2 _TEXT	
-  finished . . . . . . . . . . .	L Near	 000002FA _TEXT	
+  compare  . . . . . . . . . . .	L Near	 000001EC _TEXT	
+  lpGetLess  . . . . . . . . . .	L Near	 00000207 _TEXT	
+  gtrThan  . . . . . . . . . . .	L Near	 00000215 _TEXT	
+  lessThan . . . . . . . . . . .	L Near	 0000021C _TEXT	
+  loopFinish . . . . . . . . . .	L Near	 00000223 _TEXT	
+  reverse  . . . . . . . . . . .	L Near	 0000028F _TEXT	
+  lpLoadStack  . . . . . . . . .	L Near	 000002A6 _TEXT	
+  lpUnloadStack  . . . . . . . .	L Near	 000002BD _TEXT	
+  lpDisplayNumbers . . . . . . .	L Near	 000002E6 _TEXT	
+  finished . . . . . . . . . . .	L Near	 0000032E _TEXT	
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 

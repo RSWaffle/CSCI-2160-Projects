@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    09/30/19 21:15:32
+Microsoft (R) Macro Assembler Version 6.11		    09/30/19 21:22:47
 proj2.asm						     Page 1 - 1
 
 
@@ -199,7 +199,7 @@ proj2.asm						     Page 1 - 1
  000000E4					validNum:
  000000E4  89 87 0000020D R				MOV iNumbers[EDI], EAX					;Move EBX into iNumbers to be saved for later
  000000EA  83 C7 04					ADD EDI, 4								;Add 4 to EDI to put the number into the correct place in iNumbers
- 000000ED  89 3D 0000023D R				MOV iTemp, EDI							;
+ 000000ED  89 3D 0000023D R				MOV iTemp, EDI							;Moves the end position into iTemp of iNumbers[] array
 							
  000000F3  E2 89			loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
 					
@@ -261,114 +261,111 @@ proj2.asm						     Page 1 - 1
 					
  000001EC			compare:	
 					
- 000001EC  8B 3D 0000023D R		MOV EDI, iTemp
- 000001F2  83 EF 04			SUB EDI, 4
- 000001F5  0F B6 0D			MOVZX ECX, bNumOfNums
+ 000001EC  8B 3D 0000023D R		MOV EDI, iTemp													;moves the last position in iNumbers to EDI so we can look through the array
+ 000001F2  83 EF 04			SUB EDI, 4														;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
+ 000001F5  0F B6 0D			MOVZX ECX, bNumOfNums											;Put the amount of numbers in ECX so the loop runs that amount of times.
 	   0000020C R
- 000001FC  BA 00000000			MOV EDX, 0
- 00000201  8B 9F 0000020D R		MOV EBX, iNumbers[EDI]
 					
- 00000207				lpGetLess:
- 00000207  8B 87 0000020D R			MOV EAX, iNumbers[EDI]
- 0000020D  3B D8				CMP EBX, EAX
- 0000020F  7D 04				JGE gtrThanLss
+ 000001FC				lpGetLess:
+ 000001FC  8B 87 0000020D R			MOV EAX, iNumbers[EDI]										;Moves the value of iNumbers{EDI} into the EAX register for comparing
+ 00000202  3B D8				CMP EBX, EAX												;Compare the two registers
+ 00000204  7D 04				JGE gtrThanLss												;If it is greater than or equal to, jump to gtrThanLss section
 						
- 00000211  3B D8				CMP EBX, EAX
- 00000213  7C 07				JL lessThanLss
+ 00000206  3B D8				CMP EBX, EAX												;Compare the two registers
+ 00000208  7C 07				JL lessThanLss												;If it is less than, jump to lessThanLss section
 					
- 00000215				gtrThanLss:	
- 00000215  8B D8				MOV EBX, EAX
- 00000217  83 EF 04				SUB EDI, 4
- 0000021A  EB 05				JMP loopFinishLss
+ 0000020A				gtrThanLss:	
+ 0000020A  8B D8				MOV EBX, EAX												;Move the value of EAX into EBX to store the number
+ 0000020C  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+ 0000020F  EB 05				JMP loopFinishLss											;Jump to the end of the loop
 						
- 0000021C				lessThanLss:
- 0000021C  83 EF 04				SUB EDI, 4
- 0000021F  EB 00				JMP loopFinishLss
+ 00000211				lessThanLss:
+ 00000211  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+ 00000214  EB 00				JMP loopFinishLss											;Jump to the end of the loop
 						
- 00000221				loopFinishLss:
- 00000221  E2 E4				loop lpGetLess
+ 00000216				loopFinishLss:
+ 00000216  E2 E4				loop lpGetLess												;Decrement ECX, and go to the top of the loop
 						
- 00000223  8B 3D 0000023D R		MOV EDI, iTemp
- 00000229  83 EF 04			SUB EDI, 4
- 0000022C  0F B6 0D			MOVZX ECX, bNumOfNums
+ 00000218  8B 3D 0000023D R		MOV EDI, iTemp													;moves the last position in iNumbers to EDI so we can look through the array
+ 0000021E  83 EF 04			SUB EDI, 4														;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
+ 00000221  0F B6 0D			MOVZX ECX, bNumOfNums											;Put the amount of numbers in ECX so the loop runs that amount of times.
 	   0000020C R
- 00000233  BA 00000000			MOV EDX, 0
- 00000238  8B 97 0000020D R		MOV EDX, iNumbers[EDI]
+ 00000228  BA 00000000			MOV EDX, 0														;Set EDX to 0 so there is no error in calculation
 					
- 0000023E				lpGetGtr:
- 0000023E  8B 87 0000020D R			MOV EAX, iNumbers[EDI]
- 00000244  3B D0				CMP EDX, EAX
- 00000246  7D 04				JGE gtrThanGtr
+ 0000022D				lpGetGtr:
+ 0000022D  8B 87 0000020D R			MOV EAX, iNumbers[EDI]										;Moves the value of iNumbers{EDI} into the EAX register for comparing
+ 00000233  3B D0				CMP EDX, EAX												;Compare the two registers
+ 00000235  7D 04				JGE gtrThanGtr												;If it is greater than or equal to, jump to gtrThanGtr section
 						
- 00000248  3B D0				CMP EDX, EAX
- 0000024A  7C 05				JL lessThanGtr
+ 00000237  3B D0				CMP EDX, EAX												;Compare the two registers
+ 00000239  7C 05				JL lessThanGtr												;If it is greater than or equal to, jump to lessThanGtr section
 					
- 0000024C				gtrThanGtr:	
- 0000024C  83 EF 04				SUB EDI, 4
- 0000024F  EB 07				JMP loopFinishGtr
+ 0000023B				gtrThanGtr:	
+ 0000023B  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+ 0000023E  EB 07				JMP loopFinishGtr											;Jump to the end of the loop
 						
- 00000251				lessThanGtr:
- 00000251  8B D0				MOV EDX, EAX
- 00000253  83 EF 04				SUB EDI, 4
- 00000256  EB 00				JMP loopFinishGtr
+ 00000240				lessThanGtr:
+ 00000240  8B D0				MOV EDX, EAX												;Move the value of EAX into EDX to store the number
+ 00000242  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+ 00000245  EB 00				JMP loopFinishGtr											;Jump to the end of the loop
 						
- 00000258				loopFinishGtr:
- 00000258  E2 E4				loop lpGetGtr
+ 00000247				loopFinishGtr:	
+ 00000247  E2 E4				loop lpGetGtr												;Decrement ECX, and go to the top of the loop
 						
 					
- 0000025A  89 1D 00000241 R		MOV iResult, EBX
+ 00000249  89 1D 00000241 R		MOV iResult, EBX												;Move into iResult the value of EBX for display
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strLess					 				;display the string "The smallest value is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 0000028E  89 15 00000241 R		MOV iResult, EDX
+ 0000027D  89 15 00000241 R		MOV iResult, EDX												;Move into iResult the value of EDX for display
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 					INVOKE putstring, ADDR strGtr					 				;display the string "The greatest value is:"
 					INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 					INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 					
- 000002C2  EB 00			JMP reverse														;Jump to the reverse section of our code. 
+ 000002B1  EB 00			JMP reverse														;Jump to the reverse section of our code. 
 					
 					
 					
- 000002C4			reverse:
- 000002C4  83 2D 0000023D R		SUB iTemp, 4													;Subtract 4 from iTemp so we dont start outside the iNumbers zone. 
+ 000002B3			reverse:
+ 000002B3  83 2D 0000023D R		SUB iTemp, 4													;Subtract 4 from iTemp so we dont start outside the iNumbers zone. 
 	   04
- 000002CB  8B 3D 0000023D R		MOV EDI, iTemp													;Move into EDI the value of iTemp which should be the amount of numbers * 4 - 4.
+ 000002BA  8B 3D 0000023D R		MOV EDI, iTemp													;Move into EDI the value of iTemp which should be the amount of numbers * 4 - 4.
 					
- 000002D1  55				PUSH EBP														;Preserve our current base pointer
- 000002D2  8B EC			MOV EBP, ESP													;Move our stack pointer into the base pointer
- 000002D4  0F B6 0D			MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
+ 000002C0  55				PUSH EBP														;Preserve our current base pointer
+ 000002C1  8B EC			MOV EBP, ESP													;Move our stack pointer into the base pointer
+ 000002C3  0F B6 0D			MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
 	   0000020C R
- 000002DB				lpLoadStack:
- 000002DB  FF B7 0000020D R			PUSH iNumbers[EDI]											;Push onto the stack the value iNumbers offset EDI
- 000002E1  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
- 000002E4  E2 F5			loop lpLoadStack		
+ 000002CA				lpLoadStack:
+ 000002CA  FF B7 0000020D R			PUSH iNumbers[EDI]											;Push onto the stack the value iNumbers offset EDI
+ 000002D0  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
+ 000002D3  E2 F5			loop lpLoadStack		
 					
- 000002E6  0F B6 0D			MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
+ 000002D5  0F B6 0D			MOVZX ECX, bNumOfNums											;Move the number of numbers into ECX so the loop knows when to terminate
 	   0000020C R
- 000002ED  BF 00000000			MOV EDI, 0														;Move 0 into EDI so we have a starting point
- 000002F2				lpUnloadStack:			
- 000002F2  8F 87 0000020D R			POP iNumbers[EDI]											;Pop out of the stack into iNumbers offset EDI (should be in reverse)	
- 000002F8  83 C7 04				ADD EDI, 4													;Add 4 to EDI to get the next number in INumbers.
- 000002FB  E2 F5			loop lpUnloadStack
+ 000002DC  BF 00000000			MOV EDI, 0														;Move 0 into EDI so we have a starting point
+ 000002E1				lpUnloadStack:			
+ 000002E1  8F 87 0000020D R			POP iNumbers[EDI]											;Pop out of the stack into iNumbers offset EDI (should be in reverse)	
+ 000002E7  83 C7 04				ADD EDI, 4													;Add 4 to EDI to get the next number in INumbers.
+ 000002EA  E2 F5			loop lpUnloadStack
 					
- 000002FD  5D				POP EBP															;Pop EBP out of the stack so we are  fully cleared
- 000002FE  03 25 0000023D R		ADD ESP, iTemp												    ;Add to ESP iTemp so we get the bytes we used back
+ 000002EC  5D				POP EBP															;Pop EBP out of the stack so we are  fully cleared
+ 000002ED  03 25 0000023D R		ADD ESP, iTemp												    ;Add to ESP iTemp so we get the bytes we used back
 
- 00000304  8B 3D 0000023D R		MOV EDI, iTemp													;Move into EDi ITemp, which should be the amount of numbers * 4 - 4.
- 0000030A  0F B6 0D			MOVZX ECX, bNumOfNums										    ;Move the amount of numbers into ECX so the loop knows when to terminate
+ 000002F3  8B 3D 0000023D R		MOV EDI, iTemp													;Move into EDi ITemp, which should be the amount of numbers * 4 - 4.
+ 000002F9  0F B6 0D			MOVZX ECX, bNumOfNums										    ;Move the amount of numbers into ECX so the loop knows when to terminate
 	   0000020C R
 					INVOKE putstring, ADDR strReverse					 			;display the string "The greatest value is:"
- 0000031B				lpDisplayNumbers:
- 0000031B  8B 87 0000020D R			MOV EAX, iNumbers[EDI]										;Move the value at iNumbers[EDI] into EAX to be put in another variable, cant do mem to mem 
- 00000321  A3 00000241 R			MOV iResult, EAX											;Move into iResult the value of EAX for displaying
- 00000326  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
+ 0000030A				lpDisplayNumbers:
+ 0000030A  8B 87 0000020D R			MOV EAX, iNumbers[EDI]										;Move the value at iNumbers[EDI] into EAX to be put in another variable, cant do mem to mem 
+ 00000310  A3 00000241 R			MOV iResult, EAX											;Move into iResult the value of EAX for displaying
+ 00000315  83 EF 04				SUB EDI, 4													;Subtract 4 from EDI so we get the next number in iNumbers
 						INVOKE putstring, ADDR crlf						 	 		;Skips to a new line
 						INVOKE intasc32, ADDR strCalcResult, iResult    	 		;convert the D-WORD IResult to ASCII characters
 						INVOKE putstring, ADDR strCalcResult            	 		;display the numeric string
- 0000034D  E2 CC			loop lpDisplayNumbers
+ 0000033C  E2 CC			loop lpDisplayNumbers
 					
 					
 					INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
@@ -378,14 +375,14 @@ proj2.asm						     Page 1 - 1
 
 					
 				;************************************* the instructions below calls for "normal termination"	
- 00000363			finished:
+ 00000352			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 0000036A			main ENDP
+ 00000359			main ENDP
 					END												;Signals assembler that there are no instructions after this statement
 					
-Microsoft (R) Macro Assembler Version 6.11		    09/30/19 21:15:32
+Microsoft (R) Macro Assembler Version 6.11		    09/30/19 21:22:47
 proj2.asm						     Symbols 2 - 1
 
 
@@ -398,7 +395,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000246 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000036A DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000359 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -410,7 +407,7 @@ ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000365 Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000354 Public
   getNumofNums . . . . . . . . .	L Near	 00000005 _TEXT	
   getNums  . . . . . . . . . . .	L Near	 00000074 _TEXT	
   lpGetNums  . . . . . . . . . .	L Near	 0000007E _TEXT	
@@ -424,19 +421,19 @@ main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000365 Public
   nextNum  . . . . . . . . . . .	L Near	 00000182 _TEXT	
   resultNums . . . . . . . . . .	L Near	 00000185 _TEXT	
   compare  . . . . . . . . . . .	L Near	 000001EC _TEXT	
-  lpGetLess  . . . . . . . . . .	L Near	 00000207 _TEXT	
-  gtrThanLss . . . . . . . . . .	L Near	 00000215 _TEXT	
-  lessThanLss  . . . . . . . . .	L Near	 0000021C _TEXT	
-  loopFinishLss  . . . . . . . .	L Near	 00000221 _TEXT	
-  lpGetGtr . . . . . . . . . . .	L Near	 0000023E _TEXT	
-  gtrThanGtr . . . . . . . . . .	L Near	 0000024C _TEXT	
-  lessThanGtr  . . . . . . . . .	L Near	 00000251 _TEXT	
-  loopFinishGtr  . . . . . . . .	L Near	 00000258 _TEXT	
-  reverse  . . . . . . . . . . .	L Near	 000002C4 _TEXT	
-  lpLoadStack  . . . . . . . . .	L Near	 000002DB _TEXT	
-  lpUnloadStack  . . . . . . . .	L Near	 000002F2 _TEXT	
-  lpDisplayNumbers . . . . . . .	L Near	 0000031B _TEXT	
-  finished . . . . . . . . . . .	L Near	 00000363 _TEXT	
+  lpGetLess  . . . . . . . . . .	L Near	 000001FC _TEXT	
+  gtrThanLss . . . . . . . . . .	L Near	 0000020A _TEXT	
+  lessThanLss  . . . . . . . . .	L Near	 00000211 _TEXT	
+  loopFinishLss  . . . . . . . .	L Near	 00000216 _TEXT	
+  lpGetGtr . . . . . . . . . . .	L Near	 0000022D _TEXT	
+  gtrThanGtr . . . . . . . . . .	L Near	 0000023B _TEXT	
+  lessThanGtr  . . . . . . . . .	L Near	 00000240 _TEXT	
+  loopFinishGtr  . . . . . . . .	L Near	 00000247 _TEXT	
+  reverse  . . . . . . . . . . .	L Near	 000002B3 _TEXT	
+  lpLoadStack  . . . . . . . . .	L Near	 000002CA _TEXT	
+  lpUnloadStack  . . . . . . . .	L Near	 000002E1 _TEXT	
+  lpDisplayNumbers . . . . . . .	L Near	 0000030A _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000352 _TEXT	
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 

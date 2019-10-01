@@ -102,7 +102,7 @@ getNums:
 		validNum:
 			MOV iNumbers[EDI], EAX					;Move EBX into iNumbers to be saved for later
 			ADD EDI, 4								;Add 4 to EDI to put the number into the correct place in iNumbers
-			MOV iTemp, EDI							;
+			MOV iTemp, EDI							;Moves the end position into iTemp of iNumbers[] array
 			
 	loop lpgetNums									;Keep looping this until all of the numbers to be entered are filled.
 	
@@ -162,66 +162,63 @@ resultNums:
 	
 compare:	
 	
-	MOV EDI, iTemp
-	SUB EDI, 4
-	MOVZX ECX, bNumOfNums
-	MOV EDX, 0
-	MOV EBX, iNumbers[EDI]
+	MOV EDI, iTemp													;moves the last position in iNumbers to EDI so we can look through the array
+	SUB EDI, 4														;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
+	MOVZX ECX, bNumOfNums											;Put the amount of numbers in ECX so the loop runs that amount of times.
 	
 	lpGetLess:
-		MOV EAX, iNumbers[EDI]
-		CMP EBX, EAX
-		JGE gtrThanLss
+		MOV EAX, iNumbers[EDI]										;Moves the value of iNumbers{EDI} into the EAX register for comparing
+		CMP EBX, EAX												;Compare the two registers
+		JGE gtrThanLss												;If it is greater than or equal to, jump to gtrThanLss section
 		
-		CMP EBX, EAX
-		JL lessThanLss
+		CMP EBX, EAX												;Compare the two registers
+		JL lessThanLss												;If it is less than, jump to lessThanLss section
 	
 	gtrThanLss:	
-		MOV EBX, EAX
-		SUB EDI, 4
-		JMP loopFinishLss
+		MOV EBX, EAX												;Move the value of EAX into EBX to store the number
+		SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+		JMP loopFinishLss											;Jump to the end of the loop
 		
 	lessThanLss:
-		SUB EDI, 4
-		JMP loopFinishLss
+		SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+		JMP loopFinishLss											;Jump to the end of the loop
 		
 	loopFinishLss:
-		loop lpGetLess
+		loop lpGetLess												;Decrement ECX, and go to the top of the loop
 		
-	MOV EDI, iTemp
-	SUB EDI, 4
-	MOVZX ECX, bNumOfNums
-	MOV EDX, 0
-	MOV EDX, iNumbers[EDI]
+	MOV EDI, iTemp													;moves the last position in iNumbers to EDI so we can look through the array
+	SUB EDI, 4														;Subtract 4 from EDI so it doesnt point to the end of the iNumbers array
+	MOVZX ECX, bNumOfNums											;Put the amount of numbers in ECX so the loop runs that amount of times.
+	MOV EDX, 0														;Set EDX to 0 so there is no error in calculation
 	
 	lpGetGtr:
-		MOV EAX, iNumbers[EDI]
-		CMP EDX, EAX
-		JGE gtrThanGtr
+		MOV EAX, iNumbers[EDI]										;Moves the value of iNumbers{EDI} into the EAX register for comparing
+		CMP EDX, EAX												;Compare the two registers
+		JGE gtrThanGtr												;If it is greater than or equal to, jump to gtrThanGtr section
 		
-		CMP EDX, EAX
-		JL lessThanGtr
+		CMP EDX, EAX												;Compare the two registers
+		JL lessThanGtr												;If it is greater than or equal to, jump to lessThanGtr section
 	
 	gtrThanGtr:	
-		SUB EDI, 4
-		JMP loopFinishGtr
+		SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+		JMP loopFinishGtr											;Jump to the end of the loop
 		
 	lessThanGtr:
-		MOV EDX, EAX
-		SUB EDI, 4
-		JMP loopFinishGtr
+		MOV EDX, EAX												;Move the value of EAX into EDX to store the number
+		SUB EDI, 4													;Subtract 4 from EDI, so we can compare the next number
+		JMP loopFinishGtr											;Jump to the end of the loop
 		
-	loopFinishGtr:
-		loop lpGetGtr
+	loopFinishGtr:	
+		loop lpGetGtr												;Decrement ECX, and go to the top of the loop
 		
 	
-	MOV iResult, EBX
+	MOV iResult, EBX												;Move into iResult the value of EBX for display
 	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 	INVOKE putstring, ADDR strLess					 				;display the string "The smallest value is:"
 	INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters
 	INVOKE putstring, ADDR strCalcResult            	 			;display the numeric string
 	
-	MOV iResult, EDX
+	MOV iResult, EDX												;Move into iResult the value of EDX for display
 	INVOKE putstring, ADDR crlf						 	 			;Skips to a new line
 	INVOKE putstring, ADDR strGtr					 				;display the string "The greatest value is:"
 	INVOKE intasc32, ADDR strCalcResult, iResult    	 			;convert the D-WORD IResult to ASCII characters

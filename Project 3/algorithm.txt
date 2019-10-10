@@ -1,0 +1,10 @@
+apAllocHarrison PROTO Near32 stdcall, dSize:DWORD 
+•Creates memory on the heap (of dSize words) and returns the address of the start of the allocated heap memory
+o Use this to create your strings!
+
+HeapDestroyHarrison PROTO Near32 stdcall •Destroys the allocated heap storage created through heapAllocHarrisono
+Invoke this immediately before you invoke ExitProcess! 
+oConvention dictates that you (the programmer) clean up your memory mess and 
+not the operating system!
+
+

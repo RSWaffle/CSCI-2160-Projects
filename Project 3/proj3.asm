@@ -84,16 +84,16 @@ ENDM
 	strRectangleLength byte 10,10, "Enter a whole number length for a rectangle [3,25]: ", 0
 	strRectangleWidth byte 10,10, "Enter a whole number width for a rectangle [3,25]: ", 0
 	strTriangleHeight byte 10,10, "Enter a whole number height for a right triangle [4,25]: ", 0
-	strSolidRectangleInfo byte 10,10, "This is a rectangle with input dimensions $recLength by $recWidth: "
-	strHallowRectangleInfo byte 10,10, "This is the same rectangle hollowed out: "
-	strSolidTriangleInfo byte 10,10, "This is a right triangle with height $Triheight: "
-	strHallowTriangleInfo byte 10,10, "This is the same right triangle hollowed out: "
-	crlf byte  10,13,0																		;Null-terminated string to skip to new line
-	recLength byte ?
-	recWidth byte ?
-	triHeight byte ?
-	
-	
+	strSolidRectangleInfo byte 10,10, "This is a rectangle with input dimensions $recLength by $recWidth: ",0
+	strHallowRectangleInfo byte 10,10, "This is the same rectangle hollowed out: ",0
+	strSolidTriangleInfo byte 10,10, "This is a right triangle with height $Triheight: ",0
+	strHallowTriangleInfo byte 10,10, "This is the same right triangle hollowed out: ",0
+	recLength byte ?								;set aside memory to hold the length of the rectangle
+	recWidth byte ?									;set aside memory to hold the width of the rectangle
+	triHeight byte ?								;memory to hold the height of a triangle
+
+	crlf byte  10,13,0								;Null-terminated string to skip to new line
+
 ;******************************************************************************************
 	.CODE
 	
@@ -128,7 +128,7 @@ getRectangleWidth:
 	JG getRectangleWidth							;If greater than, jump to getRectangleWidth
 	CMP EAX, 3										;Compare EAX to 3 to see if it is less than 3	
 	JL getRectangleWidth							;If so, jump to getRectangleWidth 
-	JMP displayRectangle
+	JMP displayRectangle							;jump to the next section to display the rectangle
 	
 	
 displayRectangle:	
@@ -149,9 +149,10 @@ getTriangleHeight:
 	JG getTriangleHeight							;If greater than, jump to getRectangleWidth
 	CMP EAX, 4										;Compare EAX to 4 to see if it is less than 4	
 	JL getTriangleHeight							;If so, jump to getRectangleWidth 
-	JMP displayTriangle
+	JMP displayTri
 	
-displayTriangle:	
+displayTri:	
+	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 	DisplayString strSolidTriangleInfo				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 	DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.

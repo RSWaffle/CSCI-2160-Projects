@@ -19,6 +19,26 @@
 	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 	
+	
+;******************************************************************************************
+COMMENT %
+******************************************************************************
+*Name: DisplayString                                                         *
+*Purpose:                                                                    *
+*	The purpose of this macro is to display a set of strings to the console  *
+*                                                                            *
+*Date Created: 10/02/2019                                                    *
+*Date Modified: 10/02/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param String1:byte                                                         *
+*****************************************************************************%
+
+DisplayString MACRO String:REQ
+	INVOKE putstring, ADDR String     				;;Skip to new line, tab, and display The string passed in 
+	INVOKE putstring, ADDR crlf						;;Display the characters to skip to a new line
+ENDM
+	
 ;******************************************************************************************
 	.DATA							;declare all data identifiers after this directive
 	strEnterAmtNumbers byte 10,10, "How many values to input: ", 0
@@ -59,11 +79,13 @@ _start:
 main PROC
 	
 getNumofNums:
-	INVOKE putstring, ADDR strProjInfo     			;Skip to new line, tab, and display Project information "Name: Ryan Shupe" etc. 
-	INVOKE putstring, ADDR crlf						;Display the characters to skip to a new line
-	INVOKE putstring, ADDR strEnterAmtNumbers  	    ;Display the "Enter amount of numbers" message
+
+	DisplayString strProjInfo	
+	DisplayString strEnterAmtNumbers  	   			;Display the "Enter amount of numbers" message
+	
 	INVOKE getstring, ADDR strInput, sNumNumbers	;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 	INVOKE ascint32, ADDR strInput					;Convert the ASCII value to its true decimal number
+	
 	MOV bNumOfNums, AL								;Move the result of above method stored in EAX into variable so it isn't lost.
 	MOVZX ECX, bNumOfNums							;Put the value of bNumOfNums into ECX so we can use it to loop later
 	MOV EDI, 0										;Put 0 into EDI so we can start at a 0 offset into iNumbers
@@ -76,7 +98,8 @@ getNumofNums:
 	JLE getNums										;If so, jump to getNums so we can get the numbers for calculation 
 
 getNums:
-	INVOKE putstring, ADDR strEnterNumbers   		;Display the "Type each value and press ENTER after each one:" message
+	DisplayString strEnterNumbers   				;Display the "Type each value and press ENTER after each one:" message
+	
 	lpGetNums:
 		MOV EAX, 0									;Reset EAX to 0 to prevent errors
 		INVOKE putstring, ADDR crlf					;Display the characters to skip to a new line

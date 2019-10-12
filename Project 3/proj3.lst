@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/10/19 15:18:39
+Microsoft (R) Macro Assembler Version 6.11		    10/12/19 16:25:31
 proj3.asm						     Page 1 - 1
 
 
@@ -21,10 +21,12 @@ proj3.asm						     Page 1 - 1
 					getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
 					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 					HeapDestroyHarrison PROTO Near32 stdcall								;Creates memory on the heap (of dSize words) and returns the address of the 
+					putch PROTO Near32 stdcall, bVal:byte
 																							;start of the allocated heap memory
 					HeapAllocHarrison PROTO Near32 stdcall, dSize:DWORD 					;Destroys the allocated heap storage created through heapAllocHarrison
+					;sizeOfString PROTO C, dSize:DWORD 
 				;******************************************************************************************
-				;EXTERN externalProc:near
+				EXTERN sizeOfString:near32
 				;******************************************************************************************
 				COMMENT %
 				******************************************************************************
@@ -38,11 +40,28 @@ proj3.asm						     Page 1 - 1
 				*                                                                            *
 				*@param String1:byte                                                         *
 				*****************************************************************************%
-				
+
 				DisplayString MACRO String:REQ
-					INVOKE putstring, ADDR String     				;;display The string passed in 
+					INVOKE putstring, ADDR String    				;;display The string passed in 
 				ENDM
-				
+
+				COMMENT %
+				******************************************************************************
+				*Name: AscInt                                                                *
+				*Purpose:                                                                    *
+				*	Converts ascii value to int and stores in dVal							 *
+				*                                                                            *
+				*Date Created: 10/02/2019                                                    *
+				*Date Modified: 10/02/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*****************************************************************************%
+
+				IntAsc MACRO String:REQ, val:REQ
+					INVOKE intasc32, ADDR String, ADDR val  				;;invoke ascint proc 
+				ENDM
+
 				COMMENT %
 				******************************************************************************
 				*Name: PullString                                                            *
@@ -56,15 +75,15 @@ proj3.asm						     Page 1 - 1
 				*@param String1:byte                                                         *
 				*@param limit:byte                                                           *
 				*****************************************************************************%
-				
+
 				PullString MACRO String:REQ, limit:REQ
 						INVOKE getstring, ADDR String, limit		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
 						INVOKE ascint32, ADDR String				;Convert the ASCII value to its true decimal number
 				ENDM
-				
+
 				COMMENT %
 				******************************************************************************
-				*Name: CvtoNum                                                               *
+				*Name: CvtoToNum                                                             *
 				*Purpose:                                                                    *
 				*	converts a string to its real decimal number.                            *
 				*                                                                            *
@@ -77,7 +96,7 @@ proj3.asm						     Page 1 - 1
 				CvtoNum MACRO String:REQ
 					INVOKE ascint32, ADDR String					;Convert the ASCII value to its true decimal number
 				ENDM
-				
+
 				;******************************************************************************************
  00000000				.DATA
  00000000 0A 0D 09 4E 61		strProjInfo byte  10,13,9,
@@ -138,8 +157,7 @@ proj3.asm						     Page 1 - 1
 	   61 6E 67 6C 65
 	   20 5B 34 2C 32
 	   35 5D 3A 20 00
-					
- 0000010A 0A 0A 54 68 69		strSolidRectangleInfo byte 10,10, "This is a rectangle with input dimensions $recLength by $recWidth: ",0
+ 0000010A 0A 0A 54 68 69		strSolidRectangleInfo1 byte 10,10, "This is a rectangle with input dimensions ",0
 	   73 20 69 73 20
 	   61 20 72 65 63
 	   74 61 6E 67 6C
@@ -147,13 +165,10 @@ proj3.asm						     Page 1 - 1
 	   68 20 69 6E 70
 	   75 74 20 64 69
 	   6D 65 6E 73 69
-	   6F 6E 73 20 24
-	   72 65 63 4C 65
-	   6E 67 74 68 20
-	   62 79 20 24 72
-	   65 63 57 69 64
-	   74 68 3A 20 00
- 00000150 0A 0A 54 68 69		strHallowRectangleInfo byte 10,10, "This is the same rectangle hollowed out: ",0
+	   6F 6E 73 20 00
+ 00000137 20 62 79 20 00		strSolidRectangleInfo2 byte " by ",0
+ 0000013C 3A 20 00			strSolidRectangleInfo3 byte ": ",0
+ 0000013F 0A 0A 54 68 69		strHallowRectangleInfo byte 10,10, "This is the same rectangle hollowed out: ",0
 	   73 20 69 73 20
 	   74 68 65 20 73
 	   61 6D 65 20 72
@@ -162,18 +177,16 @@ proj3.asm						     Page 1 - 1
 	   6F 6C 6C 6F 77
 	   65 64 20 6F 75
 	   74 3A 20 00
- 0000017C 0A 0A 54 68 69		strSolidTriangleInfo byte 10,10, "This is a right triangle with height $Triheight: ",0
+ 0000016B 0A 0A 54 68 69		strSolidTriangleInfo1 byte 10,10, "This is a right triangle with height ",0
 	   73 20 69 73 20
 	   61 20 72 69 67
 	   68 74 20 74 72
 	   69 61 6E 67 6C
 	   65 20 77 69 74
 	   68 20 68 65 69
-	   67 68 74 20 24
-	   54 72 69 68 65
-	   69 67 68 74 3A
-	   20 00
- 000001B0 0A 0A 54 68 69		strHallowTriangleInfo byte 10,10, "This is the same right triangle hollowed out: ",0
+	   67 68 74 20 00
+ 00000193 3A 20 00			strSolidTriangleInfo2 byte ": ",0
+ 00000196 0A 0A 54 68 69		strHallowTriangleInfo byte 10,10, "This is the same right triangle hollowed out: ",0
 	   73 20 69 73 20
 	   74 68 65 20 73
 	   61 6D 65 20 72
@@ -183,14 +196,18 @@ proj3.asm						     Page 1 - 1
 	   6F 6C 6C 6F 77
 	   65 64 20 6F 75
 	   74 3A 20 00
- 000001E1 00				recLength byte ?
- 000001E2 00				recWidth byte ?
- 000001E3 00				triHeight byte ?
-				
- 000001E4 0A 0D 00			crlf byte  10,13,0																		;Null-terminated string to skip to new line
-				
-					
-					
+ 000001C7  00000002 [			recLength byte 2 dup (?) 						;set aside memory to hold the length of the rectangle with an empty byte between the next variable
+	    00
+	   ]
+ 000001C9  00000002 [			recWidth byte 2 dup (?) 	 					;set aside memory to hold the width of the rectangle with an empty byte between the next variable
+	    00
+	   ]
+ 000001CB 00				triHeight byte ?								;memory to hold the height of a triangle
+
+ 000001CC 0A 0D 00			crlf byte  10,13,0								;Null-terminated string to skip to new line
+ 000001CF 00000000			sizeString dword ?
+ 000001D3 00000000			dVal dword ?
+
 				;******************************************************************************************
  00000000				.CODE
 					
@@ -198,7 +215,7 @@ proj3.asm						     Page 1 - 1
  00000000  B8 00000000			MOV EAX, 0										;Statement to help in debugging
 					
  00000005 00000005		main PROC
-				
+
 					DisplayString strProjInfo						;calls the display string macro as passes in the project information.
 					
  0000000F			getRectangleLength:	
@@ -225,46 +242,56 @@ proj3.asm						     Page 1 - 1
  0000007A  7F CC			JG getRectangleWidth							;If greater than, jump to getRectangleWidth
  0000007C  83 F8 03			CMP EAX, 3										;Compare EAX to 3 to see if it is less than 3	
  0000007F  7C C7			JL getRectangleWidth							;If so, jump to getRectangleWidth 
- 00000081  EB 00			JMP displayRectangle
+ 00000081  EB 00			JMP displayRectangle							;jump to the next section to display the rectangle
 					
 					
  00000083			displayRectangle:	
-					DisplayString strSolidRectangleInfo				;calls the display string macro and passes in the specified string and shows this is a rectangle with the specified dims.
+					DisplayString strSolidRectangleInfo1			;calls the display string macro and passes in the specified string and shows this is a rectangle with the specified dims.
+					DisplayString recLength							;this will display the length of the rectangle via the macro
+					DisplayString strSolidRectangleInfo2			;this will show the second part of the string "by"
+					DisplayString recWidth							;this will display the width of the rectangle via the macro
+					DisplayString strSolidRectangleInfo3			;this will display the end colon to make the string look nice. 
 					DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 					DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
- 000000A1  EB 00			JMP getTriangleHeight
+ 000000C9  EB 00			JMP getTriangleHeight
 					
 					
- 000000A3			getTriangleHeight:	
+ 000000CB			getTriangleHeight:	
 					DisplayString strTriangleHeight					;calls the display string macro as passes in the length string.
 					PullString triHeight, 2							;get the user specified string and store into a variable, also in EAX
 					CvtoNum triHeight								;convert the value to its true decimal number so we can actually use it.
 					
- 000000CD  83 F8 00			CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
- 000000D0  74 D1			JE getTriangleHeight							;If it is null then jump to getRectangleWidth
- 000000D2  83 F8 19			CMP EAX, 25										;Compare EAX to 25 to see if the user typed a number greater than 25.
- 000000D5  7F CC			JG getTriangleHeight							;If greater than, jump to getRectangleWidth
- 000000D7  83 F8 04			CMP EAX, 4										;Compare EAX to 4 to see if it is less than 4	
- 000000DA  7C C7			JL getTriangleHeight							;If so, jump to getRectangleWidth 
- 000000DC  EB 00			JMP displayTri
+ 000000F5  83 F8 00			CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
+ 000000F8  74 D1			JE getTriangleHeight							;If it is null then jump to getRectangleWidth
+ 000000FA  83 F8 19			CMP EAX, 25										;Compare EAX to 25 to see if the user typed a number greater than 25.
+ 000000FD  7F CC			JG getTriangleHeight							;If greater than, jump to getRectangleWidth
+ 000000FF  83 F8 04			CMP EAX, 4										;Compare EAX to 4 to see if it is less than 4	
+ 00000102  7C C7			JL getTriangleHeight							;If so, jump to getRectangleWidth 
+ 00000104  EB 00			JMP displayTri
 					
- 000000DE			displayTri:	
+ 00000106			displayTri:	
 					DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
-					DisplayString strSolidTriangleInfo				;calls the display string macro and passes in the specified string to show information about the solid triangle.
+					DisplayString strSolidTriangleInfo1				;calls the display string macro and passes in the specified string to show information about the solid triangle.
+					DisplayString triHeight							;this will call the macro to display the height of the rectangle 
+					DisplayString strSolidTriangleInfo2				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 					DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 					DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.
 					
- 00000106  B8 00000000			MOV EAX, 0										;Statement to help in debugging
- 0000010B  EB 00			JMP finished
-				
+ 00000142  68 00000137 R		PUSH OFFSET strSolidRectangleInfo2
+ 00000147  E8 00000000 E		call sizeOfString
+ 0000014C  83 C4 04			ADD ESP, 4
+					
+ 0000014F  B8 00000000			MOV EAX, 0										;Statement to help in debugging
+ 00000154  EB 00			JMP finished
+
 				;************************************* the instructions below calls for "normal termination"	
- 0000010D			finished:
+ 00000156			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 00000114			main ENDP
+ 0000015D			main ENDP
 					END												;Signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    10/10/19 15:18:39
+Microsoft (R) Macro Assembler Version 6.11		    10/12/19 16:25:31
 proj3.asm						     Symbols 2 - 1
 
 
@@ -276,6 +303,7 @@ Macros:
 
 CvtoNum  . . . . . . . . . . . .	Proc
 DisplayString  . . . . . . . . .	Proc
+IntAsc . . . . . . . . . . . . .	Proc
 PullString . . . . . . . . . . .	Proc
 
 
@@ -285,8 +313,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000001E7 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000114 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001D7 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000015D DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -300,13 +328,14 @@ HeapDestroyHarrison  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 0000010F Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000158 Public
   getRectangleLength . . . . . .	L Near	 0000000F _TEXT	
   getRectangleWidth  . . . . . .	L Near	 00000048 _TEXT	
   displayRectangle . . . . . . .	L Near	 00000083 _TEXT	
-  getTriangleHeight  . . . . . .	L Near	 000000A3 _TEXT	
-  displayTri . . . . . . . . . .	L Near	 000000DE _TEXT	
-  finished . . . . . . . . . . .	L Near	 0000010D _TEXT	
+  getTriangleHeight  . . . . . .	L Near	 000000CB _TEXT	
+  displayTri . . . . . . . . . .	L Near	 00000106 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000156 _TEXT	
+putch  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
@@ -324,18 +353,24 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
-crlf . . . . . . . . . . . . . .	Byte	 000001E4 _DATA	
-recLength  . . . . . . . . . . .	Byte	 000001E1 _DATA	
-recWidth . . . . . . . . . . . .	Byte	 000001E2 _DATA	
-strHallowRectangleInfo . . . . .	Byte	 00000150 _DATA	
-strHallowTriangleInfo  . . . . .	Byte	 000001B0 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 000001CC _DATA	
+dVal . . . . . . . . . . . . . .	DWord	 000001D3 _DATA	
+recLength  . . . . . . . . . . .	Byte	 000001C7 _DATA	
+recWidth . . . . . . . . . . . .	Byte	 000001C9 _DATA	
+sizeOfString . . . . . . . . . .	L Near	 00000000 FLAT	External
+sizeString . . . . . . . . . . .	DWord	 000001CF _DATA	
+strHallowRectangleInfo . . . . .	Byte	 0000013F _DATA	
+strHallowTriangleInfo  . . . . .	Byte	 00000196 _DATA	
 strProjInfo  . . . . . . . . . .	Byte	 00000000 _DATA	
 strRectangleLength . . . . . . .	Byte	 00000061 _DATA	
 strRectangleWidth  . . . . . . .	Byte	 00000098 _DATA	
-strSolidRectangleInfo  . . . . .	Byte	 0000010A _DATA	
-strSolidTriangleInfo . . . . . .	Byte	 0000017C _DATA	
+strSolidRectangleInfo1 . . . . .	Byte	 0000010A _DATA	
+strSolidRectangleInfo2 . . . . .	Byte	 00000137 _DATA	
+strSolidRectangleInfo3 . . . . .	Byte	 0000013C _DATA	
+strSolidTriangleInfo1  . . . . .	Byte	 0000016B _DATA	
+strSolidTriangleInfo2  . . . . .	Byte	 00000193 _DATA	
 strTriangleHeight  . . . . . . .	Byte	 000000CE _DATA	
-triHeight  . . . . . . . . . . .	Byte	 000001E3 _DATA	
+triHeight  . . . . . . . . . . .	Byte	 000001CB _DATA	
 
 	   0 Warnings
 	   0 Errors

@@ -17,10 +17,12 @@
 	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 	HeapDestroyHarrison PROTO Near32 stdcall								;Creates memory on the heap (of dSize words) and returns the address of the 
+	putch PROTO Near32 stdcall, bVal:byte
 																			;start of the allocated heap memory
 	HeapAllocHarrison PROTO Near32 stdcall, dSize:DWORD 					;Destroys the allocated heap storage created through heapAllocHarrison
+	;sizeOfString PROTO C, dSize:DWORD 
 ;******************************************************************************************
-;EXTERN externalProc:near
+EXTERN sizeOfString:near32
 ;******************************************************************************************
 COMMENT %
 ******************************************************************************
@@ -36,7 +38,24 @@ COMMENT %
 *****************************************************************************%
 
 DisplayString MACRO String:REQ
-	INVOKE putstring, ADDR String     				;;display The string passed in 
+	INVOKE putstring, ADDR String    				;;display The string passed in 
+ENDM
+
+COMMENT %
+******************************************************************************
+*Name: AscInt                                                                *
+*Purpose:                                                                    *
+*	Converts ascii value to int and stores in dVal							 *
+*                                                                            *
+*Date Created: 10/02/2019                                                    *
+*Date Modified: 10/02/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param String1:byte                                                         *
+*****************************************************************************%
+
+IntAsc MACRO String:REQ, val:REQ
+	INVOKE intasc32, ADDR String, ADDR val  				;;invoke ascint proc 
 ENDM
 
 COMMENT %
@@ -60,7 +79,7 @@ ENDM
 
 COMMENT %
 ******************************************************************************
-*Name: CvtoNum                                                               *
+*Name: CvtoToNum                                                             *
 *Purpose:                                                                    *
 *	converts a string to its real decimal number.                            *
 *                                                                            *
@@ -84,15 +103,20 @@ ENDM
 	strRectangleLength byte 10,10, "Enter a whole number length for a rectangle [3,25]: ", 0
 	strRectangleWidth byte 10,10, "Enter a whole number width for a rectangle [3,25]: ", 0
 	strTriangleHeight byte 10,10, "Enter a whole number height for a right triangle [4,25]: ", 0
-	strSolidRectangleInfo byte 10,10, "This is a rectangle with input dimensions $recLength by $recWidth: ",0
+	strSolidRectangleInfo1 byte 10,10, "This is a rectangle with input dimensions ",0
+	strSolidRectangleInfo2 byte " by ",0
+	strSolidRectangleInfo3 byte ": ",0
 	strHallowRectangleInfo byte 10,10, "This is the same rectangle hollowed out: ",0
-	strSolidTriangleInfo byte 10,10, "This is a right triangle with height $Triheight: ",0
+	strSolidTriangleInfo1 byte 10,10, "This is a right triangle with height ",0
+	strSolidTriangleInfo2 byte ": ",0
 	strHallowTriangleInfo byte 10,10, "This is the same right triangle hollowed out: ",0
-	recLength byte ?								;set aside memory to hold the length of the rectangle
-	recWidth byte ?									;set aside memory to hold the width of the rectangle
+	recLength byte 2 dup (?) 						;set aside memory to hold the length of the rectangle with an empty byte between the next variable
+	recWidth byte 2 dup (?) 	 					;set aside memory to hold the width of the rectangle with an empty byte between the next variable
 	triHeight byte ?								;memory to hold the height of a triangle
 
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
+	sizeString dword ?
+	dVal dword ?
 
 ;******************************************************************************************
 	.CODE
@@ -132,7 +156,11 @@ getRectangleWidth:
 	
 	
 displayRectangle:	
-	DisplayString strSolidRectangleInfo				;calls the display string macro and passes in the specified string and shows this is a rectangle with the specified dims.
+	DisplayString strSolidRectangleInfo1			;calls the display string macro and passes in the specified string and shows this is a rectangle with the specified dims.
+	DisplayString recLength							;this will display the length of the rectangle via the macro
+	DisplayString strSolidRectangleInfo2			;this will show the second part of the string "by"
+	DisplayString recWidth							;this will display the width of the rectangle via the macro
+	DisplayString strSolidRectangleInfo3			;this will display the end colon to make the string look nice. 
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
 	JMP getTriangleHeight
@@ -153,9 +181,15 @@ getTriangleHeight:
 	
 displayTri:	
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
-	DisplayString strSolidTriangleInfo				;calls the display string macro and passes in the specified string to show information about the solid triangle.
+	DisplayString strSolidTriangleInfo1				;calls the display string macro and passes in the specified string to show information about the solid triangle.
+	DisplayString triHeight							;this will call the macro to display the height of the rectangle 
+	DisplayString strSolidTriangleInfo2				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 	DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.
+	
+	PUSH OFFSET strSolidRectangleInfo2
+	call sizeOfString
+	ADD ESP, 4
 	
 	MOV EAX, 0										;Statement to help in debugging
 	JMP finished

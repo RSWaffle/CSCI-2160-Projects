@@ -21,7 +21,7 @@
 																			;start of the allocated heap memory
 
 ;******************************************************************************************
-EXTERN sizeOfString:near32,createRectangle:near32
+EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32
 ;******************************************************************************************
 COMMENT %
 ******************************************************************************
@@ -54,7 +54,7 @@ COMMENT %
 *****************************************************************************%
 
 IntAsc MACRO String:REQ, val:REQ
-	INVOKE intasc32, ADDR String, ADDR val  				;;invoke ascint proc 
+	INVOKE intasc32, ADDR String, ADDR val  		;;invoke ascint proc 
 ENDM
 
 COMMENT %
@@ -91,6 +91,32 @@ CvtoNum MACRO String:REQ
 	INVOKE ascint32, ADDR String					;Convert the ASCII value to its true decimal number
 ENDM
 
+COMMENT %
+******************************************************************************
+*Name: DisplayShape                                                          *
+*Purpose:                                                                    *
+*	takes in a string address and displays contents until null character     *
+*                                                                            *
+*Date Created: 10/13/2019                                                    *
+*Date Modified: 10/13/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param String1:byte                                                         *
+*****************************************************************************%
+DisplayShape MACRO String:REQ	
+	MOV EAX, 0										;clear out EAX to avoid error
+	MOV EDI, 0										;clear out EDI to avoid error
+	ADD EDI, strAddress								;Adds the address of straddress to edi so we get the memory location
+	lpDisplay:
+		MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
+		CMP AL, 00									;compare to 00 to see if we are at the end of the string
+		JE finishedDisplay							;if it is equal, jump to finished display
+		MOV bDisplay, AL							;move the byte into bdisplay to setup for output
+		DisplayString bDisplay						;calls the DisplayString macro and passes in the byte stored in bdisplay
+		INC EDI										;increment edi so we look at the next location in the loop
+		JMP lpDisplay								;jump back to the top
+	finishedDisplay:	
+ENDM
 ;******************************************************************************************
 	.DATA
 	strProjInfo byte  10,13,9,
@@ -108,6 +134,7 @@ ENDM
 	strSolidTriangleInfo1 byte 10,10, "This is a right triangle with height ",0
 	strSolidTriangleInfo2 byte ": ",0
 	strHallowTriangleInfo byte 10, "This is the same right triangle hollowed out: ",0
+	TestString byte 10, ":^)",0
 	recLength byte 4 dup (?) 						;set aside memory to hold the length of the rectangle with an empty bytes between the next variable
 	recWidth byte 4 dup (?) 	 					;set aside memory to hold the width of the rectangle with an empty bytes between the next variable
 	triHeight byte ?								;memory to hold the height of a triangle
@@ -116,11 +143,10 @@ ENDM
 	triHeightASCII byte ?							;memory to hold the height of a triangle in ASCII form
 
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
-	sizeString dword ?
-	dVal dword ?
-	strAddress dword ?
-	bDisplay byte ?
-	iTemp dword ?
+	sizeString dword ?								;Temp memory to hold the size of a string
+	strAddress dword ?								;Memory to hold the 4 byte address of a string
+	bDisplay byte ?									;memory to hold a byte to display
+	iTemp dword ?									;temp memory to hold a number for calculation
 
 ;******************************************************************************************
 	.CODE
@@ -136,7 +162,7 @@ getRectangleLength:
 	DisplayString strRectangleLength				;calls the display string macro as passes in the length string.
 	PullString recLengthASCII, 2					;get the user specified string and store into a variable, also in EAX
 	CvtoNum recLengthASCII							;convert the value to its true decimal number so we can actually use it.
-	MOV recLength, AL
+	MOV recLength, AL								;moves the length of the rectangle into AL so we can properly compare it
 	
 	CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
 	JE getRectangleLength							;If it is null then jump to getRectangleLength
@@ -150,7 +176,7 @@ getRectangleWidth:
 	DisplayString strRectangleWidth					;calls the display string macro as passes in the length string.
 	PullString recWidthASCII, 2						;get the user specified string and store into a variable, also in EAX
 	CvtoNum recWidthASCII							;convert the value to its true decimal number so we can actually use it.
-	MOV recWidth, AL
+	MOV recWidth, AL								;moves the width of the rectangle into AL so we can properly compare it
 	
 	CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
 	JE getRectangleWidth							;If it is null then jump to getRectangleWidth
@@ -168,34 +194,23 @@ displayRectangle:
 	DisplayString recWidthASCII						;this will display the width of the rectangle via the macro
 	DisplayString strSolidRectangleInfo3			;this will display the end colon to make the string look nice. 
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
-	PUSH dword ptr recLength
-	PUSH dword ptr recWidth
-	CALL CreateRectangle
-	ADD ESP, 8
-	MOV strAddress, EAX
-	MOV EAX, 0
-	MOV EDI, 0
-	LEA EBX, strAddress
-	ADD EDI, strAddress
-	lpDisplay:
-		MOV AL,[EDI]
-		CMP AL, 00
-		JE finishedDisplay
-		MOV bDisplay, AL
-		DisplayString bDisplay
-		INC EDI
-		JMP lpDisplay
-		
-	finishedDisplay:
+	PUSH dword ptr recLength						;Push the length of the rectangle so the method is able to access it
+	PUSH dword ptr recWidth							;Push the width of the rectangle so the method is able to access it
+	CALL CreateRectangle							;Call the method in proj3procs
+	ADD ESP, 8										;Add back the bits that we used in the method
+	MOV strAddress, EAX								;move the address that the method gave us into a variable
+	DisplayShape strAddress							;call the display shape macro to display the shape for us
 	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
-	JMP getTriangleHeight
+	DisplayString crlf								;displays the chars to skip to a new line.	
+	DisplayString TestString						;Display test string because im happy
+	JMP getTriangleHeight							;jump to the next section after completion.
 	
 	
 getTriangleHeight:	
 	DisplayString strTriangleHeight					;calls the display string macro as passes in the length string.
 	PullString triHeightASCII, 2					;get the user specified string and store into a variable, also in EAX
 	CvtoNum triHeightASCII							;convert the value to its true decimal number so we can actually use it.
-	MOV triHeight, AL
+	MOV triHeight, AL								;moves the height of the triangle into AL so we can properly compare it
 	
 	CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
 	JE getTriangleHeight							;If it is null then jump to getRectangleWidth
@@ -203,7 +218,7 @@ getTriangleHeight:
 	JG getTriangleHeight							;If greater than, jump to getRectangleWidth
 	CMP EAX, 4										;Compare EAX to 4 to see if it is less than 4	
 	JL getTriangleHeight							;If so, jump to getRectangleWidth 
-	JMP displayTri
+	JMP displayTri									;jump to next section
 	
 displayTri:	
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
@@ -211,7 +226,14 @@ displayTri:
 	DisplayString triHeightASCII					;this will call the macro to display the height of the rectangle 
 	DisplayString strSolidTriangleInfo2				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
+	PUSH dword ptr triHeight						;Push the height of the triangle so the method is able to access it
+	CALL createTriangle								;call the method create triangle so we can get the location of our stored triangle
+	ADD ESP, 4										;add back the bytes we used
+	MOV strAddress, EAX								;move the address that the method gave us into a variable
+	DisplayShape, strAddress						;call the display shape macro to display the shape for us
 	DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.
+	DisplayString crlf								;displays the chars to skip to a new line.	
+	DisplayString TestString						;Display test string because im happy
 	
 	PUSH OFFSET strSolidRectangleInfo2
 	call sizeOfString
@@ -222,6 +244,7 @@ displayTri:
 
 ;************************************* the instructions below calls for "normal termination"	
 finished:
+	;INVOKE HeapDestroyHarrison
 	INVOKE ExitProcess,0						 
 	PUBLIC _start
 	

@@ -16,10 +16,7 @@
 	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
 	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-	HeapDestroyHarrison PROTO Near32 stdcall								;Creates memory on the heap (of dSize words) and returns the address of the 
-	putch PROTO Near32 stdcall, bVal:byte
-																			;start of the allocated heap memory
-
+	heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
 ;******************************************************************************************
 EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32
 ;******************************************************************************************
@@ -104,6 +101,8 @@ COMMENT %
 *@param String1:byte                                                         *
 *****************************************************************************%
 DisplayShape MACRO String:REQ	
+	LOCAL lpDisplay									;make this label local to avoid errors calling this more than once.
+	LOCAL finishedDisplay							;make this label local to avoid errors calling this more than once.
 	MOV EAX, 0										;clear out EAX to avoid error
 	MOV EDI, 0										;clear out EDI to avoid error
 	ADD EDI, strAddress								;Adds the address of straddress to edi so we get the memory location
@@ -230,7 +229,7 @@ displayTri:
 	CALL createTriangle								;call the method create triangle so we can get the location of our stored triangle
 	ADD ESP, 4										;add back the bytes we used
 	MOV strAddress, EAX								;move the address that the method gave us into a variable
-	DisplayShape, strAddress						;call the display shape macro to display the shape for us
+	DisplayShape  strAddress						;call the display shape macro to display the shape for us
 	DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.
 	DisplayString crlf								;displays the chars to skip to a new line.	
 	DisplayString TestString						;Display test string because im happy
@@ -244,7 +243,7 @@ displayTri:
 
 ;************************************* the instructions below calls for "normal termination"	
 finished:
-	;INVOKE HeapDestroyHarrison
+	INVOKE heapDestroyHarrison
 	INVOKE ExitProcess,0						 
 	PUBLIC _start
 	

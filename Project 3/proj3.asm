@@ -1,7 +1,7 @@
 ;******************************************************************************************
 ;*  Program Name: proj3.asm
 ;*  Programmer:   Ryan Shupe
-;*  Class:        CSCI 2160-001
+;*  Class:        CSCI 2160-001 _HeapAllocHarrison@0
 ;*  Lab:          Proj3
 ;*  Date:         10/19/2019
 ;*  Purpose:      
@@ -19,10 +19,9 @@
 	HeapDestroyHarrison PROTO Near32 stdcall								;Creates memory on the heap (of dSize words) and returns the address of the 
 	putch PROTO Near32 stdcall, bVal:byte
 																			;start of the allocated heap memory
-	HeapAllocHarrison PROTO Near32 stdcall, dSize:DWORD 					;Destroys the allocated heap storage created through heapAllocHarrison
-	;sizeOfString PROTO C, dSize:DWORD 
+
 ;******************************************************************************************
-EXTERN sizeOfString:near32
+EXTERN sizeOfString:near32,createRectangle:near32
 ;******************************************************************************************
 COMMENT %
 ******************************************************************************
@@ -74,7 +73,6 @@ COMMENT %
 
 PullString MACRO String:REQ, limit:REQ
 		INVOKE getstring, ADDR String, limit		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
-		INVOKE ascint32, ADDR String				;Convert the ASCII value to its true decimal number
 ENDM
 
 COMMENT %
@@ -106,17 +104,23 @@ ENDM
 	strSolidRectangleInfo1 byte 10,10, "This is a rectangle with input dimensions ",0
 	strSolidRectangleInfo2 byte " by ",0
 	strSolidRectangleInfo3 byte ": ",0
-	strHallowRectangleInfo byte 10,10, "This is the same rectangle hollowed out: ",0
+	strHallowRectangleInfo byte 10,"This is the same rectangle hollowed out: ",0
 	strSolidTriangleInfo1 byte 10,10, "This is a right triangle with height ",0
 	strSolidTriangleInfo2 byte ": ",0
-	strHallowTriangleInfo byte 10,10, "This is the same right triangle hollowed out: ",0
-	recLength byte 2 dup (?) 						;set aside memory to hold the length of the rectangle with an empty byte between the next variable
-	recWidth byte 2 dup (?) 	 					;set aside memory to hold the width of the rectangle with an empty byte between the next variable
+	strHallowTriangleInfo byte 10, "This is the same right triangle hollowed out: ",0
+	recLength byte 4 dup (?) 						;set aside memory to hold the length of the rectangle with an empty bytes between the next variable
+	recWidth byte 4 dup (?) 	 					;set aside memory to hold the width of the rectangle with an empty bytes between the next variable
 	triHeight byte ?								;memory to hold the height of a triangle
+	recLengthASCII byte 4 dup (?) 					;set aside memory to hold the length of the rectangle in ASCII form with an empty bytes between the next variable
+	recWidthASCII byte 4 dup (?) 	 				;set aside memory to hold the width of the rectanglein ASCII form with an empty bytes between the next variable
+	triHeightASCII byte ?							;memory to hold the height of a triangle in ASCII form
 
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
 	sizeString dword ?
 	dVal dword ?
+	strAddress dword ?
+	bDisplay byte ?
+	iTemp dword ?
 
 ;******************************************************************************************
 	.CODE
@@ -130,8 +134,9 @@ main PROC
 	
 getRectangleLength:	
 	DisplayString strRectangleLength				;calls the display string macro as passes in the length string.
-	PullString recLength, 2							;get the user specified string and store into a variable, also in EAX
-	CvtoNum recLength								;convert the value to its true decimal number so we can actually use it.
+	PullString recLengthASCII, 2					;get the user specified string and store into a variable, also in EAX
+	CvtoNum recLengthASCII							;convert the value to its true decimal number so we can actually use it.
+	MOV recLength, AL
 	
 	CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
 	JE getRectangleLength							;If it is null then jump to getRectangleLength
@@ -143,8 +148,9 @@ getRectangleLength:
 	
 getRectangleWidth:	
 	DisplayString strRectangleWidth					;calls the display string macro as passes in the length string.
-	PullString recWidth, 2							;get the user specified string and store into a variable, also in EAX
-	CvtoNum recWidth								;convert the value to its true decimal number so we can actually use it.
+	PullString recWidthASCII, 2						;get the user specified string and store into a variable, also in EAX
+	CvtoNum recWidthASCII							;convert the value to its true decimal number so we can actually use it.
+	MOV recWidth, AL
 	
 	CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
 	JE getRectangleWidth							;If it is null then jump to getRectangleWidth
@@ -157,19 +163,39 @@ getRectangleWidth:
 	
 displayRectangle:	
 	DisplayString strSolidRectangleInfo1			;calls the display string macro and passes in the specified string and shows this is a rectangle with the specified dims.
-	DisplayString recLength							;this will display the length of the rectangle via the macro
+	DisplayString recLengthASCII					;this will display the length of the rectangle via the macro
 	DisplayString strSolidRectangleInfo2			;this will show the second part of the string "by"
-	DisplayString recWidth							;this will display the width of the rectangle via the macro
+	DisplayString recWidthASCII						;this will display the width of the rectangle via the macro
 	DisplayString strSolidRectangleInfo3			;this will display the end colon to make the string look nice. 
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
+	PUSH dword ptr recLength
+	PUSH dword ptr recWidth
+	CALL CreateRectangle
+	ADD ESP, 8
+	MOV strAddress, EAX
+	MOV EAX, 0
+	MOV EDI, 0
+	LEA EBX, strAddress
+	ADD EDI, strAddress
+	lpDisplay:
+		MOV AL,[EDI]
+		CMP AL, 00
+		JE finishedDisplay
+		MOV bDisplay, AL
+		DisplayString bDisplay
+		INC EDI
+		JMP lpDisplay
+		
+	finishedDisplay:
 	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
 	JMP getTriangleHeight
 	
 	
 getTriangleHeight:	
 	DisplayString strTriangleHeight					;calls the display string macro as passes in the length string.
-	PullString triHeight, 2							;get the user specified string and store into a variable, also in EAX
-	CvtoNum triHeight								;convert the value to its true decimal number so we can actually use it.
+	PullString triHeightASCII, 2					;get the user specified string and store into a variable, also in EAX
+	CvtoNum triHeightASCII							;convert the value to its true decimal number so we can actually use it.
+	MOV triHeight, AL
 	
 	CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
 	JE getTriangleHeight							;If it is null then jump to getRectangleWidth
@@ -182,7 +208,7 @@ getTriangleHeight:
 displayTri:	
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 	DisplayString strSolidTriangleInfo1				;calls the display string macro and passes in the specified string to show information about the solid triangle.
-	DisplayString triHeight							;this will call the macro to display the height of the rectangle 
+	DisplayString triHeightASCII					;this will call the macro to display the height of the rectangle 
 	DisplayString strSolidTriangleInfo2				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 	DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.

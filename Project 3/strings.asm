@@ -45,6 +45,7 @@ sizeOfString PROC Near32
 	
 	POP ESI								;restore original esi
 	POP EBX								;restore original ebx
+	POP EBP
 	RET									;return
 sizeOfString ENDP
 

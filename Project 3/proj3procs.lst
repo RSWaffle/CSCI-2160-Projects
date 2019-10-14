@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:12:44
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 16:29:19
 proj3procs.asm						     Page 1 - 1
 
 
@@ -21,9 +21,11 @@ proj3procs.asm						     Page 1 - 1
  00000000 00000000			strSize dword ?						;Temp memory to hold the size of words we need to allocate
  00000004 00000000			iLength dword ?						;memory to hold the length of a rectangle
  00000008 00000000			iWidth dword ?						;memory to hold the width of a rectangle
- 0000000C 00000000			iHeight dword ?						;memory to hold the height of a triangle
- 00000010 00000000			iTemp dword ? 						;temp memory to use during calculation
- 00000014 00000000			strStartAddr dword ?				;dword to hold the 4 byte address of the beginning of heap memory
+ 0000000C 00000000			iWidthHollow dword ?				;Memory to hold the width -2 of the rectangle
+ 00000010 00000000			iHeightHollow dword ?				;memory to hold the height -2 of the triangle
+ 00000014 00000000			iHeight dword ?						;memory to hold the height of a triangle
+ 00000018 00000000			iTemp dword ? 						;temp memory to use during calculation
+ 0000001C 00000000			strStartAddr dword ?				;dword to hold the 4 byte address of the beginning of heap memory
 					
 				;******************************************************************************************
  00000000			.code
@@ -52,46 +54,181 @@ proj3procs.asm						     Page 1 - 1
  00000016  A3 00000000 R		MOV strSize, EAX					;moves the value into eax into strSize, this should be enough memory to hold what we need.
 
 					INVOKE heapAllocHarrison, strSize	;calls the allocation method to allocate strSize words in memory that we can use to hold our string
- 00000026  A3 00000014 R		MOV strStartAddr, EAX				;moves the address of the first byte in our allocated memory into a variable
+ 00000026  A3 0000001C R		MOV strStartAddr, EAX				;moves the address of the first byte in our allocated memory into a variable
 					
  0000002B  BF 00000000			MOV EDI, 0							;sets our initial offset to 0, we will inc this when we go through the loops
- 00000030  C7 87 00000014 R		MOV [strStartAddr + EDI], 10		;this should set the first byte to the new line character.
+ 00000030  C7 87 0000001C R		MOV [strStartAddr + EDI], 10		;this should set the first byte to the new line character.
 	   0000000A
  0000003A  47				INC EDI								;increment to the next position
  0000003B  8B 0D 00000004 R		MOV ECX, iLength					;moves into ecx the length of the rectangle so we get the proper dims and the loop knows when to terminate
 					
  00000041				lpCreateRectangle:
- 00000041  C7 87 00000014 R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
+ 00000041  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
 	   00000009
  0000004B  47					INC EDI							;increment to the next position
- 0000004C  C7 87 00000014 R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+ 0000004C  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
  00000056  47					INC EDI							;increment to the next position
  00000057  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
  00000059  8B 0D 00000008 R			MOV ECX, iWidth					;sets the new value of ECX to the width of the rectangle.
  0000005F					lpCreateStars:
- 0000005F  C7 87 00000014 R				MOV [strStartAddr + EDI], 42;put the character * at the addr offset edi
+ 0000005F  C7 87 0000001C R				MOV [strStartAddr + EDI], 42;put the character * at the addr offset edi
 	   0000002A
  00000069  47						INC EDI						;increment to the next position
- 0000006A  C7 87 00000014 R				MOV [strStartAddr + EDI], 32;put the character space at the addr offset edi
+ 0000006A  C7 87 0000001C R				MOV [strStartAddr + EDI], 32;put the character space at the addr offset edi
 	   00000020
  00000074  47						INC EDI						;increment to the next position
  00000075  E2 E8				loop lpCreateStars				;decrement ECX and go to the top of the loop
  00000077  8B CB				MOV ECX, EBX					;restores our old ECX value
- 00000079  C7 87 00000014 R			MOV [strStartAddr + EDI], 10	;put the new line at the addr offset edi
+ 00000079  C7 87 0000001C R			MOV [strStartAddr + EDI], 10	;put the new line at the addr offset edi
 	   0000000A
  00000083  47					INC EDI							;increment to the next position
- 00000084  C7 87 00000014 R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+ 00000084  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
  0000008E  47					INC EDI							;increment to the next position
  0000008F  E2 B0			loop lpCreateRectangle				;decrement ECX and go to the top of the loop
- 00000091  C7 87 00000014 R		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
+ 00000091  C7 87 0000001C R		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
 	   00000000
- 0000009B  B8 00000014 R		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+ 0000009B  B8 0000001C R		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
  000000A0  5D				POP EBP								;restore original EBP
  000000A1  C3				RET									;return
  000000A2			createRectangle ENDP
 
+				COMMENT %
+				******************************************************************************
+				*Name: hollowRectangle                                                       *
+				*Purpose:                                                                    *
+				*	     this takes in a position  of a copied string, modifies it and returns
+				*		the edited string													 *
+				*Date Created: 10/14/2019                                                    *
+				*Date Modified: 10/14/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param iLength:dword                                                        *
+				*@param iWidth:dword													 	 *
+				*@param ADDR:dword													 	     *
+				*@returns addr:dword														 *
+				*****************************************************************************%
+ 000000A2			hollowRectangle  PROC Near32
+ 000000A2  55				PUSH EBP							;preserves base register
+ 000000A3  8B EC			MOV EBP, ESP						;sets a new stack frame
+ 000000A5  8B 45 0C			MOV EAX, [EBP + 12]					;moves the variable passed in into eax
+ 000000A8  83 E8 02			SUB EAX, 2							;subtract the length by two so we can properly igmore the first and last lines. 
+ 000000AB  A3 00000004 R		MOV iLength, EAX					;moves the variable into iLength
+ 000000B0  8B 5D 10			MOV EBX, [EBP + 16]					;moves the variable passed in into ebx
+ 000000B3  89 1D 00000008 R		MOV iWidth, EBX						;moves the variable into iWidth
+ 000000B9  83 EB 02			SUB EBX, 2							;get the value in between the two end points.
+ 000000BC  89 1D 0000000C R		MOV iWidthHollow, EBX				;store this value into a variable so it can control our loop
+ 000000C2  8B 55 08			MOV EDX, [EBP + 8]					;move the address of where to write into EDX register
+ 000000C5  89 15 0000001C R		MOV strStartAddr, EDX				;moves the address of the first byte in our allocated memory into a variable
+					
+ 000000CB  BF 00000000			MOV EDI, 0							;sets our initial offset to 0, we will inc this when we go through the loops
+ 000000D0  C7 87 0000001C R		MOV [strStartAddr + EDI], 10		;this should set the first byte to the new line character.
+	   0000000A
+ 000000DA  47				INC EDI								;increment to the next position
+ 000000DB  B9 00000001			MOV ECX, 1							;move 1 into ECX so this loop executes 1 time. (doesnt work without this being in a loop for some odd reason)
+					
+ 000000E0				lpDisplayFirstLine:
+ 000000E0  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
+	   00000009
+ 000000EA  47					INC EDI							;increment to the next position
+ 000000EB  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 000000F5  47					INC EDI							;increment to the next position
+ 000000F6  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
+ 000000F8  8B 0D 00000008 R			MOV ECX, iWidth					;sets the new value of ECX to the width of the rectangle.
+ 000000FE					lpCreateStars:
+ 000000FE  C7 87 0000001C R				MOV [strStartAddr + EDI], 42;put the character * at the addr offset edi
+	   0000002A
+ 00000108  47						INC EDI						;increment to the next position
+ 00000109  C7 87 0000001C R				MOV [strStartAddr + EDI], 32;put the character space at the addr offset edi
+	   00000020
+ 00000113  47						INC EDI						;increment to the next position
+ 00000114  E2 E8				loop lpCreateStars				;decrement ECX and go to the top of the loop
+ 00000116  8B CB				MOV ECX, EBX					;restores our old ECX value
+ 00000118  C7 87 0000001C R			MOV [strStartAddr + EDI], 10	;put the new line at the addr offset edi
+	   0000000A
+ 00000122  47					INC EDI							;increment to the next position
+ 00000123  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 0000012D  47					INC EDI							;increment to the next position
+ 0000012E  E2 B0			loop lpDisplayFirstLine
+					
+ 00000130  8B 0D 00000004 R		MOV ECX, iLength					;moves into ecx the length -2 of the rectangle so we get the proper inside dims and the loop knows when to terminate
+						
+ 00000136				lpCreateHollowRectangle:
+ 00000136  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
+	   00000009
+ 00000140  47					INC EDI							;increment to the next position
+ 00000141  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 0000014B  47					INC EDI							;increment to the next position
+ 0000014C  C7 87 0000001C R			MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+	   0000002A
+ 00000156  47					INC EDI							;increment to the next position
+ 00000157  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 00000161  47					INC EDI							;increment to the next position
+ 00000162  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
+ 00000164  8B 0D 0000000C R			MOV ECX, iWidthHollow			;sets the new value of ECX to the width of the rectangle.
+ 0000016A					lpCreateSpaces:
+ 0000016A  C7 87 0000001C R				MOV [strStartAddr + EDI], 32;put the character * at the addr offset edi
+	   00000020
+ 00000174  47						INC EDI						;increment to the next position
+ 00000175  C7 87 0000001C R				MOV [strStartAddr + EDI], 32;put the character space at the addr offset edi
+	   00000020
+ 0000017F  47						INC EDI						;increment to the next position
+ 00000180  E2 E8				loop lpCreateSpaces				;decrement ECX and go to the top of the loop
+ 00000182  8B CB				MOV ECX, EBX					;restores our old ECX value
+ 00000184  C7 87 0000001C R			MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+	   0000002A
+ 0000018E  47					INC EDI							;increment to the next position
+ 0000018F  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 00000199  47					INC EDI							;increment to the next position
+ 0000019A  C7 87 0000001C R			MOV [strStartAddr + EDI], 10	;put the new line at the addr offset edi
+	   0000000A
+ 000001A4  47					INC EDI							;increment to the next position
+ 000001A5  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 000001AF  47					INC EDI							;increment to the next position
+						
+ 000001B0  E2 84			loop lpCreateHollowRectangle		;decrement ECX and go to the top of the loop
+					
+ 000001B2  B9 00000001			MOV ECX, 1							;move 1 into ECX so this loop executes 1 time. (doesnt work without this being in a loop for some odd reason)
+					
+ 000001B7				lpDisplayLastLine:
+ 000001B7  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
+	   00000009
+ 000001C1  47					INC EDI							;increment to the next position
+ 000001C2  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 000001CC  47					INC EDI							;increment to the next position
+ 000001CD  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
+ 000001CF  8B 0D 00000008 R			MOV ECX, iWidth					;sets the new value of ECX to the width of the rectangle.
+ 000001D5					lpCreateLastStars:
+ 000001D5  C7 87 0000001C R				MOV [strStartAddr + EDI], 42;put the character * at the addr offset edi
+	   0000002A
+ 000001DF  47						INC EDI						;increment to the next position
+ 000001E0  C7 87 0000001C R				MOV [strStartAddr + EDI], 32;put the character space at the addr offset edi
+	   00000020
+ 000001EA  47						INC EDI						;increment to the next position
+ 000001EB  E2 E8				loop lpCreateLastStars			;decrement ECX and go to the top of the loop
+ 000001ED  8B CB				MOV ECX, EBX					;restores our old ECX value
+ 000001EF  C7 87 0000001C R			MOV [strStartAddr + EDI], 10	;put the new line at the addr offset edi
+	   0000000A
+ 000001F9  47					INC EDI							;increment to the next position
+ 000001FA  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 00000204  47					INC EDI							;increment to the next position
+ 00000205  E2 B0			loop lpDisplayLastLine
+					
+ 00000207  C7 87 0000001C R		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
+	   00000000
+ 00000211  B8 0000001C R		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+ 00000216  5D				POP EBP								;restore original EBP
+ 00000217  C3				RET									;return
+ 00000218			hollowRectangle ENDP
 
 				COMMENT %
 				******************************************************************************
@@ -104,62 +241,200 @@ proj3procs.asm						     Page 1 - 1
 				*                                                                            *
 				*                                                                            *
 				*@param iHeight:dword                                                        *
+				*@returns addr:dword														 *
 				*****************************************************************************%
- 000000A2			createTriangle  PROC Near32
- 000000A2  55				PUSH EBP							;preserves base register
- 000000A3  8B EC			MOV EBP, ESP						;sets a new stack frame
- 000000A5  B8 00000000			MOV EAX, 0							;clear out EAX to avoid error
- 000000AA  8B 45 08			MOV EAX, [EBP + 8]					;moves the variable passed in into eax
- 000000AD  A3 0000000C R		MOV iHeight, EAX					;moves the variable into iHeight
- 000000B2  A3 00000000 R		MOV strSize, EAX					;moves the value into eax into strSize, this should be enough memory to hold what we need.				
+ 00000218			createTriangle  PROC Near32
+ 00000218  55				PUSH EBP							;preserves base register
+ 00000219  8B EC			MOV EBP, ESP						;sets a new stack frame
+ 0000021B  B8 00000000			MOV EAX, 0							;clear out EAX to avoid error
+ 00000220  8B 45 08			MOV EAX, [EBP + 8]					;moves the variable passed in into eax
+ 00000223  A3 00000014 R		MOV iHeight, EAX					;moves the variable into iHeight
+ 00000228  A3 00000000 R		MOV strSize, EAX					;moves the value into eax into strSize, this should be enough memory to hold what we need.				
 					
-					INVOKE heapAllocHarrison, strSize	;calls the allocation method to allocate strSize words in memory that we can use to hold our string
- 000000C2  A3 00000014 R		MOV strStartAddr, EAX				;moves the address of the first byte in our allocated memory into a variable
-					
- 000000C7  BF 00000000			MOV EDI, 0							;set EDI to 0 to reference the beginning of the string
- 000000CC  C7 87 00000014 R		MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
+ 0000022D  BF 00000000			MOV EDI, 0							;set EDI to 0 to reference the beginning of the string
+ 00000232  C7 87 0000001C R		MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
 	   0000000A
- 000000D6  47				INC EDI								;increment to the next position
- 000000D7  C7 87 00000014 R		MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
+ 0000023C  47				INC EDI								;increment to the next position
+ 0000023D  C7 87 0000001C R		MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
 	   0000000A
- 000000E1  47				INC EDI								;increment to the next position
- 000000E2  B9 00000000			MOV ECX, 0							;clear out ECX just in case
- 000000E7  8A 0D 0000000C R		MOV CL, byte ptr iHeight			;moves the height of the triangle to CL so the loop knows when to terminate
- 000000ED  C7 05 00000010 R		MOV iTemp, 1						;set the initial value of iTemp to 1 because there will always be atleast 1 star
+ 00000247  47				INC EDI								;increment to the next position
+ 00000248  B9 00000000			MOV ECX, 0							;clear out ECX just in case
+ 0000024D  8A 0D 00000014 R		MOV CL, byte ptr iHeight			;moves the height of the triangle to CL so the loop knows when to terminate
+ 00000253  C7 05 00000018 R		MOV iTemp, 1						;set the initial value of iTemp to 1 because there will always be atleast 1 star
 	   00000001
 					
- 000000F7				lpDrawTriangle:
- 000000F7  C7 87 00000014 R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
+ 0000025D				lpDrawTriangle:
+ 0000025D  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
 	   00000009
- 00000101  47					INC EDI							;increment to the next position
- 00000102  C7 87 00000014 R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+ 00000267  47					INC EDI							;increment to the next position
+ 00000268  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
- 0000010C  47					INC EDI							;increment to the next position
- 0000010D  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
- 0000010F  8B 0D 00000010 R			MOV ECX, iTemp					;moves into ECX iTemp, so the loop knows how many stars to insert
- 00000115						lpPutStars:					
- 00000115  C7 87 00000014 R					MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+ 00000272  47					INC EDI							;increment to the next position
+ 00000273  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
+ 00000275  8B 0D 00000018 R			MOV ECX, iTemp					;moves into ECX iTemp, so the loop knows how many stars to insert
+ 0000027B						lpPutStars:					
+ 0000027B  C7 87 0000001C R					MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
 	   0000002A
- 0000011F  47							INC EDI							;increment to the next position
- 00000120  C7 87 00000014 R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+ 00000285  47							INC EDI							;increment to the next position
+ 00000286  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
- 0000012A  47							INC EDI							;increment to the next position
- 0000012B  E2 E8					loop lpPutStars						;decrement ECX and go to the top of the loop
- 0000012D  C7 87 00000014 R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
+ 00000290  47							INC EDI							;increment to the next position
+ 00000291  E2 E8					loop lpPutStars						;decrement ECX and go to the top of the loop
+ 00000293  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 	   0000000A
- 00000137  47					INC EDI									;increment to the next position
- 00000138  FF 05 00000010 R			INC iTemp						;increment our Temp variable to we add another star for the next line.
- 0000013E  8B CB				MOV ECX, EBX					;restores our old ECX value
- 00000140  E2 B5			loop lpDrawTriangle					;decrement ECX and go to the top of the loop
- 00000142  C7 87 00000014 R		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
+ 0000029D  47					INC EDI									;increment to the next position
+ 0000029E  FF 05 00000018 R			INC iTemp						;increment our Temp variable to we add another star for the next line.
+ 000002A4  8B CB				MOV ECX, EBX					;restores our old ECX value
+ 000002A6  E2 B5			loop lpDrawTriangle					;decrement ECX and go to the top of the loop
+ 000002A8  C7 87 0000001C R		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
 	   00000000
- 0000014C  B8 00000014 R		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
- 00000151  5D				POP EBP								;restore original EBP
- 00000152  C3				RET									;return
- 00000153			createTriangle ENDP
+ 000002B2  B8 0000001C R		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+ 000002B7  5D				POP EBP								;restore original EBP
+ 000002B8  C3				RET									;return
+ 000002B9			createTriangle ENDP
+
+				COMMENT %
+				******************************************************************************
+				*Name: hollowTriangle                                                        *
+				*Purpose:                                                                    *
+				*	     this takes in a position  of a copied string, modifies it and returns
+				*		the edited string													 *
+				*Date Created: 10/14/2019                                                    *
+				*Date Modified: 10/14/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param ADDR:dword                                                           *
+				*@param ADDR:dword													 	     *
+				*****************************************************************************%
+ 000002B9			hollowTriangle  PROC Near32
+ 000002B9  55				PUSH EBP							;preserves base register
+ 000002BA  8B EC			MOV EBP, ESP						;sets a new stack frame
+ 000002BC  B8 00000000			MOV EAX, 0							;clear out EAX to avoid error
+ 000002C1  8A 45 0C			MOV AL, [EBP + 12]					;moves the variable passed in into eax
+ 000002C4  A3 00000014 R		MOV iHeight, EAX					;moves the variable into iHeight
+
+ 000002C9  8B 45 08			MOV EAX, [EBP + 8]					;moves the address of the first byte in our allocated memory into a variable
+ 000002CC  A3 0000001C R		MOV strStartAddr, EAX
+					
+ 000002D1  BF 00000000			MOV EDI, 0							;set EDI to 0 to reference the beginning of the string
+ 000002D6  C7 87 0000001C R		MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
+	   0000000A
+ 000002E0  47				INC EDI								;increment to the next position
+ 000002E1  B9 00000000			MOV ECX, 0							;clear out ECX just in case
+					
+ 000002E6  C7 05 00000018 R		MOV iTemp, 1						;set the initial value of iTemp to 1 because there will always be atleast 1 star
+	   00000001
+					
+ 000002F0				Compare:
+ 000002F0  B1 01				MOV CL, 1			
+ 000002F2  83 3D 00000018 R			CMP iTemp, 1
+	   01
+ 000002F9  74 1B				JE lpDrawFirstLineTriangle
+ 000002FB  83 3D 00000018 R			CMP iTemp, 2
+	   02
+ 00000302  74 12				JE lpDrawFirstLineTriangle
+ 00000304  A1 00000018 R			MOV EAX, iTemp
+ 00000309  3B 05 00000014 R			CMP EAX, iHeight
+ 0000030F  74 52				JE lpDrawLastLineTriangle
+ 00000311  E9 0000009A				JMP lpDrawHollowTriangle
+						
+ 00000316				lpDrawFirstLineTriangle:
+ 00000316  C7 87 0000001C R			MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
+	   00000009
+ 00000320  47					INC EDI									;increment to the next position
+ 00000321  C7 87 0000001C R			MOV [strStartAddr + EDI], 32			;put the character space at the addr offset edi
+	   00000020
+ 0000032B  47					INC EDI									;increment to the next position
+ 0000032C  8B D9				MOV EBX, ECX							;stores the current value of ECX into EBX
+ 0000032E  8B 0D 00000018 R			MOV ECX, iTemp							;moves into ECX iTemp, so the loop knows how many stars to insert
+ 00000334						lpPutStars1:					
+ 00000334  C7 87 0000001C R					MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+	   0000002A
+ 0000033E  47							INC EDI							;increment to the next position
+ 0000033F  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 00000349  47							INC EDI							;increment to the next position
+ 0000034A  E2 E8					loop lpPutStars1						;decrement ECX and go to the top of the loop
+ 0000034C  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
+	   0000000A
+ 00000356  47					INC EDI									;increment to the next position
+ 00000357  FF 05 00000018 R			INC iTemp								;increment our Temp variable to we add another star for the next line.
+ 0000035D  8B CB				MOV ECX, EBX							;restores our old ECX value
+ 0000035F  E2 B5			loop lpDrawFirstLineTriangle				;decrement ECX and go to the top of the loop
+ 00000361  EB 8D			JMP Compare
+					
+ 00000363				lpDrawLastLineTriangle:
+ 00000363  C7 87 0000001C R			MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
+	   00000009
+ 0000036D  47					INC EDI									;increment to the next position
+ 0000036E  C7 87 0000001C R			MOV [strStartAddr + EDI], 32			;put the character space at the addr offset edi
+	   00000020
+ 00000378  47					INC EDI									;increment to the next position
+ 00000379  8B D9				MOV EBX, ECX							;stores the current value of ECX into EBX
+ 0000037B  8B 0D 00000018 R			MOV ECX, iTemp							;moves into ECX iTemp, so the loop knows how many stars to insert
+ 00000381						lpPutStars2:					
+ 00000381  C7 87 0000001C R					MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+	   0000002A
+ 0000038B  47							INC EDI							;increment to the next position
+ 0000038C  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 00000396  47							INC EDI							;increment to the next position
+ 00000397  E2 E8					loop lpPutStars2						;decrement ECX and go to the top of the loop
+ 00000399  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
+	   0000000A
+ 000003A3  47					INC EDI									;increment to the next position
+ 000003A4  FF 05 00000018 R			INC iTemp								;increment our Temp variable to we add another star for the next line.
+ 000003AA  8B CB				MOV ECX, EBX							;restores our old ECX value
+ 000003AC  E2 B5			loop lpDrawLastLineTriangle				;decrement ECX and go to the top of the loop
+ 000003AE  EB 76			JMP Complete
+					
+ 000003B0				lpDrawHollowTriangle:
+ 000003B0  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
+	   00000009
+ 000003BA  47					INC EDI							;increment to the next position
+ 000003BB  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 000003C5  47					INC EDI							;increment to the next position
+ 000003C6  C7 87 0000001C R			MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+	   0000002A
+ 000003D0  47					INC EDI							;increment to the next position
+ 000003D1  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
+ 000003D3  8B 15 00000018 R			MOV EDX, iTemp
+ 000003D9  83 EA 02				SUB EDX, 2
+ 000003DC  8B CA				MOV ECX, EDX					;moves into ECX iTemp, so the loop knows how many stars to insert
+ 000003DE						lpPutSpace:					
+ 000003DE  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 000003E8  47							INC EDI							;increment to the next position
+ 000003E9  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 000003F3  47							INC EDI							;increment to the next position
+ 000003F4  E2 E8					loop lpPutSpace						;decrement ECX and go to the top of the loop
+ 000003F6  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
+	   00000020
+ 00000400  47					INC EDI							;increment to the next position
+ 00000401  C7 87 0000001C R			MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
+	   0000002A
+ 0000040B  47					INC EDI							;increment to the next position
+ 0000040C  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
+	   0000000A
+ 00000416  47					INC EDI									;increment to the next position
+ 00000417  FF 05 00000018 R			INC iTemp						;increment our Temp variable to we add another star for the next line.
+ 0000041D  8B CB				MOV ECX, EBX					;restores our old ECX value
+ 0000041F  E2 8F			loop lpDrawHollowTriangle
+					
+ 00000421  E9 FFFFFECA			JMP Compare
+					
+ 00000426				Complete:
+ 00000426  C7 87 0000001C R			MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
+	   00000000
+ 00000430  B8 0000001C R			MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+ 00000435  5D					POP EBP								;restore original EBP
+ 00000436  C3				RET									;return
+ 00000437			hollowTriangle ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:12:44
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 16:29:19
 proj3procs.asm						     Symbols 2 - 1
 
 
@@ -171,8 +446,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000018 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000153 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000020 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000437 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -182,10 +457,26 @@ Procedures,  parameters and locals:
 createRectangle  . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A2 Public
   lpCreateRectangle  . . . . . .	L Near	 00000041 _TEXT	
   lpCreateStars  . . . . . . . .	L Near	 0000005F _TEXT	
-createTriangle . . . . . . . . .	P Near	 000000A2 _TEXT	Length= 000000B1 Public
-  lpDrawTriangle . . . . . . . .	L Near	 000000F7 _TEXT	
-  lpPutStars . . . . . . . . . .	L Near	 00000115 _TEXT	
+createTriangle . . . . . . . . .	P Near	 00000218 _TEXT	Length= 000000A1 Public
+  lpDrawTriangle . . . . . . . .	L Near	 0000025D _TEXT	
+  lpPutStars . . . . . . . . . .	L Near	 0000027B _TEXT	
 heapAllocHarrison  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+hollowRectangle  . . . . . . . .	P Near	 000000A2 _TEXT	Length= 00000176 Public
+  lpDisplayFirstLine . . . . . .	L Near	 000000E0 _TEXT	
+  lpCreateStars  . . . . . . . .	L Near	 000000FE _TEXT	
+  lpCreateHollowRectangle  . . .	L Near	 00000136 _TEXT	
+  lpCreateSpaces . . . . . . . .	L Near	 0000016A _TEXT	
+  lpDisplayLastLine  . . . . . .	L Near	 000001B7 _TEXT	
+  lpCreateLastStars  . . . . . .	L Near	 000001D5 _TEXT	
+hollowTriangle . . . . . . . . .	P Near	 000002B9 _TEXT	Length= 0000017E Public
+  Compare  . . . . . . . . . . .	L Near	 000002F0 _TEXT	
+  lpDrawFirstLineTriangle  . . .	L Near	 00000316 _TEXT	
+  lpPutStars1  . . . . . . . . .	L Near	 00000334 _TEXT	
+  lpDrawLastLineTriangle . . . .	L Near	 00000363 _TEXT	
+  lpPutStars2  . . . . . . . . .	L Near	 00000381 _TEXT	
+  lpDrawHollowTriangle . . . . .	L Near	 000003B0 _TEXT	
+  lpPutSpace . . . . . . . . . .	L Near	 000003DE _TEXT	
+  Complete . . . . . . . . . . .	L Near	 00000426 _TEXT	
 
 
 Symbols:
@@ -201,12 +492,14 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
-iHeight  . . . . . . . . . . . .	DWord	 0000000C _DATA	
+iHeightHollow  . . . . . . . . .	DWord	 00000010 _DATA	
+iHeight  . . . . . . . . . . . .	DWord	 00000014 _DATA	
 iLength  . . . . . . . . . . . .	DWord	 00000004 _DATA	
-iTemp  . . . . . . . . . . . . .	DWord	 00000010 _DATA	
+iTemp  . . . . . . . . . . . . .	DWord	 00000018 _DATA	
+iWidthHollow . . . . . . . . . .	DWord	 0000000C _DATA	
 iWidth . . . . . . . . . . . . .	DWord	 00000008 _DATA	
 strSize  . . . . . . . . . . . .	DWord	 00000000 _DATA	
-strStartAddr . . . . . . . . . .	DWord	 00000014 _DATA	
+strStartAddr . . . . . . . . . .	DWord	 0000001C _DATA	
 
 	   0 Warnings
 	   0 Errors

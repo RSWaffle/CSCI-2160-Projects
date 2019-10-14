@@ -18,7 +18,7 @@
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 	heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
 ;******************************************************************************************
-EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32,createStringCopy:near32
+EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32,createStringCopy:near32,hollowRectangle:near32, hollowTriangle:near32
 ;******************************************************************************************
 COMMENT %
 ******************************************************************************
@@ -136,10 +136,11 @@ ENDM
 	TestString byte 10, ":^)",0
 	recLength byte 4 dup (?) 						;set aside memory to hold the length of the rectangle with an empty bytes between the next variable
 	recWidth byte 4 dup (?) 	 					;set aside memory to hold the width of the rectangle with an empty bytes between the next variable
-	triHeight byte ?								;memory to hold the height of a triangle
+	triHeight byte 4 dup (?)						;memory to hold the height of a triangle
 	recLengthASCII byte 4 dup (?) 					;set aside memory to hold the length of the rectangle in ASCII form with an empty bytes between the next variable
 	recWidthASCII byte 4 dup (?) 	 				;set aside memory to hold the width of the rectanglein ASCII form with an empty bytes between the next variable
-	triHeightASCII byte ?							;memory to hold the height of a triangle in ASCII form
+	triHeightASCII byte 4 dup (?)					;memory to hold the height of a triangle in ASCII form
+	strEnd byte ?
 
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
 	sizeString dword ?								;Temp memory to hold the size of a string
@@ -201,13 +202,17 @@ displayRectangle:
 	DisplayShape strAddress							;call the display shape macro to display the shape for us
 	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
 	DisplayString crlf								;displays the chars to skip to a new line.
-	PUSH strAddress
-	CALL createStringCopy
+	PUSH strAddress									;Push the starting address to write to to the stack
+	CALL createStringCopy							
 	ADD ESP, 4
-	MOV strAddress, 0
+	MOV strAddress, EAX								;move the address that the method gave us into a variable
+	PUSH dword ptr recLength						;Push the length of the rectangle so the method is able to access it
+	PUSH dword ptr recWidth							;Push the width of the rectangle so the method is able to access it
+	PUSH strAddress									;call the string copy method and new addr is stored in eax
+	CALL hollowRectangle							;call the hollow rectangle method and the starting address of where it is located is in eax
+	ADD ESP, 12										;add back the bytes we used.
 	MOV strAddress, EAX								;move the address that the method gave us into a variable
 	DisplayShape strAddress							;call the display shape macro to display the shape for us
-	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells
 	JMP getTriangleHeight							;jump to the next section after completion.
 	
 	
@@ -238,11 +243,23 @@ displayTri:
 	DisplayShape  strAddress						;call the display shape macro to display the shape for us
 	DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.
 	DisplayString crlf								;displays the chars to skip to a new line.	
-	DisplayString TestString						;Display test string because im happy
+	PUSH dword ptr triHeight						;Push the height of the triangle so the method is able to access it
+	PUSH strAddress									;Push the starting address to write to to the stack
+	CALL createStringCopy							;call the string copy method and new addr is stored in eax
+	ADD ESP, 4										;add back our used bytes
+	DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
+	MOV strAddress, EAX								;move the address that the method gave us into a variable
+	PUSH dword ptr triHeight						;Push the length of the rectangle so the method is able to access it
+	PUSH strAddress									;Push the starting address to write to to the stack
+	CALL hollowTriangle								;call the hollow triangle method and the starting address of where it is located is in eax
+	ADD ESP, 8										;add back the bytes we used.
+	MOV strAddress, EAX								;move the address that the method gave us into a variable
+	DisplayShape strAddress							;call the display shape macro to display the shape for us
+	DisplayString crlf								;calls the display string macro and passes in the specified string and tells to clear line
 	
-	PUSH OFFSET strSolidRectangleInfo2
-	call sizeOfString
-	ADD ESP, 4
+	
+	DisplayString TestString
+	PullString strEnd, 1 
 	
 	MOV EAX, 0										;Statement to help in debugging
 	JMP finished

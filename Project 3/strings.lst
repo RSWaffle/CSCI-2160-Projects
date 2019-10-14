@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:58:42
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 14:10:57
 strings.asm						     Page 1 - 1
 
 
@@ -125,7 +125,7 @@ strings.asm						     Page 1 - 1
  000000A6  C3				RET									;return
  000000A7			createStringCopy ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:58:42
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 14:10:57
 strings.asm						     Symbols 2 - 1
 
 

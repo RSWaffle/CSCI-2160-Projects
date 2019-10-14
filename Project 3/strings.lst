@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/14/19 14:10:57
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 17:10:19
 strings.asm						     Page 1 - 1
 
 
@@ -91,41 +91,37 @@ strings.asm						     Page 1 - 1
  00000037  E8 FFFFFFC4			CALL sizeOfString
  0000003C  83 C4 04			ADD ESP, 4
  0000003F  89 1D 00000000 R		MOV numBytes, EBX
- 00000045  B3 02			MOV BL, 2
- 00000047  F6 F3			DIV BL
- 00000049  04 01			ADD AL, 1 
- 0000004B  A3 00000004 R		MOV numWords, EAX
- 00000050  BB 00000000			MOV EBX, 0
+ 00000045  BB 00000000			MOV EBX, 0
 
-					INVOKE 	heapAllocHarrison, numWords
- 00000060  A3 0000000D R		MOV cpAddr, EAX
- 00000065  B8 00000000			MOV EAX, 0
- 0000006A  8B 35 00000009 R		MOV ESI, [originalAddr]
- 00000070				topOfLoop:
- 00000070  8A 1E				MOV BL, [ESI]
- 00000072  88 1D 00000008 R			MOV bChar, BL
- 00000078  80 3D 00000008 R			CMP bChar, 00
+					INVOKE 	heapAllocHarrison, numBytes
+ 00000055  A3 0000000D R		MOV cpAddr, EAX
+ 0000005A  B8 00000000			MOV EAX, 0
+ 0000005F  8B 35 00000009 R		MOV ESI, [originalAddr]
+ 00000065				topOfLoop:
+ 00000065  8A 1E				MOV BL, [ESI]
+ 00000067  88 1D 00000008 R			MOV bChar, BL
+ 0000006D  80 3D 00000008 R			CMP bChar, 00
 	   00
- 0000007F  74 0F				JE finished
- 00000081  A0 00000008 R			MOV AL, bChar
- 00000086  89 87 0000000D R			MOV [cpAddr + EDI], EAX
- 0000008C  47					INC EDI
- 0000008D  46					INC ESI
- 0000008E  EB E0				JMP topOfLoop
- 00000090				finished:
- 00000090  0F BE 1D				MOVSX EBX, bChar
+ 00000074  74 0F				JE finished
+ 00000076  A0 00000008 R			MOV AL, bChar
+ 0000007B  89 87 0000000D R			MOV [cpAddr + EDI], EAX
+ 00000081  47					INC EDI
+ 00000082  46					INC ESI
+ 00000083  EB E0				JMP topOfLoop
+ 00000085				finished:
+ 00000085  0F BE 1D				MOVSX EBX, bChar
 	   00000008 R
- 00000097  89 87 0000000D R			MOV [cpAddr + EDI], EAX
- 0000009D  B8 0000000D R		MOV EAX, OFFSET cpAddr
+ 0000008C  89 87 0000000D R			MOV [cpAddr + EDI], EAX
+ 00000092  B8 0000000D R		MOV EAX, OFFSET cpAddr
 					
- 000000A2  5B				POP EBX	
- 000000A3  5E				POP ESI								;restore original esi
- 000000A4  5F				POP EDI						;restore original ebx
- 000000A5  5D				POP EBP
- 000000A6  C3				RET									;return
- 000000A7			createStringCopy ENDP
+ 00000097  5B				POP EBX	
+ 00000098  5E				POP ESI								;restore original esi
+ 00000099  5F				POP EDI						;restore original ebx
+ 0000009A  5D				POP EBP
+ 0000009B  C3				RET									;return
+ 0000009C			createStringCopy ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/14/19 14:10:57
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 17:10:19
 strings.asm						     Symbols 2 - 1
 
 
@@ -138,16 +134,16 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A7 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000009C DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-createStringCopy . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000008A Public
-  topOfLoop  . . . . . . . . . .	L Near	 00000070 _TEXT	
-  finished . . . . . . . . . . .	L Near	 00000090 _TEXT	
+createStringCopy . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000007F Public
+  topOfLoop  . . . . . . . . . .	L Near	 00000065 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000085 _TEXT	
 heapAllocHarrison  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 sizeOfString . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001D Public
   stLoop . . . . . . . . . . . .	L Near	 0000000D _TEXT	

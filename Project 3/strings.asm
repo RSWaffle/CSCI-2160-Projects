@@ -87,13 +87,9 @@ createStringCopy PROC Near32
 	CALL sizeOfString
 	ADD ESP, 4
 	MOV numBytes, EBX
-	MOV BL, 2
-	DIV BL
-	ADD AL, 1 
-	MOV numWords, EAX
 	MOV EBX, 0
 
-	INVOKE 	heapAllocHarrison, numWords
+	INVOKE 	heapAllocHarrison, numBytes
 	MOV cpAddr, EAX
 	MOV EAX, 0
 	MOV ESI, [originalAddr]

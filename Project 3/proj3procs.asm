@@ -301,7 +301,7 @@ hollowTriangle  PROC Near32
 				INC EDI							;increment to the next position
 				MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 				INC EDI							;increment to the next position
-			loop lpPutStars1						;decrement ECX and go to the top of the loop
+			loop lpPutStars1					;decrement ECX and go to the top of the loop
 		MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 		INC EDI									;increment to the next position
 		INC iTemp								;increment our Temp variable to we add another star for the next line.
@@ -321,39 +321,39 @@ hollowTriangle  PROC Near32
 				INC EDI							;increment to the next position
 				MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 				INC EDI							;increment to the next position
-			loop lpPutStars2						;decrement ECX and go to the top of the loop
+			loop lpPutStars2					;decrement ECX and go to the top of the loop
 		MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 		INC EDI									;increment to the next position
 		INC iTemp								;increment our Temp variable to we add another star for the next line.
 		MOV ECX, EBX							;restores our old ECX value
-	loop lpDrawLastLineTriangle				;decrement ECX and go to the top of the loop
+	loop lpDrawLastLineTriangle					;decrement ECX and go to the top of the loop
 	JMP Complete
 	
 	lpDrawHollowTriangle:
-		MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
-		INC EDI							;increment to the next position
-		MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
-		INC EDI							;increment to the next position
-		MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
-		INC EDI							;increment to the next position
-		MOV EBX, ECX					;stores the current value of ECX into EBX
-		MOV EDX, iTemp
-		SUB EDX, 2
-		MOV ECX, EDX					;moves into ECX iTemp, so the loop knows how many stars to insert
+		MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
+		INC EDI									;increment to the next position
+		MOV [strStartAddr + EDI], 32			;put the character space at the addr offset edi
+		INC EDI									;increment to the next position
+		MOV [strStartAddr + EDI], 42			;put the character * at the addr offset edi
+		INC EDI									;increment to the next position
+		MOV EBX, ECX							;stores the current value of ECX into EBX
+		MOV EDX, iTemp							;moves iTemp into EDX
+		SUB EDX, 2								;Subtracts from EDX 2 so we can ignore the first and last character positions
+		MOV ECX, EDX							;moves into ECX iTemp, so the loop knows how many stars to insert
 			lpPutSpace:					
 				MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 				INC EDI							;increment to the next position
 				MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 				INC EDI							;increment to the next position
 			loop lpPutSpace						;decrement ECX and go to the top of the loop
-		MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
-		INC EDI							;increment to the next position
-		MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
-		INC EDI							;increment to the next position
+		MOV [strStartAddr + EDI], 32			;put the character space at the addr offset edi
+		INC EDI									;increment to the next position
+		MOV [strStartAddr + EDI], 42			;put the character * at the addr offset edi
+		INC EDI									;increment to the next position
 		MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 		INC EDI									;increment to the next position
-		INC iTemp						;increment our Temp variable to we add another star for the next line.
-		MOV ECX, EBX					;restores our old ECX value
+		INC iTemp								;increment our Temp variable to we add another star for the next line.
+		MOV ECX, EBX							;restores our old ECX value
 	loop lpDrawHollowTriangle
 	
 	JMP Compare

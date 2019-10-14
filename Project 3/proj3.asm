@@ -18,7 +18,7 @@
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 	heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
 ;******************************************************************************************
-EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32
+EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32,createStringCopy:near32
 ;******************************************************************************************
 COMMENT %
 ******************************************************************************
@@ -105,7 +105,7 @@ DisplayShape MACRO String:REQ
 	LOCAL finishedDisplay							;make this label local to avoid errors calling this more than once.
 	MOV EAX, 0										;clear out EAX to avoid error
 	MOV EDI, 0										;clear out EDI to avoid error
-	ADD EDI, strAddress								;Adds the address of straddress to edi so we get the memory location
+	ADD EDI, String									;Adds the address of straddress to edi so we get the memory location
 	lpDisplay:
 		MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
 		CMP AL, 00									;compare to 00 to see if we are at the end of the string
@@ -200,8 +200,14 @@ displayRectangle:
 	MOV strAddress, EAX								;move the address that the method gave us into a variable
 	DisplayShape strAddress							;call the display shape macro to display the shape for us
 	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
-	DisplayString crlf								;displays the chars to skip to a new line.	
-	DisplayString TestString						;Display test string because im happy
+	DisplayString crlf								;displays the chars to skip to a new line.
+	PUSH strAddress
+	CALL createStringCopy
+	ADD ESP, 4
+	MOV strAddress, 0
+	MOV strAddress, EAX								;move the address that the method gave us into a variable
+	DisplayShape strAddress							;call the display shape macro to display the shape for us
+	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells
 	JMP getTriangleHeight							;jump to the next section after completion.
 	
 	

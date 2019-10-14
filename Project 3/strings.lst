@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/13/19 00:26:30
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:58:42
 strings.asm						     Page 1 - 1
 
 
@@ -14,6 +14,16 @@ strings.asm						     Page 1 - 1
 					.486						;This tells assembler to generate 32-bit code
 					.model flat					;This tells assembler that all addresses are real addresses
 					.stack 100h					;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+				heapAllocHarrison PROTO Near32 stdcall, dSize:DWORD 							;Creates memory on the heap (of dSize words) and returns the address of the
+				;******************************************************************************************
+ 00000000			.data
+ 00000000 00000000			numBytes dword ?
+ 00000004 00000000			numWords dword ?
+ 00000008 00				bChar byte ?
+ 00000009 00000000			originalAddr dword ?
+ 0000000D 00000000			cpAddr dword ?
+
 				;******************************************************************************************
  00000000			.code
 
@@ -53,8 +63,69 @@ strings.asm						     Page 1 - 1
  0000001C  C3				RET									;return
  0000001D			sizeOfString ENDP
 
+				COMMENT %
+				******************************************************************************
+				*Name: createStringCopy                                                      *
+				*Purpose:                                                                    *
+				*	accepts an address, makes a copy, sends back new addr in EAX		     *
+				*                                                                            *
+				*Date Created: 10/12/2019                                                    *
+				*Date Modified: 10/12/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param Addr1:dword                                                          *
+				*@returns Addr2:dword														 *
+				*****************************************************************************%
+ 0000001D			createStringCopy PROC Near32
+ 0000001D  55				PUSH EBP							;preserves base register
+ 0000001E  8B EC			MOV EBP, ESP						;sets a new stack frame
+ 00000020  53				PUSH EBX							;pushes EBX to the stack to store this
+ 00000021  57				PUSH EDI
+ 00000022  56				PUSH ESI							;pushes ESI to the stack to preseve
+
+ 00000023  8B 5D 08			MOV EBX, [EBP + 8]			;moves into ebx the address to the beginning of the original string.
+ 00000026  89 1D 00000009 R		MOV originalAddr, EBX
+ 0000002C  BE 00000000			MOV ESI, 0							;sets the initial point to 0
+ 00000031  BF 00000000			MOV EDI, 0
+ 00000036  53				PUSH EBX
+ 00000037  E8 FFFFFFC4			CALL sizeOfString
+ 0000003C  83 C4 04			ADD ESP, 4
+ 0000003F  89 1D 00000000 R		MOV numBytes, EBX
+ 00000045  B3 02			MOV BL, 2
+ 00000047  F6 F3			DIV BL
+ 00000049  04 01			ADD AL, 1 
+ 0000004B  A3 00000004 R		MOV numWords, EAX
+ 00000050  BB 00000000			MOV EBX, 0
+
+					INVOKE 	heapAllocHarrison, numWords
+ 00000060  A3 0000000D R		MOV cpAddr, EAX
+ 00000065  B8 00000000			MOV EAX, 0
+ 0000006A  8B 35 00000009 R		MOV ESI, [originalAddr]
+ 00000070				topOfLoop:
+ 00000070  8A 1E				MOV BL, [ESI]
+ 00000072  88 1D 00000008 R			MOV bChar, BL
+ 00000078  80 3D 00000008 R			CMP bChar, 00
+	   00
+ 0000007F  74 0F				JE finished
+ 00000081  A0 00000008 R			MOV AL, bChar
+ 00000086  89 87 0000000D R			MOV [cpAddr + EDI], EAX
+ 0000008C  47					INC EDI
+ 0000008D  46					INC ESI
+ 0000008E  EB E0				JMP topOfLoop
+ 00000090				finished:
+ 00000090  0F BE 1D				MOVSX EBX, bChar
+	   00000008 R
+ 00000097  89 87 0000000D R			MOV [cpAddr + EDI], EAX
+ 0000009D  B8 0000000D R		MOV EAX, OFFSET cpAddr
+					
+ 000000A2  5B				POP EBX	
+ 000000A3  5E				POP ESI								;restore original esi
+ 000000A4  5F				POP EDI						;restore original ebx
+ 000000A5  5D				POP EBP
+ 000000A6  C3				RET									;return
+ 000000A7			createStringCopy ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/13/19 00:26:30
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:58:42
 strings.asm						     Symbols 2 - 1
 
 
@@ -66,14 +137,18 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000001D DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A7 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
+createStringCopy . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000008A Public
+  topOfLoop  . . . . . . . . . .	L Near	 00000070 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000090 _TEXT	
+heapAllocHarrison  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 sizeOfString . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001D Public
   stLoop . . . . . . . . . . . .	L Near	 0000000D _TEXT	
   finished . . . . . . . . . . .	L Near	 00000016 _TEXT	
@@ -92,6 +167,11 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
+bChar  . . . . . . . . . . . . .	Byte	 00000008 _DATA	
+cpAddr . . . . . . . . . . . . .	DWord	 0000000D _DATA	
+numBytes . . . . . . . . . . . .	DWord	 00000000 _DATA	
+numWords . . . . . . . . . . . .	DWord	 00000004 _DATA	
+originalAddr . . . . . . . . . .	DWord	 00000009 _DATA	
 
 	   0 Warnings
 	   0 Errors

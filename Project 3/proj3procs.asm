@@ -80,6 +80,25 @@ createRectangle  PROC Near32
 	RET									;return
 createRectangle ENDP
 
+COMMENT %
+******************************************************************************
+*Name: hollowRectangle                                                       *
+*Purpose:                                                                    *
+*	     this takes in a position  of a copied string, modifies it and returns
+*		the edited string													 *
+*Date Created: 10/14/2019                                                    *
+*Date Modified: 10/14/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param ADDR:dword                                                           *
+*@param ADDR:dword													 	     *
+*****************************************************************************%
+hollowRectangle  PROC Near32
+	PUSH EBP							;preserves base register
+	MOV EBP, ESP						;sets a new stack frame
+	POP EBP								;restore original EBP
+	RET									;return
+hollowRectangle ENDP
 
 COMMENT %
 ******************************************************************************
@@ -136,5 +155,25 @@ createTriangle  PROC Near32
 	POP EBP								;restore original EBP
 	RET									;return
 createTriangle ENDP
+
+COMMENT %
+******************************************************************************
+*Name: hollowTriangle                                                        *
+*Purpose:                                                                    *
+*	     this takes in a position  of a copied string, modifies it and returns
+*		the edited string													 *
+*Date Created: 10/14/2019                                                    *
+*Date Modified: 10/14/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param ADDR:dword                                                           *
+*@param ADDR:dword													 	     *
+*****************************************************************************%
+hollowTriangle  PROC Near32
+	PUSH EBP							;preserves base register
+	MOV EBP, ESP						;sets a new stack frame
+	POP EBP								;restore original EBP
+	RET									;return
+hollowTriangle ENDP
 
 END

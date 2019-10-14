@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/13/19 00:26:53
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:36:58
 proj3.asm						     Page 1 - 1
 
 
@@ -22,7 +22,7 @@ proj3.asm						     Page 1 - 1
 					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 					heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
 				;******************************************************************************************
-				EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32
+				EXTERN sizeOfString:near32,createRectangle:near32,createTriangle:near32,createStringCopy:near32
 				;******************************************************************************************
 				COMMENT %
 				******************************************************************************
@@ -109,7 +109,7 @@ proj3.asm						     Page 1 - 1
 					LOCAL finishedDisplay							;make this label local to avoid errors calling this more than once.
 					MOV EAX, 0										;clear out EAX to avoid error
 					MOV EDI, 0										;clear out EDI to avoid error
-					ADD EDI, strAddress								;Adds the address of straddress to edi so we get the memory location
+					ADD EDI, String									;Adds the address of straddress to edi so we get the memory location
 					lpDisplay:
 						MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
 						CMP AL, 00									;compare to 00 to see if we are at the end of the string
@@ -284,7 +284,7 @@ proj3.asm						     Page 1 - 1
 					DisplayString strSolidRectangleInfo1			;calls the display string macro and passes in the specified string and shows this is a rectangle with the specified dims.
 					DisplayString recLengthASCII					;this will display the length of the rectangle via the macro
 					DisplayString strSolidRectangleInfo2			;this will show the second part of the string "by"
-	DisplayString recWidthASCII						;this will display the width of the rectangle via the macro
+					DisplayString recWidthASCII						;this will display the width of the rectangle via the macro
 					DisplayString strSolidRectangleInfo3			;this will display the end colon to make the string look nice. 
 					DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
  000000B5  FF 35 000001CA R		PUSH dword ptr recLength						;Push the length of the rectangle so the method is able to access it
@@ -295,7 +295,7 @@ proj3.asm						     Page 1 - 1
 					DisplayShape strAddress							;call the display shape macro to display the shape for us
  000000CE  B8 00000000	     1		MOV EAX, 0										;clear out EAX to avoid error
  000000D3  BF 00000000	     1		MOV EDI, 0										;clear out EDI to avoid error
- 000000D8  03 3D 000001E3 R  1		ADD EDI, strAddress								;Adds the address of straddress to edi so we get the memory location
+ 000000D8  03 3D 000001E3 R  1		ADD EDI, strAddress									;Adds the address of straddress to edi so we get the memory location
  000000DE		     1		??0000:
  000000DE  8A 07	     1			MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
  000000E0  3C 00	     1			CMP AL, 00									;compare to 00 to see if we are at the end of the string
@@ -305,67 +305,85 @@ proj3.asm						     Page 1 - 1
  000000F4  EB E8	     1			JMP ??0000								;jump back to the top
  000000F6		     1		??0001:	
 					DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
-					DisplayString crlf								;displays the chars to skip to a new line.	
-					DisplayString TestString						;Display test string because im happy
- 00000114  EB 00			JMP getTriangleHeight							;jump to the next section after completion.
+					DisplayString crlf								;displays the chars to skip to a new line.
+ 0000010A  FF 35 000001E3 R		PUSH strAddress
+ 00000110  E8 00000000 E		CALL createStringCopy
+ 00000115  83 C4 04			ADD ESP, 4
+ 00000118  C7 05 000001E3 R		MOV strAddress, 0
+	   00000000
+ 00000122  A3 000001E3 R		MOV strAddress, EAX								;move the address that the method gave us into a variable
+					DisplayShape strAddress							;call the display shape macro to display the shape for us
+ 00000127  B8 00000000	     1		MOV EAX, 0										;clear out EAX to avoid error
+ 0000012C  BF 00000000	     1		MOV EDI, 0										;clear out EDI to avoid error
+ 00000131  03 3D 000001E3 R  1		ADD EDI, strAddress									;Adds the address of straddress to edi so we get the memory location
+ 00000137		     1		??0002:
+ 00000137  8A 07	     1			MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
+ 00000139  3C 00	     1			CMP AL, 00									;compare to 00 to see if we are at the end of the string
+ 0000013B  74 12	     1			JE ??0003							;if it is equal, jump to finished display
+ 0000013D  A2 000001E7 R     1			MOV bDisplay, AL							;move the byte into bdisplay to setup for output
+ 0000014C  47		     1			INC EDI										;increment edi so we look at the next location in the loop
+ 0000014D  EB E8	     1			JMP ??0002								;jump back to the top
+ 0000014F		     1		??0003:	
+					DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells
+ 00000159  EB 00			JMP getTriangleHeight							;jump to the next section after completion.
 					
 					
- 00000116			getTriangleHeight:	
+ 0000015B			getTriangleHeight:	
 					DisplayString strTriangleHeight					;calls the display string macro as passes in the length string.
 					PullString triHeightASCII, 2					;get the user specified string and store into a variable, also in EAX
 					CvtoNum triHeightASCII							;convert the value to its true decimal number so we can actually use it.
- 00000136  A2 000001D2 R		MOV triHeight, AL								;moves the height of the triangle into AL so we can properly compare it
+ 0000017B  A2 000001D2 R		MOV triHeight, AL								;moves the height of the triangle into AL so we can properly compare it
 					
- 0000013B  83 F8 00			CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
- 0000013E  74 D6			JE getTriangleHeight							;If it is null then jump to getRectangleWidth
- 00000140  83 F8 19			CMP EAX, 25										;Compare EAX to 25 to see if the user typed a number greater than 25.
- 00000143  7F D1			JG getTriangleHeight							;If greater than, jump to getRectangleWidth
- 00000145  83 F8 04			CMP EAX, 4										;Compare EAX to 4 to see if it is less than 4	
- 00000148  7C CC			JL getTriangleHeight							;If so, jump to getRectangleWidth 
- 0000014A  EB 00			JMP displayTri									;jump to next section
+ 00000180  83 F8 00			CMP EAX, 0										;Compare EAX to 0 to see if the user typed null character
+ 00000183  74 D6			JE getTriangleHeight							;If it is null then jump to getRectangleWidth
+ 00000185  83 F8 19			CMP EAX, 25										;Compare EAX to 25 to see if the user typed a number greater than 25.
+ 00000188  7F D1			JG getTriangleHeight							;If greater than, jump to getRectangleWidth
+ 0000018A  83 F8 04			CMP EAX, 4										;Compare EAX to 4 to see if it is less than 4	
+ 0000018D  7C CC			JL getTriangleHeight							;If so, jump to getRectangleWidth 
+ 0000018F  EB 00			JMP displayTri									;jump to next section
 					
- 0000014C			displayTri:	
+ 00000191			displayTri:	
 					DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
 					DisplayString strSolidTriangleInfo1				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 					DisplayString triHeightASCII					;this will call the macro to display the height of the rectangle 
 					DisplayString strSolidTriangleInfo2				;calls the display string macro and passes in the specified string to show information about the solid triangle.
 					DisplayString crlf								;calls the display string macro and passes in the specified string to skip to a new line.
- 0000017E  FF 35 000001D2 R		PUSH dword ptr triHeight						;Push the height of the triangle so the method is able to access it
- 00000184  E8 00000000 E		CALL createTriangle								;call the method create triangle so we can get the location of our stored triangle
- 00000189  83 C4 04			ADD ESP, 4										;add back the bytes we used
- 0000018C  A3 000001E3 R		MOV strAddress, EAX								;move the address that the method gave us into a variable
+ 000001C3  FF 35 000001D2 R		PUSH dword ptr triHeight						;Push the height of the triangle so the method is able to access it
+ 000001C9  E8 00000000 E		CALL createTriangle								;call the method create triangle so we can get the location of our stored triangle
+ 000001CE  83 C4 04			ADD ESP, 4										;add back the bytes we used
+ 000001D1  A3 000001E3 R		MOV strAddress, EAX								;move the address that the method gave us into a variable
 					DisplayShape  strAddress						;call the display shape macro to display the shape for us
- 00000191  B8 00000000	     1		MOV EAX, 0										;clear out EAX to avoid error
- 00000196  BF 00000000	     1		MOV EDI, 0										;clear out EDI to avoid error
- 0000019B  03 3D 000001E3 R  1		ADD EDI, strAddress								;Adds the address of straddress to edi so we get the memory location
- 000001A1		     1		??0002:
- 000001A1  8A 07	     1			MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
- 000001A3  3C 00	     1			CMP AL, 00									;compare to 00 to see if we are at the end of the string
- 000001A5  74 12	     1			JE ??0003							;if it is equal, jump to finished display
- 000001A7  A2 000001E7 R     1			MOV bDisplay, AL							;move the byte into bdisplay to setup for output
- 000001B6  47		     1			INC EDI										;increment edi so we look at the next location in the loop
- 000001B7  EB E8	     1			JMP ??0002								;jump back to the top
- 000001B9		     1		??0003:	
+ 000001D6  B8 00000000	     1		MOV EAX, 0										;clear out EAX to avoid error
+ 000001DB  BF 00000000	     1		MOV EDI, 0										;clear out EDI to avoid error
+ 000001E0  03 3D 000001E3 R  1		ADD EDI, strAddress									;Adds the address of straddress to edi so we get the memory location
+ 000001E6		     1		??0004:
+ 000001E6  8A 07	     1			MOV AL,[EDI]								;moves into al the byte located at the address that is in edi
+ 000001E8  3C 00	     1			CMP AL, 00									;compare to 00 to see if we are at the end of the string
+ 000001EA  74 12	     1			JE ??0005							;if it is equal, jump to finished display
+ 000001EC  A2 000001E7 R     1			MOV bDisplay, AL							;move the byte into bdisplay to setup for output
+ 000001FB  47		     1			INC EDI										;increment edi so we look at the next location in the loop
+ 000001FC  EB E8	     1			JMP ??0004								;jump back to the top
+ 000001FE		     1		??0005:	
 					DisplayString strHallowTriangleInfo				;calls the display string macro and passes in the specified string telling user this is the hollowed triangle.
 					DisplayString crlf								;displays the chars to skip to a new line.	
 					DisplayString TestString						;Display test string because im happy
 					
- 000001D7  68 00000137 R		PUSH OFFSET strSolidRectangleInfo2
- 000001DC  E8 00000000 E		call sizeOfString
- 000001E1  83 C4 04			ADD ESP, 4
+ 0000021C  68 00000137 R		PUSH OFFSET strSolidRectangleInfo2
+ 00000221  E8 00000000 E		call sizeOfString
+ 00000226  83 C4 04			ADD ESP, 4
 					
- 000001E4  B8 00000000			MOV EAX, 0										;Statement to help in debugging
- 000001E9  EB 00			JMP finished
+ 00000229  B8 00000000			MOV EAX, 0										;Statement to help in debugging
+ 0000022E  EB 00			JMP finished
 
 				;************************************* the instructions below calls for "normal termination"	
- 000001EB			finished:
+ 00000230			finished:
 					INVOKE heapDestroyHarrison
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 000001F7			main ENDP
+ 0000023C			main ENDP
 					END												;Signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    10/13/19 00:26:53
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 13:36:58
 proj3.asm						     Symbols 2 - 1
 
 
@@ -389,7 +407,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000001EC DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F7 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000023C DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -402,17 +420,19 @@ ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 heapDestroyHarrison  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000001F2 Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000237 Public
   getRectangleLength . . . . . .	L Near	 0000000F _TEXT	
   getRectangleWidth  . . . . . .	L Near	 00000043 _TEXT	
   displayRectangle . . . . . . .	L Near	 00000079 _TEXT	
   ??0000 . . . . . . . . . . . .	L Near	 000000DE _TEXT	
   ??0001 . . . . . . . . . . . .	L Near	 000000F6 _TEXT	
-  getTriangleHeight  . . . . . .	L Near	 00000116 _TEXT	
-  displayTri . . . . . . . . . .	L Near	 0000014C _TEXT	
-  ??0002 . . . . . . . . . . . .	L Near	 000001A1 _TEXT	
-  ??0003 . . . . . . . . . . . .	L Near	 000001B9 _TEXT	
-  finished . . . . . . . . . . .	L Near	 000001EB _TEXT	
+  ??0002 . . . . . . . . . . . .	L Near	 00000137 _TEXT	
+  ??0003 . . . . . . . . . . . .	L Near	 0000014F _TEXT	
+  getTriangleHeight  . . . . . .	L Near	 0000015B _TEXT	
+  displayTri . . . . . . . . . .	L Near	 00000191 _TEXT	
+  ??0004 . . . . . . . . . . . .	L Near	 000001E6 _TEXT	
+  ??0005 . . . . . . . . . . . .	L Near	 000001FE _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000230 _TEXT	
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
@@ -433,6 +453,7 @@ TestString . . . . . . . . . . .	Byte	 000001C5 _DATA
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
 bDisplay . . . . . . . . . . . .	Byte	 000001E7 _DATA	
 createRectangle  . . . . . . . .	L Near	 00000000 FLAT	External
+createStringCopy . . . . . . . .	L Near	 00000000 FLAT	External
 createTriangle . . . . . . . . .	L Near	 00000000 FLAT	External
 crlf . . . . . . . . . . . . . .	Byte	 000001DC _DATA	
 iTemp  . . . . . . . . . . . . .	DWord	 000001E8 _DATA	

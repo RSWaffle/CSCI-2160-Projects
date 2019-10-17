@@ -4,7 +4,7 @@
 ;*  Class:        CSCI 2160-001
 ;*  Lab:          Proj3
 ;*  Date:         10/19/2019
-;*  Purpose:      This handles the creation of shapes and the hollow shapes. 
+;*  Purpose:      
 ;******************************************************************************************
 	.486						;This tells assembler to generate 32-bit code
 	.model flat					;This tells assembler that all addresses are real addresses
@@ -239,13 +239,13 @@ createTriangle  PROC Near32
 			loop lpPutStars						;decrement ECX and go to the top of the loop
 		MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 		INC EDI									;increment to the next position
-		INC iTemp								;increment our Temp variable to we add another star for the next line.
-		MOV ECX, EBX							;restores our old ECX value
-	loop lpDrawTriangle							;decrement ECX and go to the top of the loop
-	MOV [strStartAddr + EDI], 00				;put the null character at the end to signal that this is the end of the loop
-	MOV EAX, OFFSET strStartAddr				;moves the offset of the strStartAddr into EAX for return address
-	POP EBP										;restore original EBP
-	RET											;return
+		INC iTemp						;increment our Temp variable to we add another star for the next line.
+		MOV ECX, EBX					;restores our old ECX value
+	loop lpDrawTriangle					;decrement ECX and go to the top of the loop
+	MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
+	MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+	POP EBP								;restore original EBP
+	RET									;return
 createTriangle ENDP
 
 COMMENT %
@@ -262,32 +262,32 @@ COMMENT %
 *@param ADDR:dword													 	     *
 *****************************************************************************%
 hollowTriangle  PROC Near32
-	PUSH EBP									;preserves base register
-	MOV EBP, ESP								;sets a new stack frame
-	MOV EAX, 0									;clear out EAX to avoid error
-	MOV AL, [EBP + 12]							;moves the variable passed in into eax
-	MOV iHeight, EAX							;moves the variable into iHeight
+	PUSH EBP							;preserves base register
+	MOV EBP, ESP						;sets a new stack frame
+	MOV EAX, 0							;clear out EAX to avoid error
+	MOV AL, [EBP + 12]					;moves the variable passed in into eax
+	MOV iHeight, EAX					;moves the variable into iHeight
 
-	MOV EAX, [EBP + 8]							;moves the address of the first byte in our allocated memory into a variable
+	MOV EAX, [EBP + 8]					;moves the address of the first byte in our allocated memory into a variable
 	MOV strStartAddr, EAX
 	
-	MOV EDI, 0									;set EDI to 0 to reference the beginning of the string
-	MOV [strStartAddr + EDI], 10				;put the new line at the addr offset edi
-	INC EDI										;increment to the next position
-	MOV ECX, 0									;clear out ECX just in case
+	MOV EDI, 0							;set EDI to 0 to reference the beginning of the string
+	MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
+	INC EDI								;increment to the next position
+	MOV ECX, 0							;clear out ECX just in case
 	
-	MOV iTemp, 1								;set the initial value of iTemp to 1 because there will always be atleast 1 star
+	MOV iTemp, 1						;set the initial value of iTemp to 1 because there will always be atleast 1 star
 	
 	Compare:
-		MOV CL, 1								;sets the value of cl to 1 to signify the start of the triangle
-		CMP iTemp, 1							;compares the value of iTemp to 1 to see if this is the first line in the triangle
-		JE lpDrawFirstLineTriangle				;if it is equal to 1, then jump to draw the first few lines. 
-		CMP iTemp, 2							;compares the value of iTemp to 2 to see if this is the second line in the triangle
-		JE lpDrawFirstLineTriangle				;if it is equal to 2, then jump to draw the second line.
-		MOV EAX, iTemp							;move the itemp value into eax because we cant compare mem to mem
-		CMP EAX, iHeight						;comapre eax to the height to see if we hit the last line in the triangle. 
-		JE lpDrawLastLineTriangle				;if it is equal to the height, then jump to draw the last line. 
-		JMP lpDrawHollowTriangle				;if it is not equal to 1, 2, or the height then keep looping. 
+		MOV CL, 1			
+		CMP iTemp, 1
+		JE lpDrawFirstLineTriangle
+		CMP iTemp, 2
+		JE lpDrawFirstLineTriangle
+		MOV EAX, iTemp
+		CMP EAX, iHeight
+		JE lpDrawLastLineTriangle
+		JMP lpDrawHollowTriangle
 		
 	lpDrawFirstLineTriangle:
 		MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
@@ -307,7 +307,7 @@ hollowTriangle  PROC Near32
 		INC iTemp								;increment our Temp variable to we add another star for the next line.
 		MOV ECX, EBX							;restores our old ECX value
 	loop lpDrawFirstLineTriangle				;decrement ECX and go to the top of the loop
-	JMP Compare									;jump to the top of the loop
+	JMP Compare
 	
 	lpDrawLastLineTriangle:
 		MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
@@ -327,7 +327,7 @@ hollowTriangle  PROC Near32
 		INC iTemp								;increment our Temp variable to we add another star for the next line.
 		MOV ECX, EBX							;restores our old ECX value
 	loop lpDrawLastLineTriangle					;decrement ECX and go to the top of the loop
-	JMP Complete								;jump to the complete section
+	JMP Complete
 	
 	lpDrawHollowTriangle:
 		MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
@@ -356,13 +356,13 @@ hollowTriangle  PROC Near32
 		MOV ECX, EBX							;restores our old ECX value
 	loop lpDrawHollowTriangle
 	
-	JMP Compare									;jump back up to compare
+	JMP Compare
 	
 	Complete:
-		MOV [strStartAddr + EDI], 00			;put the null character at the end to signal that this is the end of the loop
-		MOV EAX, OFFSET strStartAddr			;moves the offset of the strStartAddr into EAX for return address
-		POP EBP									;restore original EBP
-	RET											;return
+		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
+		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+		POP EBP								;restore original EBP
+	RET									;return
 hollowTriangle ENDP
 
 END

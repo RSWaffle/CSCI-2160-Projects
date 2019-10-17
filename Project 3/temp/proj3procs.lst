@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/17/19 17:53:26
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 16:29:19
 proj3procs.asm						     Page 1 - 1
 
 
@@ -8,7 +8,7 @@ proj3procs.asm						     Page 1 - 1
 				;*  Class:        CSCI 2160-001
 				;*  Lab:          Proj3
 				;*  Date:         10/19/2019
-				;*  Purpose:      This handles the creation of shapes and the hollow shapes. 
+				;*  Purpose:      
 				;******************************************************************************************
 					.486						;This tells assembler to generate 32-bit code
 					.model flat					;This tells assembler that all addresses are real addresses
@@ -283,14 +283,14 @@ proj3procs.asm						     Page 1 - 1
  00000293  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 	   0000000A
  0000029D  47					INC EDI									;increment to the next position
- 0000029E  FF 05 00000018 R			INC iTemp								;increment our Temp variable to we add another star for the next line.
- 000002A4  8B CB				MOV ECX, EBX							;restores our old ECX value
- 000002A6  E2 B5			loop lpDrawTriangle							;decrement ECX and go to the top of the loop
- 000002A8  C7 87 0000001C R		MOV [strStartAddr + EDI], 00				;put the null character at the end to signal that this is the end of the loop
+ 0000029E  FF 05 00000018 R			INC iTemp						;increment our Temp variable to we add another star for the next line.
+ 000002A4  8B CB				MOV ECX, EBX					;restores our old ECX value
+ 000002A6  E2 B5			loop lpDrawTriangle					;decrement ECX and go to the top of the loop
+ 000002A8  C7 87 0000001C R		MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
 	   00000000
- 000002B2  B8 0000001C R		MOV EAX, OFFSET strStartAddr				;moves the offset of the strStartAddr into EAX for return address
- 000002B7  5D				POP EBP										;restore original EBP
- 000002B8  C3				RET											;return
+ 000002B2  B8 0000001C R		MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+ 000002B7  5D				POP EBP								;restore original EBP
+ 000002B8  C3				RET									;return
  000002B9			createTriangle ENDP
 
 				COMMENT %
@@ -307,36 +307,36 @@ proj3procs.asm						     Page 1 - 1
 				*@param ADDR:dword													 	     *
 				*****************************************************************************%
  000002B9			hollowTriangle  PROC Near32
- 000002B9  55				PUSH EBP									;preserves base register
- 000002BA  8B EC			MOV EBP, ESP								;sets a new stack frame
- 000002BC  B8 00000000			MOV EAX, 0									;clear out EAX to avoid error
- 000002C1  8A 45 0C			MOV AL, [EBP + 12]							;moves the variable passed in into eax
- 000002C4  A3 00000014 R		MOV iHeight, EAX							;moves the variable into iHeight
+ 000002B9  55				PUSH EBP							;preserves base register
+ 000002BA  8B EC			MOV EBP, ESP						;sets a new stack frame
+ 000002BC  B8 00000000			MOV EAX, 0							;clear out EAX to avoid error
+ 000002C1  8A 45 0C			MOV AL, [EBP + 12]					;moves the variable passed in into eax
+ 000002C4  A3 00000014 R		MOV iHeight, EAX					;moves the variable into iHeight
 
- 000002C9  8B 45 08			MOV EAX, [EBP + 8]							;moves the address of the first byte in our allocated memory into a variable
+ 000002C9  8B 45 08			MOV EAX, [EBP + 8]					;moves the address of the first byte in our allocated memory into a variable
  000002CC  A3 0000001C R		MOV strStartAddr, EAX
 					
- 000002D1  BF 00000000			MOV EDI, 0									;set EDI to 0 to reference the beginning of the string
- 000002D6  C7 87 0000001C R		MOV [strStartAddr + EDI], 10				;put the new line at the addr offset edi
+ 000002D1  BF 00000000			MOV EDI, 0							;set EDI to 0 to reference the beginning of the string
+ 000002D6  C7 87 0000001C R		MOV [strStartAddr + EDI], 10		;put the new line at the addr offset edi
 	   0000000A
- 000002E0  47				INC EDI										;increment to the next position
- 000002E1  B9 00000000			MOV ECX, 0									;clear out ECX just in case
+ 000002E0  47				INC EDI								;increment to the next position
+ 000002E1  B9 00000000			MOV ECX, 0							;clear out ECX just in case
 					
- 000002E6  C7 05 00000018 R		MOV iTemp, 1								;set the initial value of iTemp to 1 because there will always be atleast 1 star
+ 000002E6  C7 05 00000018 R		MOV iTemp, 1						;set the initial value of iTemp to 1 because there will always be atleast 1 star
 	   00000001
 					
  000002F0				Compare:
- 000002F0  B1 01				MOV CL, 1								;sets the value of cl to 1 to signify the start of the triangle
- 000002F2  83 3D 00000018 R			CMP iTemp, 1							;compares the value of iTemp to 1 to see if this is the first line in the triangle
+ 000002F0  B1 01				MOV CL, 1			
+ 000002F2  83 3D 00000018 R			CMP iTemp, 1
 	   01
- 000002F9  74 1B				JE lpDrawFirstLineTriangle				;if it is equal to 1, then jump to draw the first few lines. 
- 000002FB  83 3D 00000018 R			CMP iTemp, 2							;compares the value of iTemp to 2 to see if this is the second line in the triangle
+ 000002F9  74 1B				JE lpDrawFirstLineTriangle
+ 000002FB  83 3D 00000018 R			CMP iTemp, 2
 	   02
- 00000302  74 12				JE lpDrawFirstLineTriangle				;if it is equal to 2, then jump to draw the second line.
- 00000304  A1 00000018 R			MOV EAX, iTemp							;move the itemp value into eax because we cant compare mem to mem
- 00000309  3B 05 00000014 R			CMP EAX, iHeight						;comapre eax to the height to see if we hit the last line in the triangle. 
- 0000030F  74 52				JE lpDrawLastLineTriangle				;if it is equal to the height, then jump to draw the last line. 
- 00000311  E9 0000009A				JMP lpDrawHollowTriangle				;if it is not equal to 1, 2, or the height then keep looping. 
+ 00000302  74 12				JE lpDrawFirstLineTriangle
+ 00000304  A1 00000018 R			MOV EAX, iTemp
+ 00000309  3B 05 00000014 R			CMP EAX, iHeight
+ 0000030F  74 52				JE lpDrawLastLineTriangle
+ 00000311  E9 0000009A				JMP lpDrawHollowTriangle
 						
  00000316				lpDrawFirstLineTriangle:
  00000316  C7 87 0000001C R			MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
@@ -354,14 +354,14 @@ proj3procs.asm						     Page 1 - 1
  0000033F  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
  00000349  47							INC EDI							;increment to the next position
- 0000034A  E2 E8					loop lpPutStars1					;decrement ECX and go to the top of the loop
+ 0000034A  E2 E8					loop lpPutStars1						;decrement ECX and go to the top of the loop
  0000034C  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 	   0000000A
  00000356  47					INC EDI									;increment to the next position
  00000357  FF 05 00000018 R			INC iTemp								;increment our Temp variable to we add another star for the next line.
  0000035D  8B CB				MOV ECX, EBX							;restores our old ECX value
  0000035F  E2 B5			loop lpDrawFirstLineTriangle				;decrement ECX and go to the top of the loop
- 00000361  EB 8D			JMP Compare									;jump to the top of the loop
+ 00000361  EB 8D			JMP Compare
 					
  00000363				lpDrawLastLineTriangle:
  00000363  C7 87 0000001C R			MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
@@ -379,29 +379,29 @@ proj3procs.asm						     Page 1 - 1
  0000038C  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
  00000396  47							INC EDI							;increment to the next position
- 00000397  E2 E8					loop lpPutStars2					;decrement ECX and go to the top of the loop
+ 00000397  E2 E8					loop lpPutStars2						;decrement ECX and go to the top of the loop
  00000399  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 	   0000000A
  000003A3  47					INC EDI									;increment to the next position
  000003A4  FF 05 00000018 R			INC iTemp								;increment our Temp variable to we add another star for the next line.
  000003AA  8B CB				MOV ECX, EBX							;restores our old ECX value
- 000003AC  E2 B5			loop lpDrawLastLineTriangle					;decrement ECX and go to the top of the loop
- 000003AE  EB 76			JMP Complete								;jump to the complete section
+ 000003AC  E2 B5			loop lpDrawLastLineTriangle				;decrement ECX and go to the top of the loop
+ 000003AE  EB 76			JMP Complete
 					
  000003B0				lpDrawHollowTriangle:
- 000003B0  C7 87 0000001C R			MOV [strStartAddr + EDI], 09			;put the character tab at the addr offset edi
+ 000003B0  C7 87 0000001C R			MOV [strStartAddr + EDI], 09	;put the character tab at the addr offset edi
 	   00000009
- 000003BA  47					INC EDI									;increment to the next position
- 000003BB  C7 87 0000001C R			MOV [strStartAddr + EDI], 32			;put the character space at the addr offset edi
+ 000003BA  47					INC EDI							;increment to the next position
+ 000003BB  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
- 000003C5  47					INC EDI									;increment to the next position
- 000003C6  C7 87 0000001C R			MOV [strStartAddr + EDI], 42			;put the character * at the addr offset edi
+ 000003C5  47					INC EDI							;increment to the next position
+ 000003C6  C7 87 0000001C R			MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
 	   0000002A
- 000003D0  47					INC EDI									;increment to the next position
- 000003D1  8B D9				MOV EBX, ECX							;stores the current value of ECX into EBX
- 000003D3  8B 15 00000018 R			MOV EDX, iTemp							;moves iTemp into EDX
- 000003D9  83 EA 02				SUB EDX, 2								;Subtracts from EDX 2 so we can ignore the first and last character positions
- 000003DC  8B CA				MOV ECX, EDX							;moves into ECX iTemp, so the loop knows how many stars to insert
+ 000003D0  47					INC EDI							;increment to the next position
+ 000003D1  8B D9				MOV EBX, ECX					;stores the current value of ECX into EBX
+ 000003D3  8B 15 00000018 R			MOV EDX, iTemp
+ 000003D9  83 EA 02				SUB EDX, 2
+ 000003DC  8B CA				MOV ECX, EDX					;moves into ECX iTemp, so the loop knows how many stars to insert
  000003DE						lpPutSpace:					
  000003DE  C7 87 0000001C R					MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
@@ -410,31 +410,31 @@ proj3procs.asm						     Page 1 - 1
 	   00000020
  000003F3  47							INC EDI							;increment to the next position
  000003F4  E2 E8					loop lpPutSpace						;decrement ECX and go to the top of the loop
- 000003F6  C7 87 0000001C R			MOV [strStartAddr + EDI], 32			;put the character space at the addr offset edi
+ 000003F6  C7 87 0000001C R			MOV [strStartAddr + EDI], 32	;put the character space at the addr offset edi
 	   00000020
- 00000400  47					INC EDI									;increment to the next position
- 00000401  C7 87 0000001C R			MOV [strStartAddr + EDI], 42			;put the character * at the addr offset edi
+ 00000400  47					INC EDI							;increment to the next position
+ 00000401  C7 87 0000001C R			MOV [strStartAddr + EDI], 42	;put the character * at the addr offset edi
 	   0000002A
- 0000040B  47					INC EDI									;increment to the next position
+ 0000040B  47					INC EDI							;increment to the next position
  0000040C  C7 87 0000001C R			MOV [strStartAddr + EDI], 10			;put the new line at the addr offset edi
 	   0000000A
  00000416  47					INC EDI									;increment to the next position
- 00000417  FF 05 00000018 R			INC iTemp								;increment our Temp variable to we add another star for the next line.
- 0000041D  8B CB				MOV ECX, EBX							;restores our old ECX value
+ 00000417  FF 05 00000018 R			INC iTemp						;increment our Temp variable to we add another star for the next line.
+ 0000041D  8B CB				MOV ECX, EBX					;restores our old ECX value
  0000041F  E2 8F			loop lpDrawHollowTriangle
 					
- 00000421  E9 FFFFFECA			JMP Compare									;jump back up to compare
+ 00000421  E9 FFFFFECA			JMP Compare
 					
  00000426				Complete:
- 00000426  C7 87 0000001C R			MOV [strStartAddr + EDI], 00			;put the null character at the end to signal that this is the end of the loop
+ 00000426  C7 87 0000001C R			MOV [strStartAddr + EDI], 00		;put the null character at the end to signal that this is the end of the loop
 	   00000000
- 00000430  B8 0000001C R			MOV EAX, OFFSET strStartAddr			;moves the offset of the strStartAddr into EAX for return address
- 00000435  5D					POP EBP									;restore original EBP
- 00000436  C3				RET											;return
+ 00000430  B8 0000001C R			MOV EAX, OFFSET strStartAddr		;moves the offset of the strStartAddr into EAX for return address
+ 00000435  5D					POP EBP								;restore original EBP
+ 00000436  C3				RET									;return
  00000437			hollowTriangle ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/17/19 17:53:26
+Microsoft (R) Macro Assembler Version 6.11		    10/14/19 16:29:19
 proj3procs.asm						     Symbols 2 - 1
 
 

@@ -1,11 +1,10 @@
 ;******************************************************************************************
 ;*  Program Name: proj3.asm
 ;*  Programmer:   Ryan Shupe
-;*  Class:        CSCI 2160-001 
+;*  Class:        CSCI 2160-001 _HeapAllocHarrison@0
 ;*  Lab:          Proj3
 ;*  Date:         10/19/2019
-;*  Purpose:      This is the driver program that handles input and output and calls other classes to 
-;*				  generate rectangle and triangle and their hollow counter parts. 
+;*  Purpose:      
 ;******************************************************************************************
 	.486						;This tells assembler to generate 32-bit code
 	.model flat					;This tells assembler that all addresses are real addresses
@@ -141,7 +140,8 @@ ENDM
 	recLengthASCII byte 4 dup (?) 					;set aside memory to hold the length of the rectangle in ASCII form with an empty bytes between the next variable
 	recWidthASCII byte 4 dup (?) 	 				;set aside memory to hold the width of the rectanglein ASCII form with an empty bytes between the next variable
 	triHeightASCII byte 4 dup (?)					;memory to hold the height of a triangle in ASCII form
-	strEnd byte ?									;something to freeze the screen at the end of execution.
+	strEnd byte ?
+
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
 	sizeString dword ?								;Temp memory to hold the size of a string
 	strAddress dword ?								;Memory to hold the 4 byte address of a string
@@ -203,8 +203,8 @@ displayRectangle:
 	DisplayString strHallowRectangleInfo			;calls the display string macro and passes in the specified string and tells user that this is the hollowed rectangle.
 	DisplayString crlf								;displays the chars to skip to a new line.
 	PUSH strAddress									;Push the starting address to write to to the stack
-	CALL createStringCopy							;create a copy of the string and store it in a seperate space
-	ADD ESP, 4										;add back the bytes we used in the previous method
+	CALL createStringCopy							
+	ADD ESP, 4
 	MOV strAddress, EAX								;move the address that the method gave us into a variable
 	PUSH dword ptr recLength						;Push the length of the rectangle so the method is able to access it
 	PUSH dword ptr recWidth							;Push the width of the rectangle so the method is able to access it
@@ -258,15 +258,15 @@ displayTri:
 	DisplayString crlf								;calls the display string macro and passes in the specified string and tells to clear line
 	
 	
-	DisplayString TestString						;display the test face at the end of the program
-	PullString strEnd, 0 							;basically press enter to terminate the program message. 
+	DisplayString TestString
+	PullString strEnd, 1 
 	
 	MOV EAX, 0										;Statement to help in debugging
 	JMP finished
 
 ;************************************* the instructions below calls for "normal termination"	
 finished:
-	INVOKE heapDestroyHarrison						;clears the memory used by heap allocharrion
+	INVOKE heapDestroyHarrison
 	INVOKE ExitProcess,0						 
 	PUBLIC _start
 	

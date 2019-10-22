@@ -1,0 +1,67 @@
+Microsoft (R) Macro Assembler Version 6.11		    10/22/19 17:10:02
+proj4procs.asm						     Page 1 - 1
+
+
+
+				;******************************************************************************************
+
+				;*  Program Name: proj4procs.asm
+
+				;*  Programmer:   Ryan Shupe
+
+				;*  Class:        CSCI 2160-001
+
+				;*  Lab:          Proj3
+
+				;*  Date:         11/02/2019
+
+				;*  Purpose:      This handles the manipulation of matrices. 
+
+				;******************************************************************************************
+
+					.486						;This tells assembler to generate 32-bit code
+
+					.model flat					;This tells assembler that all addresses are real addresses
+
+					.stack 100h					;EVERY program needs to have a stack allocated
+
+				;******************************************************************************************
+ 00000000			.DATA
+
+
+				;******************************************************************************************
+ 00000000			.CODE
+
+				END
+Microsoft (R) Macro Assembler Version 6.11		    10/22/19 17:10:02
+proj4procs.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'CODE'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+
+	   0 Warnings
+	   0 Errors

@@ -27,6 +27,8 @@
 	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
 
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
+	
+	extractDwords PROTO Near32 C, StringofChars:dword, ArrayDwords:dword
 
 ;******************************************************************************************
 
@@ -117,8 +119,8 @@ ENDM
 "         Lab: Project 4",0
 
 	strMenu byte 10,10,10,13,9, "M E N U",10,
-	"a) Input AND Extract values for matrix A",10,
-	"b) Input AND Extract values for matrix B",10,
+	"a) Set values for matrix A",10,
+	"b) Set values for matrix B",10,
 	"c) Display values in array A",10,
 	"d) Display values in array B",10,
 	"e) Add up the values in A array",10,
@@ -138,8 +140,18 @@ ENDM
 	"q) EXIT program",10,10,13,0
 	clearScr byte 10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,0
 	strTypeChoice byte 10,13, "Type the letter of your choice: ",0
+	strAskValues byte 10,10,13, "Enter the values you wish to store in the array: ",0
+	strValuesStored byte 10,13, "Values successfully stored!", 0
 	
-	choiceASCII byte ?
+	choiceASCII byte 0
+	addrArrayA dword 0 
+	numbersASCII byte 50 dup (?), 00
+	arrayA dword 0 dup (?)
+
+
+	
+	
+
 
 ;******************************************************************************************
 .CODE
@@ -243,21 +255,58 @@ getUserChoice:
 	
 	
 choiceA:
-	;DisplayString "A"
+	DisplayString strAskValues
+	PullString numbersASCII, 50
+	MOV addrArrayA, OFFSET arrayA
+	
+	INVOKE extractDwords, OFFSET numbersASCII, OFFSET arrayA
+	
+	DisplayString clearScr
+	DisplayString strValuesStored
+	JMP getUserChoice
 choiceB:
-choiceC:
+	DisplayString clearScr
+	DisplayString strValuesStored
+	JMP getUserChoice
+choiceC:	
+	DisplayString clearScr
+	JMP getUserChoice
 choiceD:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceE:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceF:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceG:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceH:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceI:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceJ:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceK:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceL:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceM:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceN:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceO:
+	DisplayString clearScr
+	JMP getUserChoice
 choiceQ:
 	JMP finished									;Jump to the end of the program, terminate.
 
@@ -267,4 +316,5 @@ finished:
 	PUBLIC _start
 	
 main ENDP
+
 	END												;Signals assembler that there are no instructions after this statement

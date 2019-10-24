@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/23/19 23:25:13
+Microsoft (R) Macro Assembler Version 6.11		    10/24/19 01:04:37
 proj4procs.asm						     Page 1 - 1
 
 
@@ -33,11 +33,11 @@ proj4procs.asm						     Page 1 - 1
 					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 				;******************************************************************************************
  00000000			.DATA
- 00000000 30 31 32 33 34		WhiteListChars byte 48,49,50,51,52,53,54,55,56,57, 45
+ 00000000 30 31 32 33 34		WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43
 	   35 36 37 38 39
-	   2D
+	   2D 2B
 						
- 0000000B 00				bTemps byte ?
+ 0000000C 00				bTemps byte ?
 
 				;******************************************************************************************
  00000000			.CODE
@@ -55,7 +55,7 @@ proj4procs.asm						     Page 1 - 1
 				*@param StringofChars:dword                                                  *
 				*@param ArrayDwords:dword												 	 *
 				*****************************************************************************%
- 00000000			extractDwords PROC Near32 C uses EDI ESI EBX ECX, StringofChars:dword, ArrayDwords:dword
+ 00000000			extractDwords PROC Near32 C uses EBX ECX EDX EDI , StringofChars:dword, ArrayDwords:dword
 					LOCAL addOut:dword, addASCII:dword
 					
  0000000A  8B 45 0C			MOV EAX, ArrayDwords
@@ -71,62 +71,60 @@ proj4procs.asm						     Page 1 - 1
  00000020  8B 45 F8				MOV EAX, addASCII
  00000023  8A 18				MOV BL, byte ptr [EAX]
  00000025  80 FB 00				CMP BL, 00
- 00000028  0F 84 00000085			JE finished
+ 00000028  74 71				JE finished
 						
- 0000002E  B9 0000000B				MOV ECX, lengthof WhiteListChars
- 00000033  BE 00000000				MOV ESI, 0
+ 0000002A  B9 0000000C				MOV ECX, lengthof WhiteListChars
+ 0000002F  BE 00000000				MOV ESI, 0
 						
- 00000038					lpCompareWhitelist:
- 00000038  3A 9E 00000000 R				CMP BL, WhiteListChars[ESI]
- 0000003E  74 08					JE ValidChar
- 00000040  46						INC ESI
- 00000041  E2 F5				loop lpCompareWhitelist
+ 00000034					lpCompareWhitelist:
+ 00000034  3A 9E 00000000 R				CMP BL, WhiteListChars[ESI]
+ 0000003A  74 08					JE ValidChar
+ 0000003C  46						INC ESI
+ 0000003D  E2 F5				loop lpCompareWhitelist
 						
- 00000043  FF 45 F8				INC addASCII
- 00000046  EB D8				JMP lpConvertandMove
+ 0000003F  FF 45 F8				INC addASCII
+ 00000042  EB DC				JMP lpConvertandMove
 						
- 00000048					ValidChar:
- 00000048  88 9F 0000000B R				MOV bTemps[EDI], BL
- 0000004E  FF 45 F8					INC addASCII
- 00000051  8B 45 F8					MOV EAX, addASCII
- 00000054  8A 18					MOV BL, byte ptr [EAX]
- 00000056  FF 4D F8					DEC addASCII
+ 00000044					ValidChar:
+ 00000044  88 9F 0000000C R				MOV bTemps[EDI], BL
+ 0000004A  FF 45 F8					INC addASCII
+ 0000004D  8B 45 F8					MOV EAX, addASCII
+ 00000050  8A 18					MOV BL, byte ptr [EAX]
+ 00000052  FF 4D F8					DEC addASCII
 							
- 00000059  B9 0000000B					MOV ECX, lengthof WhiteListChars
- 0000005E  BE 00000000					MOV ESI, 0
+ 00000055  B9 0000000C					MOV ECX, lengthof WhiteListChars
+ 0000005A  BE 00000000					MOV ESI, 0
 						
- 00000063						lpCompareNext:
- 00000063  3A 9E 00000000 R					CMP BL, WhiteListChars[ESI]
- 00000069  74 3F						JE ValidNextChar
- 0000006B  46							INC ESI
- 0000006C  E2 F5					loop lpCompareNext
+ 0000005F						lpCompareNext:
+ 0000005F  3A 9E 00000000 R					CMP BL, WhiteListChars[ESI]
+ 00000065  74 2E						JE ValidNextChar
+ 00000067  46							INC ESI
+ 00000068  E2 F5					loop lpCompareNext
 							
 							INVOKE ascint32, ADDR bTemps
- 00000078  8B 55 FC					MOV EDX, addOut
- 0000007B  89 02					MOV [EDX], EAX
- 0000007D  C6 05 0000000B R				MOV bTemps, 0
+ 00000074  8B 55 FC					MOV EDX, addOut
+ 00000077  89 02					MOV [EDX], EAX
+ 00000079  B9 00000004					MOV ECX, 4
+ 0000007E						lpClearBTemp:
+ 0000007E  C6 81 0000000C R					MOV [bTemps + ECX], 0
 	   00
- 00000084  C6 05 0000000C R				MOV [bTemps + 1], 0
-	   00
- 0000008B  C6 05 0000000D R				MOV [bTemps + 2], 0
-	   00
- 00000092  C6 05 0000000E R				MOV [bTemps + 3], 0
-	   00
- 00000099  83 45 FC 04					ADD addOut, 4
- 0000009D  BF 00000000					MOV EDI, 0
- 000000A2  FF 45 F8					INC addASCII
- 000000A5  E9 FFFFFF76					JMP lpConvertandMove
+ 00000085  E2 F7					loop  lpClearBTemp
+ 00000087  83 45 FC 04					ADD addOut, 4
+ 0000008B  BF 00000000					MOV EDI, 0
+ 00000090  FF 45 F8					INC addASCII
+ 00000093  EB 8B					JMP lpConvertandMove
 							
- 000000AA					ValidNextChar:
- 000000AA  47						INC EDI
- 000000AB  FF 45 F8					INC addASCII
- 000000AE  E9 FFFFFF6D					JMP lpConvertandMove
+ 00000095					ValidNextChar:
+ 00000095  47						INC EDI
+ 00000096  FF 45 F8					INC addASCII
+ 00000099  EB 85					JMP lpConvertandMove
 							
- 000000B3				finished:
- 000000B3			extractDwords ENDP 
+ 0000009B				finished:
+						RET
+ 000000A1			extractDwords ENDP 
 
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/23/19 23:25:13
+Microsoft (R) Macro Assembler Version 6.11		    10/24/19 01:04:37
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -138,8 +136,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000B3 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000000D DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A1 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -147,17 +145,18 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000B3 Public C
+extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public C
   StringofChars  . . . . . . . .	DWord	 bp + 00000008
   ArrayDwords  . . . . . . . . .	DWord	 bp + 0000000C
   addOut . . . . . . . . . . . .	DWord	 bp - 00000004
   addASCII . . . . . . . . . . .	DWord	 bp - 00000008
   lpConvertandMove . . . . . . .	L Near	 00000020 _TEXT	
-  lpCompareWhitelist . . . . . .	L Near	 00000038 _TEXT	
-  ValidChar  . . . . . . . . . .	L Near	 00000048 _TEXT	
-  lpCompareNext  . . . . . . . .	L Near	 00000063 _TEXT	
-  ValidNextChar  . . . . . . . .	L Near	 000000AA _TEXT	
-  finished . . . . . . . . . . .	L Near	 000000B3 _TEXT	
+  lpCompareWhitelist . . . . . .	L Near	 00000034 _TEXT	
+  ValidChar  . . . . . . . . . .	L Near	 00000044 _TEXT	
+  lpCompareNext  . . . . . . . .	L Near	 0000005F _TEXT	
+  lpClearBTemp . . . . . . . . .	L Near	 0000007E _TEXT	
+  ValidNextChar  . . . . . . . .	L Near	 00000095 _TEXT	
+  finished . . . . . . . . . . .	L Near	 0000009B _TEXT	
 
 
 Symbols:
@@ -174,7 +173,7 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 WhiteListChars . . . . . . . . .	Byte	 00000000 _DATA	
-bTemps . . . . . . . . . . . . .	Byte	 0000000B _DATA	
+bTemps . . . . . . . . . . . . .	Byte	 0000000C _DATA	
 
 	   0 Warnings
 	   0 Errors

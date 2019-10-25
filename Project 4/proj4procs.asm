@@ -289,7 +289,7 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		
 	oneByone:
 		MOV EBX, startAddr
-		MOV EAX, [EBX + EDI]
+		MOV EAX, [EBX]
 		MOV tempNum, EAX
 		MOV EBX, EDX
 		PUSH EBX

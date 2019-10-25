@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:48:34
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:53:56
 proj4procs.asm						     Page 1 - 1
 
 
@@ -404,20 +404,20 @@ proj4procs.asm						     Page 1 - 1
 						
  0000026D				oneByone:
  0000026D  8B 5D FC				MOV EBX, startAddr
- 00000270  8B 04 1F				MOV EAX, [EBX + EDI]
- 00000273  A3 0000000C R			MOV tempNum, EAX
- 00000278  8B DA				MOV EBX, EDX
- 0000027A  53					PUSH EBX
- 0000027B  03 DE				ADD EBX, ESI
+ 00000270  8B 03				MOV EAX, [EBX]
+ 00000272  A3 0000000C R			MOV tempNum, EAX
+ 00000277  8B DA				MOV EBX, EDX
+ 00000279  53					PUSH EBX
+ 0000027A  03 DE				ADD EBX, ESI
 						INVOKE intasc32, EBX, tempNum	
- 00000289  5B					POP EBX
- 0000028A  EB BE				JMP finished
+ 00000288  5B					POP EBX
+ 00000289  EB BF				JMP finished
 					
 					
 					
- 0000028C			displayArray ENDP
+ 0000028B			displayArray ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:48:34
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:53:56
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -437,7 +437,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000028C DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000028B DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -445,7 +445,7 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 000001EB Public C
+displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 000001EA Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
   cols . . . . . . . . . . . . .	DWord	 bp + 00000010

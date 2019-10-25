@@ -141,7 +141,10 @@ ENDM
 	strAskValues byte 10,10,13, "Enter the values you wish to store in the array: ",0
 	strValuesStored byte 10,13, "Values successfully stored!", 0
 	strMethodNotAdded byte 10,13, "ERROR! Method not implemented!", 0
-	
+	enterToCont byte 10,10,13, "Press ENTER to Continue...",0
+	enterValCol byte 10,10,13, "Enter a value for col: ",0
+	enterValRow byte 10,10,13, "Enter a value for row: ",0
+	crlf byte  10,13,0								;Null-terminated string to skip to new line
 	choiceASCII byte 0
 	numRows dword ?
 	numCols dword ?
@@ -150,8 +153,9 @@ ENDM
 	arrayA dword 100 dup (?)
 	arrayB dword 100 dup (?)
 	strEnter byte 0
-	enterToCont byte 10,10,13, "Press ENTER to Continue."
-	crlf byte  10,13,0								;Null-terminated string to skip to new line
+	row dword ?
+	col dword ?
+
 
 ;******************************************************************************************
 .CODE
@@ -283,8 +287,17 @@ choiceB:
 	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
 	JMP getUserChoice								;jump back up to display the menu
 choiceC:	
+	DisplayString enterValCol
+	PullString col, 10
+	CvtoNum col
+	MOV col, EAX
 	
-	INVOKE displayArray, OFFSET arrayA, 2, 2, OFFSET strDisplay
+	DisplayString enterValRow
+	PullString row, 10
+	CvtoNum row
+	MOV row, EAX
+	
+	INVOKE displayArray, OFFSET arrayA, row, col, OFFSET strDisplay
 	DisplayString crlf
 	DisplayString crlf
 	DisplayString strDisplay
@@ -293,8 +306,24 @@ choiceC:
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu
 choiceD:
+	DisplayString enterValCol
+	PullString col, 10
+	CvtoNum col
+	MOV col, EAX
+	
+	DisplayString enterValRow
+	PullString row, 10
+	CvtoNum row
+	MOV row, EAX
+	
+	INVOKE displayArray, OFFSET arrayB, row, col, OFFSET strDisplay
+	DisplayString crlf
+	DisplayString crlf
+	DisplayString strDisplay
+	DisplayString enterToCont
+	PullString strEnter, 0
 	DisplayString clearScr							;display the characters to clear the screen
-	JMP getUserChoice								;jump back up to display the menu
+	JMP getUserChoice								;jump back up to display the menu							;jump back up to display the menu
 choiceE:
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu

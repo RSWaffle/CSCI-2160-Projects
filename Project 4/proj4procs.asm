@@ -180,6 +180,17 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 	MOV EDX, outAddr
 	MOV EBX, startAddr
 	
+	MOV tempNum, 09
+	MOV EBX, EDX
+	PUSH EBX
+	ADD EBX, ESI
+	PUSH EAX
+	MOV EAX, tempNum
+	MOV [EBX], EAX
+	POP EBX
+	getBytes EDX
+	MOV ESI, EAX
+	DEC ESI
 	
 	lpConvertToASCII:
 		CMP rows, 0
@@ -230,9 +241,20 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		JMP lpConvertToASCII
 		
 	NoComma:
-		MOV ECX, 0
+		MOV ECX, 1
 		DEC rows
 		MOV tempNum, 10
+		PUSH EBX
+		ADD EBX, ESI
+		PUSH EAX
+		MOV EAX, tempNum
+		MOV [EBX], EAX
+		getBytes EDX
+		MOV ESI, EAX
+		DEC ESI
+		POP EAX
+		POP EBX
+		MOV tempNum, 09
 		PUSH EBX
 		ADD EBX, ESI
 		PUSH EAX
@@ -249,7 +271,7 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		MOV tempNum, 00
 		PUSH EBX
 		ADD EBX, ESI
-		SUB EBX, 4
+		SUB EBX, 5
 		PUSH EAX
 		MOV EAX, tempNum
 		MOV [EBX], EAX

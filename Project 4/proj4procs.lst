@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/24/19 23:56:34
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:39:51
 proj4procs.asm						     Page 1 - 1
 
 
@@ -187,160 +187,218 @@ proj4procs.asm						     Page 1 - 1
  000000C5  8B 55 F8			MOV EDX, outAddr
  000000C8  8B 5D FC			MOV EBX, startAddr
 					
+ 000000CB  C7 05 0000000C R		MOV tempNum, 09
+	   00000009
+ 000000D5  8B DA			MOV EBX, EDX
+ 000000D7  53				PUSH EBX
+ 000000D8  03 DE			ADD EBX, ESI
+ 000000DA  50				PUSH EAX
+ 000000DB  A1 0000000C R		MOV EAX, tempNum
+ 000000E0  89 03			MOV [EBX], EAX
+ 000000E2  5B				POP EBX
+					getBytes EDX
+ 000000E3  55		     1		PUSH EBP							;preserves base register
+ 000000E4  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000000E6  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000000E7  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000000E8  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000000EA  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000000EF		     1		??0000:
+ 000000EF  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 000000F3  74 03	     1			JE ??0001							;if it is jump to finished
+ 000000F5  46		     1			INC ESI							;if not increment esi
+ 000000F6  EB F7	     1			JMP ??0000						;jump to the top of the loop and look at the next char
+ 000000F8		     1		??0001:		
+ 000000F8  46		     1			INC ESI							;increment esi to include the null character in the string
+ 000000F9  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 000000FB  5E		     1		POP ESI								;restore original esi
+ 000000FC  5B		     1		POP EBX								;restore original ebx
+ 000000FD  5D		     1		POP EBP								;restore originla ebp
+ 000000FE  8B F0			MOV ESI, EAX
+ 00000100  4E				DEC ESI
 					
- 000000CB				lpConvertToASCII:
- 000000CB  83 7D 0C 00				CMP rows, 0
- 000000CF  0F 84 000000F9			JE finished
- 000000D5  8B 5D FC				MOV EBX, startAddr
- 000000D8  8B 04 1F				MOV EAX, [EBX + EDI]
- 000000DB  A3 0000000C R			MOV tempNum, EAX
- 000000E0  8B DA				MOV EBX, EDX
- 000000E2  53					PUSH EBX
- 000000E3  03 DE				ADD EBX, ESI
+ 00000101				lpConvertToASCII:
+ 00000101  83 7D 0C 00				CMP rows, 0
+ 00000105  0F 84 0000012E			JE finished
+ 0000010B  8B 5D FC				MOV EBX, startAddr
+ 0000010E  8B 04 1F				MOV EAX, [EBX + EDI]
+ 00000111  A3 0000000C R			MOV tempNum, EAX
+ 00000116  8B DA				MOV EBX, EDX
+ 00000118  53					PUSH EBX
+ 00000119  03 DE				ADD EBX, ESI
 						INVOKE intasc32, EBX, tempNum	
- 000000F1  5B					POP EBX
- 000000F2  83 C7 04				ADD EDI, 4
+ 00000127  5B					POP EBX
+ 00000128  83 C7 04				ADD EDI, 4
 						
- 000000F5  50					PUSH EAX
+ 0000012B  50					PUSH EAX
 						getBytes EDX
- 000000F6  55		     1		PUSH EBP							;preserves base register
- 000000F7  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000000F9  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000000FA  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000000FB  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000000FD  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 00000102		     1		??0000:
- 00000102  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000106  74 03	     1			JE ??0001							;if it is jump to finished
- 00000108  46		     1			INC ESI							;if not increment esi
- 00000109  EB F7	     1			JMP ??0000						;jump to the top of the loop and look at the next char
- 0000010B		     1		??0001:		
- 0000010B  46		     1			INC ESI							;increment esi to include the null character in the string
- 0000010C  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 0000010E  5E		     1		POP ESI								;restore original esi
- 0000010F  5B		     1		POP EBX								;restore original ebx
- 00000110  5D		     1		POP EBP								;restore originla ebp
- 00000111  8B F0				MOV ESI, EAX
- 00000113  4E					DEC ESI
- 00000114  58					POP EAX
+ 0000012C  55		     1		PUSH EBP							;preserves base register
+ 0000012D  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 0000012F  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 00000130  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 00000131  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 00000133  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000138		     1		??0002:
+ 00000138  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 0000013C  74 03	     1			JE ??0003							;if it is jump to finished
+ 0000013E  46		     1			INC ESI							;if not increment esi
+ 0000013F  EB F7	     1			JMP ??0002						;jump to the top of the loop and look at the next char
+ 00000141		     1		??0003:		
+ 00000141  46		     1			INC ESI							;increment esi to include the null character in the string
+ 00000142  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 00000144  5E		     1		POP ESI								;restore original esi
+ 00000145  5B		     1		POP EBX								;restore original ebx
+ 00000146  5D		     1		POP EBP								;restore originla ebp
+ 00000147  8B F0				MOV ESI, EAX
+ 00000149  4E					DEC ESI
+ 0000014A  58					POP EAX
 						
- 00000115  3B 4D 10				CMP ECX, cols
- 00000118  74 72				JE NoComma
+ 0000014B  3B 4D 10				CMP ECX, cols
+ 0000014E  74 72				JE NoComma
 						
- 0000011A  C7 05 0000000C R			MOV tempNum, 44
+ 00000150  C7 05 0000000C R			MOV tempNum, 44
 	   0000002C
- 00000124  8B DA				MOV EBX, EDX
- 00000126  53					PUSH EBX
- 00000127  03 DE				ADD EBX, ESI
- 00000129  50					PUSH EAX
- 0000012A  A1 0000000C R			MOV EAX, tempNum
- 0000012F  89 03				MOV [EBX], EAX
- 00000131  5B					POP EBX
-						getBytes EDX
- 00000132  55		     1		PUSH EBP							;preserves base register
- 00000133  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 00000135  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 00000136  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 00000137  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 00000139  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 0000013E		     1		??0002:
- 0000013E  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000142  74 03	     1			JE ??0003							;if it is jump to finished
- 00000144  46		     1			INC ESI							;if not increment esi
- 00000145  EB F7	     1			JMP ??0002						;jump to the top of the loop and look at the next char
- 00000147		     1		??0003:		
- 00000147  46		     1			INC ESI							;increment esi to include the null character in the string
- 00000148  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 0000014A  5E		     1		POP ESI								;restore original esi
- 0000014B  5B		     1		POP EBX								;restore original ebx
- 0000014C  5D		     1		POP EBP								;restore originla ebp
- 0000014D  8B F0				MOV ESI, EAX
- 0000014F  4E					DEC ESI
- 00000150  C7 05 0000000C R			MOV tempNum, 32
-	   00000020
  0000015A  8B DA				MOV EBX, EDX
  0000015C  53					PUSH EBX
  0000015D  03 DE				ADD EBX, ESI
- 0000015F  A1 0000000C R			MOV EAX, tempNum
- 00000164  89 03				MOV [EBX], EAX
- 00000166  5B					POP EBX
+ 0000015F  50					PUSH EAX
+ 00000160  A1 0000000C R			MOV EAX, tempNum
+ 00000165  89 03				MOV [EBX], EAX
+ 00000167  5B					POP EBX
 						getBytes EDX
- 00000167  55		     1		PUSH EBP							;preserves base register
- 00000168  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 0000016A  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 0000016B  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 0000016C  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 0000016E  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 00000173		     1		??0004:
- 00000173  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000177  74 03	     1			JE ??0005							;if it is jump to finished
- 00000179  46		     1			INC ESI							;if not increment esi
- 0000017A  EB F7	     1			JMP ??0004						;jump to the top of the loop and look at the next char
- 0000017C		     1		??0005:		
- 0000017C  46		     1			INC ESI							;increment esi to include the null character in the string
- 0000017D  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 0000017F  5E		     1		POP ESI								;restore original esi
- 00000180  5B		     1		POP EBX								;restore original ebx
- 00000181  5D		     1		POP EBP								;restore originla ebp
- 00000182  8B F0				MOV ESI, EAX
- 00000184  4E					DEC ESI
- 00000185  58					POP EAX
+ 00000168  55		     1		PUSH EBP							;preserves base register
+ 00000169  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 0000016B  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 0000016C  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 0000016D  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 0000016F  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000174		     1		??0004:
+ 00000174  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000178  74 03	     1			JE ??0005							;if it is jump to finished
+ 0000017A  46		     1			INC ESI							;if not increment esi
+ 0000017B  EB F7	     1			JMP ??0004						;jump to the top of the loop and look at the next char
+ 0000017D		     1		??0005:		
+ 0000017D  46		     1			INC ESI							;increment esi to include the null character in the string
+ 0000017E  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 00000180  5E		     1		POP ESI								;restore original esi
+ 00000181  5B		     1		POP EBX								;restore original ebx
+ 00000182  5D		     1		POP EBP								;restore originla ebp
+ 00000183  8B F0				MOV ESI, EAX
+ 00000185  4E					DEC ESI
+ 00000186  C7 05 0000000C R			MOV tempNum, 32
+	   00000020
+ 00000190  8B DA				MOV EBX, EDX
+ 00000192  53					PUSH EBX
+ 00000193  03 DE				ADD EBX, ESI
+ 00000195  A1 0000000C R			MOV EAX, tempNum
+ 0000019A  89 03				MOV [EBX], EAX
+ 0000019C  5B					POP EBX
+						getBytes EDX
+ 0000019D  55		     1		PUSH EBP							;preserves base register
+ 0000019E  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000001A0  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000001A1  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000001A2  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000001A4  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000001A9		     1		??0006:
+ 000001A9  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 000001AD  74 03	     1			JE ??0007							;if it is jump to finished
+ 000001AF  46		     1			INC ESI							;if not increment esi
+ 000001B0  EB F7	     1			JMP ??0006						;jump to the top of the loop and look at the next char
+ 000001B2		     1		??0007:		
+ 000001B2  46		     1			INC ESI							;increment esi to include the null character in the string
+ 000001B3  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 000001B5  5E		     1		POP ESI								;restore original esi
+ 000001B6  5B		     1		POP EBX								;restore original ebx
+ 000001B7  5D		     1		POP EBP								;restore originla ebp
+ 000001B8  8B F0				MOV ESI, EAX
+ 000001BA  4E					DEC ESI
+ 000001BB  58					POP EAX
 						
- 00000186  41					INC ECX
- 00000187  E9 FFFFFF3F				JMP lpConvertToASCII
+ 000001BC  41					INC ECX
+ 000001BD  E9 FFFFFF3F				JMP lpConvertToASCII
 						
- 0000018C				NoComma:
- 0000018C  B9 00000000				MOV ECX, 0
- 00000191  FF 4D 0C				DEC rows
- 00000194  C7 05 0000000C R			MOV tempNum, 10
+ 000001C2				NoComma:
+ 000001C2  B9 00000001				MOV ECX, 1
+ 000001C7  FF 4D 0C				DEC rows
+ 000001CA  C7 05 0000000C R			MOV tempNum, 10
 	   0000000A
- 0000019E  53					PUSH EBX
- 0000019F  03 DE				ADD EBX, ESI
- 000001A1  50					PUSH EAX
- 000001A2  A1 0000000C R			MOV EAX, tempNum
- 000001A7  89 03				MOV [EBX], EAX
+ 000001D4  53					PUSH EBX
+ 000001D5  03 DE				ADD EBX, ESI
+ 000001D7  50					PUSH EAX
+ 000001D8  A1 0000000C R			MOV EAX, tempNum
+ 000001DD  89 03				MOV [EBX], EAX
 						getBytes EDX
- 000001A9  55		     1		PUSH EBP							;preserves base register
- 000001AA  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000001AC  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000001AD  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000001AE  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000001B0  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 000001B5		     1		??0006:
- 000001B5  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 000001B9  74 03	     1			JE ??0007							;if it is jump to finished
- 000001BB  46		     1			INC ESI							;if not increment esi
- 000001BC  EB F7	     1			JMP ??0006						;jump to the top of the loop and look at the next char
- 000001BE		     1		??0007:		
- 000001BE  46		     1			INC ESI							;increment esi to include the null character in the string
- 000001BF  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 000001C1  5E		     1		POP ESI								;restore original esi
- 000001C2  5B		     1		POP EBX								;restore original ebx
- 000001C3  5D		     1		POP EBP								;restore originla ebp
- 000001C4  8B F0				MOV ESI, EAX
- 000001C6  4E					DEC ESI
- 000001C7  58					POP EAX
- 000001C8  5B					POP EBX
- 000001C9  E9 FFFFFEFD				JMP lpConvertToASCII
+ 000001DF  55		     1		PUSH EBP							;preserves base register
+ 000001E0  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000001E2  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000001E3  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000001E4  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000001E6  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000001EB		     1		??0008:
+ 000001EB  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 000001EF  74 03	     1			JE ??0009							;if it is jump to finished
+ 000001F1  46		     1			INC ESI							;if not increment esi
+ 000001F2  EB F7	     1			JMP ??0008						;jump to the top of the loop and look at the next char
+ 000001F4		     1		??0009:		
+ 000001F4  46		     1			INC ESI							;increment esi to include the null character in the string
+ 000001F5  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 000001F7  5E		     1		POP ESI								;restore original esi
+ 000001F8  5B		     1		POP EBX								;restore original ebx
+ 000001F9  5D		     1		POP EBP								;restore originla ebp
+ 000001FA  8B F0				MOV ESI, EAX
+ 000001FC  4E					DEC ESI
+ 000001FD  58					POP EAX
+ 000001FE  5B					POP EBX
+ 000001FF  C7 05 0000000C R			MOV tempNum, 09
+	   00000009
+ 00000209  53					PUSH EBX
+ 0000020A  03 DE				ADD EBX, ESI
+ 0000020C  50					PUSH EAX
+ 0000020D  A1 0000000C R			MOV EAX, tempNum
+ 00000212  89 03				MOV [EBX], EAX
+						getBytes EDX
+ 00000214  55		     1		PUSH EBP							;preserves base register
+ 00000215  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 00000217  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 00000218  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 00000219  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 0000021B  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000220		     1		??000A:
+ 00000220  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000224  74 03	     1			JE ??000B							;if it is jump to finished
+ 00000226  46		     1			INC ESI							;if not increment esi
+ 00000227  EB F7	     1			JMP ??000A						;jump to the top of the loop and look at the next char
+ 00000229		     1		??000B:		
+ 00000229  46		     1			INC ESI							;increment esi to include the null character in the string
+ 0000022A  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 0000022C  5E		     1		POP ESI								;restore original esi
+ 0000022D  5B		     1		POP EBX								;restore original ebx
+ 0000022E  5D		     1		POP EBP								;restore originla ebp
+ 0000022F  8B F0				MOV ESI, EAX
+ 00000231  4E					DEC ESI
+ 00000232  58					POP EAX
+ 00000233  5B					POP EBX
+ 00000234  E9 FFFFFEC8				JMP lpConvertToASCII
 						
- 000001CE				finished:
- 000001CE  C7 05 0000000C R			MOV tempNum, 00
+ 00000239				finished:
+ 00000239  C7 05 0000000C R			MOV tempNum, 00
 	   00000000
- 000001D8  53					PUSH EBX
- 000001D9  03 DE				ADD EBX, ESI
- 000001DB  83 EB 04				SUB EBX, 4
- 000001DE  50					PUSH EAX
- 000001DF  A1 0000000C R			MOV EAX, tempNum
- 000001E4  89 03				MOV [EBX], EAX
- 000001E6  8B 45 F8				MOV EAX, outAddr
+ 00000243  53					PUSH EBX
+ 00000244  03 DE				ADD EBX, ESI
+ 00000246  83 EB 05				SUB EBX, 5
+ 00000249  50					PUSH EAX
+ 0000024A  A1 0000000C R			MOV EAX, tempNum
+ 0000024F  89 03				MOV [EBX], EAX
+ 00000251  8B 45 F8				MOV EAX, outAddr
 						
- 000001E9  89 45 14				MOV lpStringToHold, EAX
+ 00000254  89 45 14				MOV lpStringToHold, EAX
 						RET
 					
 					
- 000001F1			displayArray ENDP
+ 0000025C			displayArray ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/24/19 23:56:34
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:39:51
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -360,7 +418,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F1 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000025C DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -368,24 +426,28 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 00000150 Public C
+displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 000001BB Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
   cols . . . . . . . . . . . . .	DWord	 bp + 00000010
   lpStringtoHold . . . . . . . .	DWord	 bp + 00000014
   startAddr  . . . . . . . . . .	DWord	 bp - 00000004
   outAddr  . . . . . . . . . . .	DWord	 bp - 00000008
-  lpConvertToASCII . . . . . . .	L Near	 000000CB _TEXT	
-  ??0000 . . . . . . . . . . . .	L Near	 00000102 _TEXT	
-  ??0001 . . . . . . . . . . . .	L Near	 0000010B _TEXT	
-  ??0002 . . . . . . . . . . . .	L Near	 0000013E _TEXT	
-  ??0003 . . . . . . . . . . . .	L Near	 00000147 _TEXT	
-  ??0004 . . . . . . . . . . . .	L Near	 00000173 _TEXT	
-  ??0005 . . . . . . . . . . . .	L Near	 0000017C _TEXT	
-  NoComma  . . . . . . . . . . .	L Near	 0000018C _TEXT	
-  ??0006 . . . . . . . . . . . .	L Near	 000001B5 _TEXT	
-  ??0007 . . . . . . . . . . . .	L Near	 000001BE _TEXT	
-  finished . . . . . . . . . . .	L Near	 000001CE _TEXT	
+  ??0000 . . . . . . . . . . . .	L Near	 000000EF _TEXT	
+  ??0001 . . . . . . . . . . . .	L Near	 000000F8 _TEXT	
+  lpConvertToASCII . . . . . . .	L Near	 00000101 _TEXT	
+  ??0002 . . . . . . . . . . . .	L Near	 00000138 _TEXT	
+  ??0003 . . . . . . . . . . . .	L Near	 00000141 _TEXT	
+  ??0004 . . . . . . . . . . . .	L Near	 00000174 _TEXT	
+  ??0005 . . . . . . . . . . . .	L Near	 0000017D _TEXT	
+  ??0006 . . . . . . . . . . . .	L Near	 000001A9 _TEXT	
+  ??0007 . . . . . . . . . . . .	L Near	 000001B2 _TEXT	
+  NoComma  . . . . . . . . . . .	L Near	 000001C2 _TEXT	
+  ??0008 . . . . . . . . . . . .	L Near	 000001EB _TEXT	
+  ??0009 . . . . . . . . . . . .	L Near	 000001F4 _TEXT	
+  ??000A . . . . . . . . . . . .	L Near	 00000220 _TEXT	
+  ??000B . . . . . . . . . . . .	L Near	 00000229 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000239 _TEXT	
 extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public C
   StringofChars  . . . . . . . .	DWord	 bp + 00000008
   ArrayDwords  . . . . . . . . .	DWord	 bp + 0000000C

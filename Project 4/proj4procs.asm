@@ -192,8 +192,12 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 	MOV ESI, EAX
 	DEC ESI
 	
-	CMP ESI, 1
+	PUSH EAX
+	MOV EAX, rows
+	ADD EAX, cols
+	CMP EAX, 2
 	JE oneByone
+	POP EAX
 	
 	lpConvertToASCII:
 		CMP rows, 0

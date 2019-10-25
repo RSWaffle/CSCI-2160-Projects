@@ -167,12 +167,16 @@ COMMENT %
 *@param lpStringtoHold:dword									 	           *
 *******************************************************************************%
 displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
-	LOCAL startAddr:dword, outAddr:dword
-		
+	LOCAL startAddr:dword, outAddr:dword, tempNumRow:dword, tempNumCol:dword
+	MOV EAX, rows								;moves the number of rows into eax so we can check if it is a 1xM later
+	MOV tempNumRow, EAX							;moves the row number into a temp variable for later
+	MOV EAX, cols								;moves the number of cols into eax so we can check if it is a 1xM later
+	MOV tempNumCol, EAX							;store the col number into a temp variable
 	MOV EAX, lpArrayDwords						;moves into EAX the address of the output array
 	MOV startAddr, EAX							;moves the address into our local variable for clarity.
 	MOV EAX, lpStringtoHold						;moves into EAX the address of the array with ascii values.
 	MOV outAddr, EAX							;moves the address into our local variable for clarity.
+
 	
 	MOV EDI, 0									;set the initial point into the original address to 0
 	MOV ESI, 0									;set the initial point into the new address to 0
@@ -275,12 +279,20 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		JMP lpConvertToASCII					;jump back to the top of the loop
 		
 	finished:
+		CMP tempNumRow, 1						;compare the number of rows to 1 to check for 1xM
+		JE FixRowCol							;if it is equal to 1 go to fix
+		CMP tempNumCol, 1						;;compare the number of cols to 1 to check for Mx1
+		JE FixRowCol							;if it is equal to 1 go to fix
+	
 		MOV tempNum, 00							;moves the null character into tempNum
 		ADD EBX, ESI							;adds the offset esi into ebx so we point to the right byte
 		SUB EBX, 5								;subtracts 5 to point to the very end of the string....
 		MOV EAX, tempNum						;moves the value of temp num into eax
 		MOV [EBX], EAX							;moves into the location ebx is pointing to the value of eax
 		RET										;return back to where i was called
+		
+		FixRowCol:
+			RET									;return back to where i was called.
 		
 	oneByone:
 		MOV EBX, startAddr						;moves the starting address into ebx
@@ -291,7 +303,7 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		ADD EBX, ESI							;adds the offset esi into ebx so we point to the right place
 		INVOKE intasc32, EBX, tempNum			;convert the number into the ascii format and put into where ebx points
 		POP EBX									;restore ebx
-		JMP finished
+		JMP finished							;jump to the finished section
 
 displayArray ENDP
 END

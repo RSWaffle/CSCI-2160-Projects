@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/25/19 01:52:25
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 18:51:32
 proj4procs.asm						     Page 1 - 1
 
 
@@ -174,243 +174,255 @@ proj4procs.asm						     Page 1 - 1
 				*@param lpStringtoHold:dword									 	           *
 				*******************************************************************************%
  000000A1			displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
-					LOCAL startAddr:dword, outAddr:dword
-						
- 000000AA  8B 45 08			MOV EAX, lpArrayDwords						;moves into EAX the address of the output array
- 000000AD  89 45 FC			MOV startAddr, EAX							;moves the address into our local variable for clarity.
- 000000B0  8B 45 14			MOV EAX, lpStringtoHold						;moves into EAX the address of the array with ascii values.
- 000000B3  89 45 F8			MOV outAddr, EAX							;moves the address into our local variable for clarity.
+					LOCAL startAddr:dword, outAddr:dword, tempNumRow:dword, tempNumCol:dword
+ 000000AA  8B 45 0C			MOV EAX, rows	
+ 000000AD  89 45 F4			MOV tempNumRow, EAX
+ 000000B0  8B 45 10			MOV EAX, cols
+ 000000B3  89 45 F0			MOV tempNumCol, EAX	
+ 000000B6  8B 45 08			MOV EAX, lpArrayDwords						;moves into EAX the address of the output array
+ 000000B9  89 45 FC			MOV startAddr, EAX							;moves the address into our local variable for clarity.
+ 000000BC  8B 45 14			MOV EAX, lpStringtoHold						;moves into EAX the address of the array with ascii values.
+ 000000BF  89 45 F8			MOV outAddr, EAX							;moves the address into our local variable for clarity.
+
 					
- 000000B6  BF 00000000			MOV EDI, 0									;set the initial point into the original address to 0
- 000000BB  BE 00000000			MOV ESI, 0									;set the initial point into the new address to 0
- 000000C0  B9 00000001			MOV ECX, 1									;set ecx to 1 because we start with 1 col
- 000000C5  8B 55 F8			MOV EDX, outAddr							;moves the address of out address to edx so we can derefrence the address
- 000000C8  8B 5D FC			MOV EBX, startAddr							;moves the address of out address to edx so we can derefrence the address
+ 000000C2  BF 00000000			MOV EDI, 0									;set the initial point into the original address to 0
+ 000000C7  BE 00000000			MOV ESI, 0									;set the initial point into the new address to 0
+ 000000CC  B9 00000001			MOV ECX, 1									;set ecx to 1 because we start with 1 col
+ 000000D1  8B 55 F8			MOV EDX, outAddr							;moves the address of out address to edx so we can derefrence the address
+ 000000D4  8B 5D FC			MOV EBX, startAddr							;moves the address of out address to edx so we can derefrence the address
 					
- 000000CB  C7 05 0000000C R		MOV tempNum, 09								;set the temp number to the tab character
+ 000000D7  C7 05 0000000C R		MOV tempNum, 09								;set the temp number to the tab character
 	   00000009
- 000000D5  8B DA			MOV EBX, EDX								;moves the address of out address into ebx so we can use it to put the character
- 000000D7  53				PUSH EBX									;store ebx so we can have the unaffected value later
- 000000D8  03 DE			ADD EBX, ESI								;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
- 000000DA  50				PUSH EAX									;preserve EAX so we can restore it later
- 000000DB  A1 0000000C R		MOV EAX, tempNum							;move into eax the temp number which is tab
- 000000E0  89 03			MOV [EBX], EAX								;moves into the location ebx points to the temp number 
- 000000E2  5B				POP EBX										;restore our unaffected EBX
+ 000000E1  8B DA			MOV EBX, EDX								;moves the address of out address into ebx so we can use it to put the character
+ 000000E3  53				PUSH EBX									;store ebx so we can have the unaffected value later
+ 000000E4  03 DE			ADD EBX, ESI								;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
+ 000000E6  50				PUSH EAX									;preserve EAX so we can restore it later
+ 000000E7  A1 0000000C R		MOV EAX, tempNum							;move into eax the temp number which is tab
+ 000000EC  89 03			MOV [EBX], EAX								;moves into the location ebx points to the temp number 
+ 000000EE  5B				POP EBX										;restore our unaffected EBX
 					getBytes EDX								;call the get bytes macro where we count the number of bytes used in the output address
- 000000E3  55		     1		PUSH EBP							;preserves base register
- 000000E4  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000000E6  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000000E7  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000000E8  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000000EA  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 000000EF		     1		??0000:
- 000000EF  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 000000F3  74 03	     1			JE ??0001							;if it is jump to finished
- 000000F5  46		     1			INC ESI							;if not increment esi
- 000000F6  EB F7	     1			JMP ??0000						;jump to the top of the loop and look at the next char
- 000000F8		     1		??0001:		
- 000000F8  46		     1			INC ESI							;increment esi to include the null character in the string
- 000000F9  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 000000FB  5E		     1		POP ESI								;restore original esi
- 000000FC  5B		     1		POP EBX								;restore original ebx
- 000000FD  5D		     1		POP EBP								;restore originla ebp
- 000000FE  8B F0			MOV ESI, EAX								;moves into ESI the offset that the previous macro returns
- 00000100  4E				DEC ESI										;decrement ESI to take into acount the null character the macro counts for.
+ 000000EF  55		     1		PUSH EBP							;preserves base register
+ 000000F0  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000000F2  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000000F3  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000000F4  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000000F6  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000000FB		     1		??0000:
+ 000000FB  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 000000FF  74 03	     1			JE ??0001							;if it is jump to finished
+ 00000101  46		     1			INC ESI							;if not increment esi
+ 00000102  EB F7	     1			JMP ??0000						;jump to the top of the loop and look at the next char
+ 00000104		     1		??0001:		
+ 00000104  46		     1			INC ESI							;increment esi to include the null character in the string
+ 00000105  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 00000107  5E		     1		POP ESI								;restore original esi
+ 00000108  5B		     1		POP EBX								;restore original ebx
+ 00000109  5D		     1		POP EBP								;restore originla ebp
+ 0000010A  8B F0			MOV ESI, EAX								;moves into ESI the offset that the previous macro returns
+ 0000010C  4E				DEC ESI										;decrement ESI to take into acount the null character the macro counts for.
 					
- 00000101  50				PUSH EAX									;preserve EAX so we can restore it later
- 00000102  8B 45 0C			MOV EAX, rows								;moves into eax the number of rows we have
- 00000105  03 45 10			ADD EAX, cols								;adds the number of cols into eax so we can test if we have a 1x1 matrix
- 00000108  83 F8 02			CMP EAX, 2									;compares eax to 2 to check if it is a 1x1  (1 + 1 = 2)
- 0000010B  0F 84 00000154		JE oneByone									;if it detects a 1x1 matrix, then jump to the proper section.
- 00000111  58				POP EAX										;otherwise, restore EAX so we can use the original value.
+ 0000010D  50				PUSH EAX									;preserve EAX so we can restore it later
+ 0000010E  8B 45 0C			MOV EAX, rows								;moves into eax the number of rows we have
+ 00000111  03 45 10			ADD EAX, cols								;adds the number of cols into eax so we can test if we have a 1x1 matrix
+ 00000114  83 F8 02			CMP EAX, 2									;compares eax to 2 to check if it is a 1x1  (1 + 1 = 2)
+ 00000117  0F 84 00000165		JE oneByone									;if it detects a 1x1 matrix, then jump to the proper section.
+ 0000011D  58				POP EAX										;otherwise, restore EAX so we can use the original value.
 					
- 00000112				lpConvertToASCII:
- 00000112  83 7D 0C 00				CMP rows, 0								;check to see if we have used up the allowed number of rows
- 00000116  0F 84 0000012E			JE finished								;if it is equal to 0, jump to the finished section
- 0000011C  8B 5D FC				MOV EBX, startAddr						;moves the address of out address to edx so we can derefrence the address
- 0000011F  8B 04 1F				MOV EAX, [EBX + EDI]					;moves into eax the address of ebx + edi so we can get the correct number to convert
- 00000122  A3 0000000C R			MOV tempNum, EAX						;stores the number obtained in EAX into tempNum so we can use it in invoke, cant use eax
- 00000127  8B DA				MOV EBX, EDX							;moves into ebx, the adress of the outaddress
- 00000129  53					PUSH EBX								;stores our ebx variable so we can get it back later
- 0000012A  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
+ 0000011E				lpConvertToASCII:
+ 0000011E  83 7D 0C 00				CMP rows, 0								;check to see if we have used up the allowed number of rows
+ 00000122  0F 84 0000012E			JE finished								;if it is equal to 0, jump to the finished section
+ 00000128  8B 5D FC				MOV EBX, startAddr						;moves the address of out address to edx so we can derefrence the address
+ 0000012B  8B 04 1F				MOV EAX, [EBX + EDI]					;moves into eax the address of ebx + edi so we can get the correct number to convert
+ 0000012E  A3 0000000C R			MOV tempNum, EAX						;stores the number obtained in EAX into tempNum so we can use it in invoke, cant use eax
+ 00000133  8B DA				MOV EBX, EDX							;moves into ebx, the adress of the outaddress
+ 00000135  53					PUSH EBX								;stores our ebx variable so we can get it back later
+ 00000136  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
 						INVOKE intasc32, EBX, tempNum			;calls intasc32 to convert the number into ascii characters and place into the address ebx points to
- 00000138  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
- 00000139  83 C7 04				ADD EDI, 4								;add 4 to edi so we get the next dword in the numbers to pull from.
+ 00000144  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
+ 00000145  83 C7 04				ADD EDI, 4								;add 4 to edi so we get the next dword in the numbers to pull from.
 						
- 0000013C  50					PUSH EAX								;store our EAX so we can get it back 
+ 00000148  50					PUSH EAX								;store our EAX so we can get it back 
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 0000013D  55		     1		PUSH EBP							;preserves base register
- 0000013E  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 00000140  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 00000141  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 00000142  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 00000144  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 00000149		     1		??0002:
- 00000149  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 0000014D  74 03	     1			JE ??0003							;if it is jump to finished
- 0000014F  46		     1			INC ESI							;if not increment esi
- 00000150  EB F7	     1			JMP ??0002						;jump to the top of the loop and look at the next char
- 00000152		     1		??0003:		
- 00000152  46		     1			INC ESI							;increment esi to include the null character in the string
- 00000153  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000155  5E		     1		POP ESI								;restore original esi
- 00000156  5B		     1		POP EBX								;restore original ebx
- 00000157  5D		     1		POP EBP								;restore originla ebp
- 00000158  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
- 0000015A  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
- 0000015B  58					POP EAX									;restore our original eax
+ 00000149  55		     1		PUSH EBP							;preserves base register
+ 0000014A  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 0000014C  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 0000014D  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 0000014E  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 00000150  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000155		     1		??0002:
+ 00000155  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000159  74 03	     1			JE ??0003							;if it is jump to finished
+ 0000015B  46		     1			INC ESI							;if not increment esi
+ 0000015C  EB F7	     1			JMP ??0002						;jump to the top of the loop and look at the next char
+ 0000015E		     1		??0003:		
+ 0000015E  46		     1			INC ESI							;increment esi to include the null character in the string
+ 0000015F  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 00000161  5E		     1		POP ESI								;restore original esi
+ 00000162  5B		     1		POP EBX								;restore original ebx
+ 00000163  5D		     1		POP EBP								;restore originla ebp
+ 00000164  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
+ 00000166  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
+ 00000167  58					POP EAX									;restore our original eax
 						
- 0000015C  3B 4D 10				CMP ECX, cols							;compare ecx to the number of cols to check if we are at the end of the row
- 0000015F  74 72				JE NoComma								;if there is no more numbers to the row, the jump to the no comma section 
+ 00000168  3B 4D 10				CMP ECX, cols							;compare ecx to the number of cols to check if we are at the end of the row
+ 0000016B  74 72				JE NoComma								;if there is no more numbers to the row, the jump to the no comma section 
 						
- 00000161  C7 05 0000000C R			MOV tempNum, 44							;moves the comma ascii value into temp num
+ 0000016D  C7 05 0000000C R			MOV tempNum, 44							;moves the comma ascii value into temp num
 	   0000002C
- 0000016B  8B DA				MOV EBX, EDX							;moves into ebx, the adress of the outaddress
- 0000016D  53					PUSH EBX								;stores our ebx variable so we can get it back later
- 0000016E  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
- 00000170  50					PUSH EAX								;store our EAX so we can get it back 
- 00000171  A1 0000000C R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
- 00000176  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
- 00000178  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
+ 00000177  8B DA				MOV EBX, EDX							;moves into ebx, the adress of the outaddress
+ 00000179  53					PUSH EBX								;stores our ebx variable so we can get it back later
+ 0000017A  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
+ 0000017C  50					PUSH EAX								;store our EAX so we can get it back 
+ 0000017D  A1 0000000C R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
+ 00000182  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
+ 00000184  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 00000179  55		     1		PUSH EBP							;preserves base register
- 0000017A  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 0000017C  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 0000017D  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 0000017E  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 00000180  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 00000185		     1		??0004:
- 00000185  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000189  74 03	     1			JE ??0005							;if it is jump to finished
- 0000018B  46		     1			INC ESI							;if not increment esi
- 0000018C  EB F7	     1			JMP ??0004						;jump to the top of the loop and look at the next char
- 0000018E		     1		??0005:		
- 0000018E  46		     1			INC ESI							;increment esi to include the null character in the string
- 0000018F  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000191  5E		     1		POP ESI								;restore original esi
- 00000192  5B		     1		POP EBX								;restore original ebx
- 00000193  5D		     1		POP EBP								;restore originla ebp
- 00000194  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
- 00000196  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
- 00000197  C7 05 0000000C R			MOV tempNum, 32							;moves the space ascii value into temp num
+ 00000185  55		     1		PUSH EBP							;preserves base register
+ 00000186  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 00000188  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 00000189  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 0000018A  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 0000018C  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000191		     1		??0004:
+ 00000191  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000195  74 03	     1			JE ??0005							;if it is jump to finished
+ 00000197  46		     1			INC ESI							;if not increment esi
+ 00000198  EB F7	     1			JMP ??0004						;jump to the top of the loop and look at the next char
+ 0000019A		     1		??0005:		
+ 0000019A  46		     1			INC ESI							;increment esi to include the null character in the string
+ 0000019B  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 0000019D  5E		     1		POP ESI								;restore original esi
+ 0000019E  5B		     1		POP EBX								;restore original ebx
+ 0000019F  5D		     1		POP EBP								;restore originla ebp
+ 000001A0  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
+ 000001A2  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
+ 000001A3  C7 05 0000000C R			MOV tempNum, 32							;moves the space ascii value into temp num
 	   00000020
- 000001A1  8B DA				MOV EBX, EDX							;moves the address in edx into ebx so we can use it 
- 000001A3  53					PUSH EBX								;stores our ebx variable so we can get it back later
- 000001A4  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
- 000001A6  A1 0000000C R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
- 000001AB  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
- 000001AD  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
+ 000001AD  8B DA				MOV EBX, EDX							;moves the address in edx into ebx so we can use it 
+ 000001AF  53					PUSH EBX								;stores our ebx variable so we can get it back later
+ 000001B0  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
+ 000001B2  A1 0000000C R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
+ 000001B7  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
+ 000001B9  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 000001AE  55		     1		PUSH EBP							;preserves base register
- 000001AF  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000001B1  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000001B2  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000001B3  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000001B5  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 000001BA		     1		??0006:
- 000001BA  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 000001BE  74 03	     1			JE ??0007							;if it is jump to finished
- 000001C0  46		     1			INC ESI							;if not increment esi
- 000001C1  EB F7	     1			JMP ??0006						;jump to the top of the loop and look at the next char
- 000001C3		     1		??0007:		
- 000001C3  46		     1			INC ESI							;increment esi to include the null character in the string
- 000001C4  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 000001C6  5E		     1		POP ESI								;restore original esi
- 000001C7  5B		     1		POP EBX								;restore original ebx
- 000001C8  5D		     1		POP EBP								;restore originla ebp
- 000001C9  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
- 000001CB  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
- 000001CC  58					POP EAX									;restore our original eax
+ 000001BA  55		     1		PUSH EBP							;preserves base register
+ 000001BB  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000001BD  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000001BE  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000001BF  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000001C1  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000001C6		     1		??0006:
+ 000001C6  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 000001CA  74 03	     1			JE ??0007							;if it is jump to finished
+ 000001CC  46		     1			INC ESI							;if not increment esi
+ 000001CD  EB F7	     1			JMP ??0006						;jump to the top of the loop and look at the next char
+ 000001CF		     1		??0007:		
+ 000001CF  46		     1			INC ESI							;increment esi to include the null character in the string
+ 000001D0  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 000001D2  5E		     1		POP ESI								;restore original esi
+ 000001D3  5B		     1		POP EBX								;restore original ebx
+ 000001D4  5D		     1		POP EBP								;restore originla ebp
+ 000001D5  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
+ 000001D7  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
+ 000001D8  58					POP EAX									;restore our original eax
 						
- 000001CD  41					INC ECX									;increments we we know we are on the next col
- 000001CE  E9 FFFFFF3F				JMP lpConvertToASCII					;jumps back to the top
+ 000001D9  41					INC ECX									;increments we we know we are on the next col
+ 000001DA  E9 FFFFFF3F				JMP lpConvertToASCII					;jumps back to the top
 						
- 000001D3				NoComma:
- 000001D3  B9 00000001				MOV ECX, 1								;reset the col value back to 1
- 000001D8  FF 4D 0C				DEC rows								;decrement the number of rows so we can terminate this loop eventually
- 000001DB  C7 05 0000000C R			MOV tempNum, 10							;moves the new line character into tempNum
+ 000001DF				NoComma:
+ 000001DF  B9 00000001				MOV ECX, 1								;reset the col value back to 1
+ 000001E4  FF 4D 0C				DEC rows								;decrement the number of rows so we can terminate this loop eventually
+ 000001E7  C7 05 0000000C R			MOV tempNum, 10							;moves the new line character into tempNum
 	   0000000A
- 000001E5  53					PUSH EBX								;pushes ebx to the stack so we can have the unaffected value later
- 000001E6  03 DE				ADD EBX, ESI							;add the offset esi into ebx so we point to the right byte to place
- 000001E8  50					PUSH EAX								;push eax to store it
- 000001E9  A1 0000000C R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
- 000001EE  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
+ 000001F1  53					PUSH EBX								;pushes ebx to the stack so we can have the unaffected value later
+ 000001F2  03 DE				ADD EBX, ESI							;add the offset esi into ebx so we point to the right byte to place
+ 000001F4  50					PUSH EAX								;push eax to store it
+ 000001F5  A1 0000000C R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
+ 000001FA  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 000001F0  55		     1		PUSH EBP							;preserves base register
- 000001F1  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000001F3  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000001F4  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000001F5  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000001F7  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 000001FC		     1		??0008:
- 000001FC  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000200  74 03	     1			JE ??0009							;if it is jump to finished
- 00000202  46		     1			INC ESI							;if not increment esi
- 00000203  EB F7	     1			JMP ??0008						;jump to the top of the loop and look at the next char
- 00000205		     1		??0009:		
- 00000205  46		     1			INC ESI							;increment esi to include the null character in the string
- 00000206  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000208  5E		     1		POP ESI								;restore original esi
- 00000209  5B		     1		POP EBX								;restore original ebx
- 0000020A  5D		     1		POP EBP								;restore originla ebp
- 0000020B  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
- 0000020D  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
- 0000020E  58					POP EAX									;restore original eax
- 0000020F  5B					POP EBX									;restore original ebx
- 00000210  C7 05 0000000C R			MOV tempNum, 09							;moves the tab character into tempNum
+ 000001FC  55		     1		PUSH EBP							;preserves base register
+ 000001FD  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000001FF  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 00000200  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 00000201  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 00000203  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000208		     1		??0008:
+ 00000208  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 0000020C  74 03	     1			JE ??0009							;if it is jump to finished
+ 0000020E  46		     1			INC ESI							;if not increment esi
+ 0000020F  EB F7	     1			JMP ??0008						;jump to the top of the loop and look at the next char
+ 00000211		     1		??0009:		
+ 00000211  46		     1			INC ESI							;increment esi to include the null character in the string
+ 00000212  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 00000214  5E		     1		POP ESI								;restore original esi
+ 00000215  5B		     1		POP EBX								;restore original ebx
+ 00000216  5D		     1		POP EBP								;restore originla ebp
+ 00000217  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
+ 00000219  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
+ 0000021A  58					POP EAX									;restore original eax
+ 0000021B  5B					POP EBX									;restore original ebx
+ 0000021C  C7 05 0000000C R			MOV tempNum, 09							;moves the tab character into tempNum
 	   00000009
- 0000021A  53					PUSH EBX								;pushes ebx to the stack so we can have the unaffected value later
- 0000021B  03 DE				ADD EBX, ESI							;add the offset esi into ebx so we point to the right byte to place
- 0000021D  50					PUSH EAX								;push eax to store it
- 0000021E  A1 0000000C R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
- 00000223  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
+ 00000226  53					PUSH EBX								;pushes ebx to the stack so we can have the unaffected value later
+ 00000227  03 DE				ADD EBX, ESI							;add the offset esi into ebx so we point to the right byte to place
+ 00000229  50					PUSH EAX								;push eax to store it
+ 0000022A  A1 0000000C R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
+ 0000022F  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 00000225  55		     1		PUSH EBP							;preserves base register
- 00000226  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 00000228  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 00000229  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 0000022A  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 0000022C  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
- 00000231		     1		??000A:
- 00000231  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000235  74 03	     1			JE ??000B							;if it is jump to finished
- 00000237  46		     1			INC ESI							;if not increment esi
- 00000238  EB F7	     1			JMP ??000A						;jump to the top of the loop and look at the next char
- 0000023A		     1		??000B:		
- 0000023A  46		     1			INC ESI							;increment esi to include the null character in the string
- 0000023B  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 0000023D  5E		     1		POP ESI								;restore original esi
- 0000023E  5B		     1		POP EBX								;restore original ebx
- 0000023F  5D		     1		POP EBP								;restore originla ebp
- 00000240  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
- 00000242  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
- 00000243  58					POP EAX									;restore original eax
- 00000244  5B					POP EBX									;restore original ebx
- 00000245  E9 FFFFFEC8				JMP lpConvertToASCII					;jump back to the top of the loop
+ 00000231  55		     1		PUSH EBP							;preserves base register
+ 00000232  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 00000234  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 00000235  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 00000236  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 00000238  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 0000023D		     1		??000A:
+ 0000023D  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000241  74 03	     1			JE ??000B							;if it is jump to finished
+ 00000243  46		     1			INC ESI							;if not increment esi
+ 00000244  EB F7	     1			JMP ??000A						;jump to the top of the loop and look at the next char
+ 00000246		     1		??000B:		
+ 00000246  46		     1			INC ESI							;increment esi to include the null character in the string
+ 00000247  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 00000249  5E		     1		POP ESI								;restore original esi
+ 0000024A  5B		     1		POP EBX								;restore original ebx
+ 0000024B  5D		     1		POP EBP								;restore originla ebp
+ 0000024C  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
+ 0000024E  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
+ 0000024F  58					POP EAX									;restore original eax
+ 00000250  5B					POP EBX									;restore original ebx
+ 00000251  E9 FFFFFEC8				JMP lpConvertToASCII					;jump back to the top of the loop
 						
- 0000024A				finished:
- 0000024A  C7 05 0000000C R			MOV tempNum, 00							;moves the null character into tempNum
+ 00000256				finished:
+ 00000256  83 7D F4 01				CMP tempNumRow, 1
+ 0000025A  74 21				JE FixRowCol
+ 0000025C  83 7D F0 01				CMP tempNumCol, 1
+ 00000260  74 1B				JE FixRowCol
+					
+ 00000262  C7 05 0000000C R			MOV tempNum, 00							;moves the null character into tempNum
 	   00000000
- 00000254  03 DE				ADD EBX, ESI							;adds the offset esi into ebx so we point to the right byte
- 00000256  83 EB 05				SUB EBX, 5								;subtracts 5 to point to the very end of the string....
- 00000259  A1 0000000C R			MOV EAX, tempNum						;moves the value of temp num into eax
- 0000025E  89 03				MOV [EBX], EAX							;moves into the location ebx is pointing to the value of eax
+ 0000026C  03 DE				ADD EBX, ESI							;adds the offset esi into ebx so we point to the right byte
+ 0000026E  83 EB 05				SUB EBX, 5								;subtracts 5 to point to the very end of the string....
+ 00000271  A1 0000000C R			MOV EAX, tempNum						;moves the value of temp num into eax
+ 00000276  89 03				MOV [EBX], EAX							;moves into the location ebx is pointing to the value of eax
 						RET										;return back to where i was called
 						
- 00000265				oneByone:
- 00000265  8B 5D FC				MOV EBX, startAddr						;moves the starting address into ebx
- 00000268  8B 03				MOV EAX, [EBX]							;moves the value ebx points to into eax
- 0000026A  A3 0000000C R			MOV tempNum, EAX						;moves eax into the temp num variable
- 0000026F  8B DA				MOV EBX, EDX							;moves the eaddress of edx into ebx so we can modify it
- 00000271  53					PUSH EBX								;pushes ebx to store it
- 00000272  03 DE				ADD EBX, ESI							;adds the offset esi into ebx so we point to the right place
+ 0000027D					FixRowCol:
+							RET
+						
+ 00000282				oneByone:
+ 00000282  8B 5D FC				MOV EBX, startAddr						;moves the starting address into ebx
+ 00000285  8B 03				MOV EAX, [EBX]							;moves the value ebx points to into eax
+ 00000287  A3 0000000C R			MOV tempNum, EAX						;moves eax into the temp num variable
+ 0000028C  8B DA				MOV EBX, EDX							;moves the eaddress of edx into ebx so we can modify it
+ 0000028E  53					PUSH EBX								;pushes ebx to store it
+ 0000028F  03 DE				ADD EBX, ESI							;adds the offset esi into ebx so we point to the right place
 						INVOKE intasc32, EBX, tempNum			;convert the number into the ascii format and put into where ebx points
- 00000280  5B					POP EBX									;restore ebx
- 00000281  EB C7				JMP finished
+ 0000029D  5B					POP EBX									;restore ebx
+ 0000029E  EB B6				JMP finished
 
- 00000283			displayArray ENDP
+ 000002A0			displayArray ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/25/19 01:52:25
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 18:51:32
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -430,7 +442,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000283 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000002A0 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -438,29 +450,32 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 000001E2 Public C
+displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 000001FF Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
   cols . . . . . . . . . . . . .	DWord	 bp + 00000010
   lpStringtoHold . . . . . . . .	DWord	 bp + 00000014
   startAddr  . . . . . . . . . .	DWord	 bp - 00000004
   outAddr  . . . . . . . . . . .	DWord	 bp - 00000008
-  ??0000 . . . . . . . . . . . .	L Near	 000000EF _TEXT	
-  ??0001 . . . . . . . . . . . .	L Near	 000000F8 _TEXT	
-  lpConvertToASCII . . . . . . .	L Near	 00000112 _TEXT	
-  ??0002 . . . . . . . . . . . .	L Near	 00000149 _TEXT	
-  ??0003 . . . . . . . . . . . .	L Near	 00000152 _TEXT	
-  ??0004 . . . . . . . . . . . .	L Near	 00000185 _TEXT	
-  ??0005 . . . . . . . . . . . .	L Near	 0000018E _TEXT	
-  ??0006 . . . . . . . . . . . .	L Near	 000001BA _TEXT	
-  ??0007 . . . . . . . . . . . .	L Near	 000001C3 _TEXT	
-  NoComma  . . . . . . . . . . .	L Near	 000001D3 _TEXT	
-  ??0008 . . . . . . . . . . . .	L Near	 000001FC _TEXT	
-  ??0009 . . . . . . . . . . . .	L Near	 00000205 _TEXT	
-  ??000A . . . . . . . . . . . .	L Near	 00000231 _TEXT	
-  ??000B . . . . . . . . . . . .	L Near	 0000023A _TEXT	
-  finished . . . . . . . . . . .	L Near	 0000024A _TEXT	
-  oneByone . . . . . . . . . . .	L Near	 00000265 _TEXT	
+  tempNumRow . . . . . . . . . .	DWord	 bp - 0000000C
+  tempNumCol . . . . . . . . . .	DWord	 bp - 00000010
+  ??0000 . . . . . . . . . . . .	L Near	 000000FB _TEXT	
+  ??0001 . . . . . . . . . . . .	L Near	 00000104 _TEXT	
+  lpConvertToASCII . . . . . . .	L Near	 0000011E _TEXT	
+  ??0002 . . . . . . . . . . . .	L Near	 00000155 _TEXT	
+  ??0003 . . . . . . . . . . . .	L Near	 0000015E _TEXT	
+  ??0004 . . . . . . . . . . . .	L Near	 00000191 _TEXT	
+  ??0005 . . . . . . . . . . . .	L Near	 0000019A _TEXT	
+  ??0006 . . . . . . . . . . . .	L Near	 000001C6 _TEXT	
+  ??0007 . . . . . . . . . . . .	L Near	 000001CF _TEXT	
+  NoComma  . . . . . . . . . . .	L Near	 000001DF _TEXT	
+  ??0008 . . . . . . . . . . . .	L Near	 00000208 _TEXT	
+  ??0009 . . . . . . . . . . . .	L Near	 00000211 _TEXT	
+  ??000A . . . . . . . . . . . .	L Near	 0000023D _TEXT	
+  ??000B . . . . . . . . . . . .	L Near	 00000246 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000256 _TEXT	
+  FixRowCol  . . . . . . . . . .	L Near	 0000027D _TEXT	
+  oneByone . . . . . . . . . . .	L Near	 00000282 _TEXT	
 extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public C
   StringofChars  . . . . . . . .	DWord	 bp + 00000008
   ArrayDwords  . . . . . . . . .	DWord	 bp + 0000000C

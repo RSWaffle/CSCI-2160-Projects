@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:28:39
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 18:43:07
 proj4.asm						     Page 1 - 1
 
 
@@ -321,21 +321,21 @@ proj4.asm						     Page 1 - 1
  00000372 00				choiceASCII byte 0
  00000373 00000000			numRows dword ?
  00000377 00000000			numCols dword ?
- 0000037B  00000032 [			strDisplay dword 50 dup(0)
+ 0000037B  00000064 [			strDisplay dword 100 dup(0)
 	    00000000
 	   ]
- 00000443  00000064 [			numbersASCII byte 100 dup (?), 00
+ 0000050B  00000064 [			numbersASCII byte 100 dup (?), 00
 	    00
 	   ] 00
- 000004A8  00000064 [			arrayA dword 100 dup (?)
+ 00000570  00000064 [			arrayA dword 100 dup (?)
 	    00000000
 	   ]
- 00000638  00000064 [			arrayB dword 100 dup (?)
+ 00000700  00000064 [			arrayB dword 100 dup (?)
 	    00000000
 	   ]
- 000007C8 00				strEnter byte 0
- 000007C9 00000000			row dword ?
- 000007CD 00000000			col dword ?
+ 00000890 00				strEnter byte 0
+ 00000891 00000000			row dword ?
+ 00000895 00000000			col dword ?
 
 
 				;******************************************************************************************
@@ -364,108 +364,108 @@ proj4.asm						     Page 1 - 1
 					
  00000053  80 3D 00000372 R		CMP choiceASCII, 66								;compare the ascii value to a capital B
 	   42
- 0000005A  0F 84 000001DA		JE choiceB										;if it is equal to the capital value, jump to the choiceB secion of the code.
+ 0000005A  0F 84 0000020E		JE choiceB										;if it is equal to the capital value, jump to the choiceB secion of the code.
  00000060  80 3D 00000372 R		CMP choiceASCII, 98								;compare the ascii value to the lowercase b
 	   62
- 00000067  0F 84 000001CD		JE choiceB										;if it is equal to this number then jump to the choiceB section.
+ 00000067  0F 84 00000201		JE choiceB										;if it is equal to this number then jump to the choiceB section.
 					
  0000006D  80 3D 00000372 R		CMP choiceASCII, 67								;compare the ascii value to a capital C
 	   43
- 00000074  0F 84 00000212		JE choiceC										;if it is equal to this number then jump to the choiceC section.
+ 00000074  0F 84 0000027A		JE choiceC										;if it is equal to this number then jump to the choiceC section.
  0000007A  80 3D 00000372 R		CMP choiceASCII, 99								;compare the ascii value to the lowercase c
 	   63
- 00000081  0F 84 00000205		JE choiceC										;if it is equal to this number then jump to the choiceC section.
+ 00000081  0F 84 0000026D		JE choiceC										;if it is equal to this number then jump to the choiceC section.
 					
  00000087  80 3D 00000372 R		CMP choiceASCII, 68								;compare the ascii value to a capital D
 	   44
- 0000008E  0F 84 000002A3		JE choiceD										;if it is equal to this number then jump to the choiceD section.
+ 0000008E  0F 84 0000030B		JE choiceD										;if it is equal to this number then jump to the choiceD section.
  00000094  80 3D 00000372 R		CMP choiceASCII, 100							;compare the ascii value to the lowercase d
 	   64
- 0000009B  0F 84 00000296		JE choiceD										;if it is equal to this number then jump to the choiceD section.
+ 0000009B  0F 84 000002FE		JE choiceD										;if it is equal to this number then jump to the choiceD section.
 					
  000000A1  80 3D 00000372 R		CMP choiceASCII, 69								;compare the ascii value to a capital E
 	   45
- 000000A8  0F 84 00000334		JE choiceE										;if it is equal to this number then jump to the choiceE section.
+ 000000A8  0F 84 0000039C		JE choiceE										;if it is equal to this number then jump to the choiceE section.
  000000AE  80 3D 00000372 R		CMP choiceASCII, 101							;compare the ascii value to the lowercase e
 	   65
- 000000B5  0F 84 00000327		JE choiceE										;if it is equal to this number then jump to the choiceE section.
+ 000000B5  0F 84 0000038F		JE choiceE										;if it is equal to this number then jump to the choiceE section.
 					
  000000BB  80 3D 00000372 R		CMP choiceASCII, 70								;compare the ascii value to a capital F
 	   46
- 000000C2  0F 84 00000329		JE choiceF										;if it is equal to this number then jump to the choiceF section.
+ 000000C2  0F 84 00000391		JE choiceF										;if it is equal to this number then jump to the choiceF section.
  000000C8  80 3D 00000372 R		CMP choiceASCII, 102							;compare the ascii value to the lowercase f
 	   66
- 000000CF  0F 84 0000031C		JE choiceF										;if it is equal to this number then jump to the choiceF section.
+ 000000CF  0F 84 00000384		JE choiceF										;if it is equal to this number then jump to the choiceF section.
 					
  000000D5  80 3D 00000372 R		CMP choiceASCII, 71								;compare the ascii value to a capital G
 	   47
- 000000DC  0F 84 0000031E		JE choiceG										;if it is equal to this number then jump to the choiceG section.
+ 000000DC  0F 84 00000386		JE choiceG										;if it is equal to this number then jump to the choiceG section.
  000000E2  80 3D 00000372 R		CMP choiceASCII, 103							;compare the ascii value to the lowercase g
 	   67
- 000000E9  0F 84 00000311		JE choiceG										;if it is equal to this number then jump to the choiceG section.
+ 000000E9  0F 84 00000379		JE choiceG										;if it is equal to this number then jump to the choiceG section.
 					
  000000EF  80 3D 00000372 R		CMP choiceASCII, 72								;compare the ascii value to a capital H
 	   48
- 000000F6  0F 84 00000313		JE choiceH										;if it is equal to this number then jump to the choiceH section.
+ 000000F6  0F 84 0000037B		JE choiceH										;if it is equal to this number then jump to the choiceH section.
  000000FC  80 3D 00000372 R		CMP choiceASCII, 104							;compare the ascii value to the lowercase h
 	   68
- 00000103  0F 84 00000306		JE choiceH										;if it is equal to this number then jump to the choiceH section.
+ 00000103  0F 84 0000036E		JE choiceH										;if it is equal to this number then jump to the choiceH section.
 					
  00000109  80 3D 00000372 R		CMP choiceASCII, 73								;compare the ascii value to a capital I
 	   49
- 00000110  0F 84 00000308		JE choiceI										;if it is equal to this number then jump to the choiceI section.
+ 00000110  0F 84 00000370		JE choiceI										;if it is equal to this number then jump to the choiceI section.
  00000116  80 3D 00000372 R		CMP choiceASCII, 105							;compare the ascii value to the lowercase i
 	   69
- 0000011D  0F 84 000002FB		JE choiceI										;if it is equal to this number then jump to the choiceI section.
+ 0000011D  0F 84 00000363		JE choiceI										;if it is equal to this number then jump to the choiceI section.
 					
  00000123  80 3D 00000372 R		CMP choiceASCII, 74								;compare the ascii value to a capital J
 	   4A
- 0000012A  0F 84 00000307		JE choiceJ										;if it is equal to this number then jump to the choiceJ section.
+ 0000012A  0F 84 0000036F		JE choiceJ										;if it is equal to this number then jump to the choiceJ section.
  00000130  80 3D 00000372 R		CMP choiceASCII, 106							;compare the ascii value to the lowercase j
 	   6A
- 00000137  0F 84 000002FA		JE choiceJ										;if it is equal to this number then jump to the choiceJ section.
+ 00000137  0F 84 00000362		JE choiceJ										;if it is equal to this number then jump to the choiceJ section.
 					
  0000013D  80 3D 00000372 R		CMP choiceASCII, 75								;compare the ascii value to a capital K
 	   4B
- 00000144  0F 84 00000306		JE choiceK										;if it is equal to this number then jump to the choiceK section.
+ 00000144  0F 84 0000036E		JE choiceK										;if it is equal to this number then jump to the choiceK section.
  0000014A  80 3D 00000372 R		CMP choiceASCII, 107							;compare the ascii value to the lowercase k
 	   6B
- 00000151  0F 84 000002F9		JE choiceK										;if it is equal to this number then jump to the choiceK section.
+ 00000151  0F 84 00000361		JE choiceK										;if it is equal to this number then jump to the choiceK section.
 					
  00000157  80 3D 00000372 R		CMP choiceASCII, 76								;compare the ascii value to a capital L
 	   4C
- 0000015E  0F 84 00000305		JE choiceL										;if it is equal to this number then jump to the choiceL section.
+ 0000015E  0F 84 0000036D		JE choiceL										;if it is equal to this number then jump to the choiceL section.
  00000164  80 3D 00000372 R		CMP choiceASCII, 108							;compare the ascii value to the lowercase l
 	   6C
- 0000016B  0F 84 000002F8		JE choiceL										;if it is equal to this number then jump to the choiceL section.
+ 0000016B  0F 84 00000360		JE choiceL										;if it is equal to this number then jump to the choiceL section.
 					
  00000171  80 3D 00000372 R		CMP choiceASCII, 77								;compare the ascii value to a capital M
 	   4D
- 00000178  0F 84 00000304		JE choiceM										;if it is equal to this number then jump to the choiceM section.
+ 00000178  0F 84 0000036C		JE choiceM										;if it is equal to this number then jump to the choiceM section.
  0000017E  80 3D 00000372 R		CMP choiceASCII, 109							;compare the ascii value to the lowercase m
 	   6D
- 00000185  0F 84 000002F7		JE choiceM										;if it is equal to this number then jump to the choiceM section.
+ 00000185  0F 84 0000035F		JE choiceM										;if it is equal to this number then jump to the choiceM section.
 					
  0000018B  80 3D 00000372 R		CMP choiceASCII, 78								;compare the ascii value to a capital N
 	   4E
- 00000192  0F 84 000002F9		JE choiceN										;if it is equal to this number then jump to the choiceN section.
+ 00000192  0F 84 00000361		JE choiceN										;if it is equal to this number then jump to the choiceN section.
  00000198  80 3D 00000372 R		CMP choiceASCII, 110							;compare the ascii value to the lowercase n
 	   6E
- 0000019F  0F 84 000002EC		JE choiceN										;if it is equal to this number then jump to the choiceN section.
+ 0000019F  0F 84 00000354		JE choiceN										;if it is equal to this number then jump to the choiceN section.
 					
  000001A5  80 3D 00000372 R		CMP choiceASCII, 79								;compare the ascii value to a capital O
 	   4F
- 000001AC  0F 84 000002EE		JE choiceO										;if it is equal to this number then jump to the choiceO section
+ 000001AC  0F 84 00000356		JE choiceO										;if it is equal to this number then jump to the choiceO section
  000001B2  80 3D 00000372 R		CMP choiceASCII, 111							;compare the ascii value to the lowercase o
 	   6F
- 000001B9  0F 84 000002E1		JE choiceO										;if it is equal to this number then jump to the choiceO section.
+ 000001B9  0F 84 00000349		JE choiceO										;if it is equal to this number then jump to the choiceO section.
 					
  000001BF  80 3D 00000372 R		CMP choiceASCII, 81								;compare the ascii value to a capital Q
 	   51
- 000001C6  0F 84 000002ED		JE choiceQ										;if it is equal to this number then jump to the choiceQ section.
+ 000001C6  0F 84 00000355		JE choiceQ										;if it is equal to this number then jump to the choiceQ section.
  000001CC  80 3D 00000372 R		CMP choiceASCII, 113							;compare the ascii value to the lowercase q
 	   71
- 000001D3  0F 84 000002E0		JE choiceQ										;if it is equal to this number then jump to the choiceQ section.
+ 000001D3  0F 84 00000348		JE choiceQ										;if it is equal to this number then jump to the choiceQ section.
 						
 					DisplayString clearScr							;display the characters to clear the screen
  000001E3  E9 FFFFFE27			JMP getUserChoice								;jump back up to display the menu
@@ -474,7 +474,7 @@ proj4.asm						     Page 1 - 1
  000001E8			choiceA:
  000001E8  B9 00000064			MOV ECX, lengthof arrayA						;moves the length of array a into ECX so we can clear that amount to clear the array
  000001ED				lpClearA:
- 000001ED  C7 81 000004A8 R			MOV arrayA[ECX], 0							;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+ 000001ED  C7 81 00000570 R		MOV arrayA[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
 	   00000000
  000001F7  E2 F4			loop lpClearA									;decrement ECX and go to the top of the loop
 					DisplayString strAskValues						;display the string asking which values to store
@@ -485,13 +485,18 @@ proj4.asm						     Page 1 - 1
 					
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored. 
- 00000235  E9 FFFFFDD5			JMP getUserChoice								;jump back up to display the menu
- 0000023A			choiceB:
- 0000023A  B9 00000064			MOV ECX, lengthof arrayB						;moves the length of array a into ECX so we can clear that amount to clear the array
- 0000023F				lpClearB:
- 0000023F  C7 81 00000638 R			MOV arrayB[ECX], 0							;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+					DisplayString crlf
+					DisplayString crlf
+					DisplayString enterToCont						;display the press enter to continue message
+					PullString strEnter, 0							;wait for the user to press enter
+					DisplayString clearScr							;display the characters to clear the screen
+ 00000269  E9 FFFFFDA1			JMP getUserChoice								;jump back up to display the menu
+ 0000026E			choiceB:
+ 0000026E  B9 00000064			MOV ECX, lengthof arrayB						;moves the length of array a into ECX so we can clear that amount to clear the array
+ 00000273				lpClearB:
+ 00000273  C7 81 00000700 R		MOV arrayB[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
 	   00000000
- 00000249  E2 F4			loop lpClearB									;decrement ECX and go to the top of the loop
+ 0000027D  E2 F4			loop lpClearB									;decrement ECX and go to the top of the loop
 					DisplayString strAskValues						;display the string asking which values to store
 					PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
 						
@@ -500,36 +505,41 @@ proj4.asm						     Page 1 - 1
 					
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
- 00000287  E9 FFFFFD83			JMP getUserChoice								;jump back up to display the menu
- 0000028C			choiceC:	
+					DisplayString crlf
+					DisplayString crlf
+					DisplayString enterToCont						;display the press enter to continue message
+					PullString strEnter, 0							;wait for the user to press enter
+					DisplayString clearScr							;display the characters to clear the screen
+ 000002EF  E9 FFFFFD1B			JMP getUserChoice								;jump back up to display the menu
+ 000002F4			choiceC:	
 					DisplayString enterValCol
 					PullString col, 10
 					CvtoNum col
- 000002AC  A3 000007CD R		MOV col, EAX
+ 00000314  A3 00000895 R		MOV col, EAX
 					
 					DisplayString enterValRow
 					PullString row, 10
 					CvtoNum row
- 000002D1  A3 000007C9 R		MOV row, EAX
+ 00000339  A3 00000891 R		MOV row, EAX
 					
 					INVOKE displayArray, OFFSET arrayA, row, col, OFFSET strDisplay
 					DisplayString crlf
 					DisplayString crlf
 					DisplayString strDisplay
-					DisplayString enterToCont
-					PullString strEnter, 0
+					DisplayString enterToCont						;display the press enter to continue message
+					PullString strEnter, 0							;wait for the user to press enter
 					DisplayString clearScr							;display the characters to clear the screen
- 00000332  E9 FFFFFCD8			JMP getUserChoice								;jump back up to display the menu
- 00000337			choiceD:
+ 0000039A  E9 FFFFFC70			JMP getUserChoice								;jump back up to display the menu
+ 0000039F			choiceD:
 					DisplayString enterValCol
 					PullString col, 10
 					CvtoNum col
- 00000357  A3 000007CD R		MOV col, EAX
+ 000003BF  A3 00000895 R		MOV col, EAX
 					
 					DisplayString enterValRow
 					PullString row, 10
 					CvtoNum row
- 0000037C  A3 000007C9 R		MOV row, EAX
+ 000003E4  A3 00000891 R		MOV row, EAX
 					
 					INVOKE displayArray, OFFSET arrayB, row, col, OFFSET strDisplay
 					DisplayString crlf
@@ -538,57 +548,58 @@ proj4.asm						     Page 1 - 1
 					DisplayString enterToCont
 					PullString strEnter, 0
 					DisplayString clearScr							;display the characters to clear the screen
- 000003DD  E9 FFFFFC2D			JMP getUserChoice								;jump back up to display the menu							;jump back up to display the menu
- 000003E2			choiceE:
+ 00000445  E9 FFFFFBC5			JMP getUserChoice								;jump back up to display the menu							;jump back up to display the menu
+ 0000044A			choiceE:
 					DisplayString clearScr							;display the characters to clear the screen
- 000003EC  E9 FFFFFC1E			JMP getUserChoice								;jump back up to display the menu
- 000003F1			choiceF:
+
+ 00000454  E9 FFFFFBB6			JMP getUserChoice								;jump back up to display the menu
+ 00000459			choiceF:
 					DisplayString clearScr							;display the characters to clear the screen
- 000003FB  E9 FFFFFC0F			JMP getUserChoice								;jump back up to display the menu
- 00000400			choiceG:
+ 00000463  E9 FFFFFBA7			JMP getUserChoice								;jump back up to display the menu
+ 00000468			choiceG:
 					DisplayString clearScr							;display the characters to clear the screen
- 0000040A  E9 FFFFFC00			JMP getUserChoice								;jump back up to display the menu
- 0000040F			choiceH:
+ 00000472  E9 FFFFFB98			JMP getUserChoice								;jump back up to display the menu
+ 00000477			choiceH:
 					DisplayString clearScr							;display the characters to clear the screen
- 00000419  E9 FFFFFBF1			JMP getUserChoice								;jump back up to display the menu
- 0000041E			choiceI:
-					DisplayString clearScr							;display the characters to clear the screen
-					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
- 00000432  E9 FFFFFBD8			JMP getUserChoice								;jump back up to display the menu
- 00000437			choiceJ:
+ 00000481  E9 FFFFFB89			JMP getUserChoice								;jump back up to display the menu
+ 00000486			choiceI:
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
- 0000044B  E9 FFFFFBBF			JMP getUserChoice								;jump back up to display the menu
- 00000450			choiceK:
+ 0000049A  E9 FFFFFB70			JMP getUserChoice								;jump back up to display the menu
+ 0000049F			choiceJ:
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
- 00000464  E9 FFFFFBA6			JMP getUserChoice								;jump back up to display the menu
- 00000469			choiceL:
+ 000004B3  E9 FFFFFB57			JMP getUserChoice								;jump back up to display the menu
+ 000004B8			choiceK:
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
- 0000047D  E9 FFFFFB8D			JMP getUserChoice								;jump back up to display the menu
- 00000482			choiceM:
-					DisplayString clearScr							;display the characters to clear the screen
- 0000048C  E9 FFFFFB7E			JMP getUserChoice								;jump back up to display the menu
- 00000491			choiceN:
-					DisplayString clearScr							;display the characters to clear the screen
- 0000049B  E9 FFFFFB6F			JMP getUserChoice								;jump back up to display the menu
- 000004A0			choiceO:
+ 000004CC  E9 FFFFFB3E			JMP getUserChoice								;jump back up to display the menu
+ 000004D1			choiceL:
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
- 000004B4  E9 FFFFFB56			JMP getUserChoice								;jump back up to display the menu
- 000004B9			choiceQ:
- 000004B9  EB 00			JMP finished									;Jump to the end of the program, terminate.
+ 000004E5  E9 FFFFFB25			JMP getUserChoice								;jump back up to display the menu
+ 000004EA			choiceM:
+					DisplayString clearScr							;display the characters to clear the screen
+ 000004F4  E9 FFFFFB16			JMP getUserChoice								;jump back up to display the menu
+ 000004F9			choiceN:
+					DisplayString clearScr							;display the characters to clear the screen
+ 00000503  E9 FFFFFB07			JMP getUserChoice								;jump back up to display the menu
+ 00000508			choiceO:
+					DisplayString clearScr							;display the characters to clear the screen
+					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+ 0000051C  E9 FFFFFAEE			JMP getUserChoice								;jump back up to display the menu
+ 00000521			choiceQ:
+ 00000521  EB 00			JMP finished									;Jump to the end of the program, terminate.
 
 				;************************************* the instructions below calls for "normal termination"	
- 000004BB			finished:
+ 00000523			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 000004C2			main ENDP
+ 0000052A			main ENDP
 
 					END												;Signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    10/25/19 00:28:39
+Microsoft (R) Macro Assembler Version 6.11		    10/25/19 18:43:07
 proj4.asm						     Symbols 2 - 1
 
 
@@ -610,8 +621,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000007D1 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000004C2 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000899 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000052A DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -625,27 +636,27 @@ displayArray . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 extractDwords  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000004BD Public
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000525 Public
   getUserChoice  . . . . . . . .	L Near	 0000000F _TEXT	
   choiceA  . . . . . . . . . . .	L Near	 000001E8 _TEXT	
   lpClearA . . . . . . . . . . .	L Near	 000001ED _TEXT	
-  choiceB  . . . . . . . . . . .	L Near	 0000023A _TEXT	
-  lpClearB . . . . . . . . . . .	L Near	 0000023F _TEXT	
-  choiceC  . . . . . . . . . . .	L Near	 0000028C _TEXT	
-  choiceD  . . . . . . . . . . .	L Near	 00000337 _TEXT	
-  choiceE  . . . . . . . . . . .	L Near	 000003E2 _TEXT	
-  choiceF  . . . . . . . . . . .	L Near	 000003F1 _TEXT	
-  choiceG  . . . . . . . . . . .	L Near	 00000400 _TEXT	
-  choiceH  . . . . . . . . . . .	L Near	 0000040F _TEXT	
-  choiceI  . . . . . . . . . . .	L Near	 0000041E _TEXT	
-  choiceJ  . . . . . . . . . . .	L Near	 00000437 _TEXT	
-  choiceK  . . . . . . . . . . .	L Near	 00000450 _TEXT	
-  choiceL  . . . . . . . . . . .	L Near	 00000469 _TEXT	
-  choiceM  . . . . . . . . . . .	L Near	 00000482 _TEXT	
-  choiceN  . . . . . . . . . . .	L Near	 00000491 _TEXT	
-  choiceO  . . . . . . . . . . .	L Near	 000004A0 _TEXT	
-  choiceQ  . . . . . . . . . . .	L Near	 000004B9 _TEXT	
-  finished . . . . . . . . . . .	L Near	 000004BB _TEXT	
+  choiceB  . . . . . . . . . . .	L Near	 0000026E _TEXT	
+  lpClearB . . . . . . . . . . .	L Near	 00000273 _TEXT	
+  choiceC  . . . . . . . . . . .	L Near	 000002F4 _TEXT	
+  choiceD  . . . . . . . . . . .	L Near	 0000039F _TEXT	
+  choiceE  . . . . . . . . . . .	L Near	 0000044A _TEXT	
+  choiceF  . . . . . . . . . . .	L Near	 00000459 _TEXT	
+  choiceG  . . . . . . . . . . .	L Near	 00000468 _TEXT	
+  choiceH  . . . . . . . . . . .	L Near	 00000477 _TEXT	
+  choiceI  . . . . . . . . . . .	L Near	 00000486 _TEXT	
+  choiceJ  . . . . . . . . . . .	L Near	 0000049F _TEXT	
+  choiceK  . . . . . . . . . . .	L Near	 000004B8 _TEXT	
+  choiceL  . . . . . . . . . . .	L Near	 000004D1 _TEXT	
+  choiceM  . . . . . . . . . . .	L Near	 000004EA _TEXT	
+  choiceN  . . . . . . . . . . .	L Near	 000004F9 _TEXT	
+  choiceO  . . . . . . . . . . .	L Near	 00000508 _TEXT	
+  choiceQ  . . . . . . . . . . .	L Near	 00000521 _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000523 _TEXT	
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
@@ -663,22 +674,22 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
-arrayA . . . . . . . . . . . . .	DWord	 000004A8 _DATA	
-arrayB . . . . . . . . . . . . .	DWord	 00000638 _DATA	
+arrayA . . . . . . . . . . . . .	DWord	 00000570 _DATA	
+arrayB . . . . . . . . . . . . .	DWord	 00000700 _DATA	
 choiceASCII  . . . . . . . . . .	Byte	 00000372 _DATA	
 clearScr . . . . . . . . . . . .	Byte	 00000273 _DATA	
-col  . . . . . . . . . . . . . .	DWord	 000007CD _DATA	
+col  . . . . . . . . . . . . . .	DWord	 00000895 _DATA	
 crlf . . . . . . . . . . . . . .	Byte	 0000036F _DATA	
 enterToCont  . . . . . . . . . .	Byte	 0000031B _DATA	
 enterValCol  . . . . . . . . . .	Byte	 00000339 _DATA	
 enterValRow  . . . . . . . . . .	Byte	 00000354 _DATA	
 numCols  . . . . . . . . . . . .	DWord	 00000377 _DATA	
 numRows  . . . . . . . . . . . .	DWord	 00000373 _DATA	
-numbersASCII . . . . . . . . . .	Byte	 00000443 _DATA	
-row  . . . . . . . . . . . . . .	DWord	 000007C9 _DATA	
+numbersASCII . . . . . . . . . .	Byte	 0000050B _DATA	
+row  . . . . . . . . . . . . . .	DWord	 00000891 _DATA	
 strAskValues . . . . . . . . . .	Byte	 000002A7 _DATA	
 strDisplay . . . . . . . . . . .	DWord	 0000037B _DATA	
-strEnter . . . . . . . . . . . .	Byte	 000007C8 _DATA	
+strEnter . . . . . . . . . . . .	Byte	 00000890 _DATA	
 strMenu2 . . . . . . . . . . . .	Byte	 00000172 _DATA	
 strMenu  . . . . . . . . . . . .	Byte	 00000061 _DATA	
 strMethodNotAdded  . . . . . . .	Byte	 000002FA _DATA	

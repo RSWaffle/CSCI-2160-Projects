@@ -148,7 +148,7 @@ ENDM
 	choiceASCII byte 0
 	numRows dword ?
 	numCols dword ?
-	strDisplay dword 50 dup(0)
+	strDisplay dword 100 dup(0)
 	numbersASCII byte 100 dup (?), 00
 	arrayA dword 100 dup (?)
 	arrayB dword 100 dup (?)
@@ -261,7 +261,7 @@ getUserChoice:
 choiceA:
 	MOV ECX, lengthof arrayA						;moves the length of array a into ECX so we can clear that amount to clear the array
 	lpClearA:
-		MOV arrayA[ECX], 0							;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+	MOV arrayA[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
 	loop lpClearA									;decrement ECX and go to the top of the loop
 	DisplayString strAskValues						;display the string asking which values to store
 	PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
@@ -271,11 +271,16 @@ choiceA:
 	
 	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored. 
+	DisplayString crlf
+	DisplayString crlf
+	DisplayString enterToCont						;display the press enter to continue message
+	PullString strEnter, 0							;wait for the user to press enter
+	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu
 choiceB:
 	MOV ECX, lengthof arrayB						;moves the length of array a into ECX so we can clear that amount to clear the array
 	lpClearB:
-		MOV arrayB[ECX], 0							;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+	MOV arrayB[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
 	loop lpClearB									;decrement ECX and go to the top of the loop
 	DisplayString strAskValues						;display the string asking which values to store
 	PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
@@ -285,6 +290,11 @@ choiceB:
 	
 	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
+	DisplayString crlf
+	DisplayString crlf
+	DisplayString enterToCont						;display the press enter to continue message
+	PullString strEnter, 0							;wait for the user to press enter
+	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu
 choiceC:	
 	DisplayString enterValCol
@@ -301,8 +311,8 @@ choiceC:
 	DisplayString crlf
 	DisplayString crlf
 	DisplayString strDisplay
-	DisplayString enterToCont
-	PullString strEnter, 0
+	DisplayString enterToCont						;display the press enter to continue message
+	PullString strEnter, 0							;wait for the user to press enter
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu
 choiceD:

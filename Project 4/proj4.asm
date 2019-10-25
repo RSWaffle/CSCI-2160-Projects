@@ -29,6 +29,8 @@
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
 	
 	extractDwords PROTO Near32 C, StringofChars:dword, ArrayDwords:dword
+	
+	displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
 
 ;******************************************************************************************
 
@@ -138,16 +140,18 @@ ENDM
 	strTypeChoice byte 10,13, "Type the letter of your choice: ",0
 	strAskValues byte 10,10,13, "Enter the values you wish to store in the array: ",0
 	strValuesStored byte 10,13, "Values successfully stored!", 0
+	strMethodNotAdded byte 10,13, "ERROR! Method not implemented!", 0
 	
 	choiceASCII byte 0
-	addrArrayA dword 0 
-	numbersASCII byte 50 dup (?), 00
-	arrayA dword 0 dup (?)
-
-
-	
-	
-
+	numRows dword ?
+	numCols dword ?
+	strDisplay dword 50 dup(0)
+	numbersASCII byte 100 dup (?), 00
+	arrayA dword 100 dup (?)
+	arrayB dword 100 dup (?)
+	strEnter byte 0
+	enterToCont byte 10,10,13, "Press ENTER to Continue."
+	crlf byte  10,13,0								;Null-terminated string to skip to new line
 
 ;******************************************************************************************
 .CODE
@@ -246,63 +250,89 @@ getUserChoice:
 	CMP choiceASCII, 113							;compare the ascii value to the lowercase q
 	JE choiceQ										;if it is equal to this number then jump to the choiceQ section.
 		
-	DisplayString clearScr	
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 	
 	
 choiceA:
-	DisplayString strAskValues
-	PullString numbersASCII, 50
-	MOV addrArrayA, OFFSET arrayA
+	MOV ECX, lengthof arrayA						;moves the length of array a into ECX so we can clear that amount to clear the array
+	lpClearA:
+		MOV arrayA[ECX], 0							;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+	loop lpClearA									;decrement ECX and go to the top of the loop
+	DisplayString strAskValues						;display the string asking which values to store
+	PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
 	
-	INVOKE extractDwords, OFFSET numbersASCII, OFFSET arrayA
+	INVOKE extractDwords, OFFSET numbersASCII, 		;call the extract dwords function so we have our array properly loaded into mem
+	OFFSET arrayA
 	
-	DisplayString clearScr
-	DisplayString strValuesStored
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored. 
+	JMP getUserChoice								;jump back up to display the menu
 choiceB:
-	DisplayString clearScr
-	DisplayString strValuesStored
-	JMP getUserChoice
+	MOV ECX, lengthof arrayB						;moves the length of array a into ECX so we can clear that amount to clear the array
+	lpClearB:
+		MOV arrayB[ECX], 0							;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+	loop lpClearB									;decrement ECX and go to the top of the loop
+	DisplayString strAskValues						;display the string asking which values to store
+	PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
+		
+	INVOKE extractDwords, OFFSET numbersASCII, 		;call the extract dwords function so we have our array properly loaded into mem
+	OFFSET arrayB
+	
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
+	JMP getUserChoice								;jump back up to display the menu
 choiceC:	
-	DisplayString clearScr
-	JMP getUserChoice
+	
+	INVOKE displayArray, OFFSET arrayA, 2, 2, OFFSET strDisplay
+	DisplayString crlf
+	DisplayString crlf
+	DisplayString strDisplay
+	DisplayString enterToCont
+	PullString strEnter, 0
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceD:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceE:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceF:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceG:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceH:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceI:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+	JMP getUserChoice								;jump back up to display the menu
 choiceJ:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+	JMP getUserChoice								;jump back up to display the menu
 choiceK:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+	JMP getUserChoice								;jump back up to display the menu
 choiceL:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+	JMP getUserChoice								;jump back up to display the menu
 choiceM:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceN:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	JMP getUserChoice								;jump back up to display the menu
 choiceO:
-	DisplayString clearScr
-	JMP getUserChoice
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+	JMP getUserChoice								;jump back up to display the menu
 choiceQ:
 	JMP finished									;Jump to the end of the program, terminate.
 

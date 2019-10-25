@@ -1,22 +1,14 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/24/19 01:04:37
+Microsoft (R) Macro Assembler Version 6.11		    10/24/19 23:56:34
 proj4procs.asm						     Page 1 - 1
 
 
-
 				;******************************************************************************************
-
 				;*  Program Name: proj4procs.asm
-
 				;*  Programmer:   Ryan Shupe
-
 				;*  Class:        CSCI 2160-001
-
 				;*  Lab:          Proj3
-
 				;*  Date:         11/02/2019
-
 				;*  Purpose:      This handles the manipulation of matrices. 
-
 				;******************************************************************************************
 
 					.486						;This tells assembler to generate 32-bit code
@@ -25,109 +17,340 @@ proj4procs.asm						     Page 1 - 1
 
 					.stack 100h					;EVERY program needs to have a stack allocated
 
-
 				;******************************************************************************************
 
 				;  List all necessary prototypes for methods to be called here
 
 					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
+					intasc32Comma proto Near32 stdcall, lpStringToHold:dword, dval:dword
+					intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword
+				;******************************************************************************************
+				COMMENT %
+
+				******************************************************************************
+				*Name: getBytes                                                              *
+				*Purpose:                                                                    *
+				*	  *
+				*                                                                            *
+				*Date Created: 10/02/2019                                                    *
+				*Date Modified: 10/02/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*****************************************************************************%
+				getBytes MACRO String:REQ
+					LOCAL stLoop
+					LOCAL done
+					PUSH EBP							;preserves base register
+					MOV EBP, ESP						;sets a new stack frame
+					PUSH EBX							;pushes EBX to the stack to store this
+					PUSH ESI							;pushes ESI to the stack to preseve
+					MOV EBX, String						;moves into ebx the first val in the stack that we are going to use
+					MOV ESI, 0							;sets the initial point to 0
+						
+					stLoop:
+						CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+						JE done							;if it is jump to finished
+						INC ESI							;if not increment esi
+						JMP stLoop						;jump to the top of the loop and look at the next char
+					done:		
+						INC ESI							;increment esi to include the null character in the string
+						MOV EAX, ESI					;move the value of esi into eax for proper output and return
+					
+					POP ESI								;restore original esi
+					POP EBX								;restore original ebx
+					POP EBP								;restore originla ebp
+				ENDM
 				;******************************************************************************************
  00000000			.DATA
- 00000000 30 31 32 33 34		WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43
+
+ 00000000 30 31 32 33 34		WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 + - 
 	   35 36 37 38 39
 	   2D 2B
-						
- 0000000C 00				bTemps byte ?
+ 0000000C				tempNum dword 0 dup (12)
+ 0000000C 00				bNumBytes byte ?
+ 0000000D 00000000			iColCount dword 0
+ 00000011				bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
 
 				;******************************************************************************************
  00000000			.CODE
 
-					COMMENT %
-				******************************************************************************
-				*Name: extractDwords                                                         *
-				*Purpose:                                                                    *
-				*	     *
-				*                   *
-				*Date Created: 10/23/2019                                                    *
-				*Date Modified: 10/23/2019                                                   *
-				*                                                                            *
-				*                                                                            *
-				*@param StringofChars:dword                                                  *
-				*@param ArrayDwords:dword												 	 *
-				*****************************************************************************%
+				COMMENT %
+				********************************************************************************
+				*Name: extractDwords                                                           *
+				*Purpose:                                                                      *
+				*	     This method takes in two addresses, one with ascii characters and one *
+				*        where the converted numbers will go. It translates the ascii character*
+				*		 to the dword value and stores into the output location    			   *
+				*Date Created: 10/23/2019                                                      *
+				*Date Modified: 10/23/2019                                                     *
+				*                                                                              *
+				*                                                                              *
+				*@param StringofChars:dword                                                    *
+				*@param ArrayDwords:dword												 	   *
+				*******************************************************************************%
  00000000			extractDwords PROC Near32 C uses EBX ECX EDX EDI , StringofChars:dword, ArrayDwords:dword
-					LOCAL addOut:dword, addASCII:dword
+					LOCAL addOut:dword, addASCII:dword			;sets up our stack frame and declares our local variables. 
 					
- 0000000A  8B 45 0C			MOV EAX, ArrayDwords
- 0000000D  89 45 FC			MOV addOut, EAX
- 00000010  8B 45 08			MOV EAX, StringofChars
- 00000013  89 45 F8			MOV addASCII, EAX
+ 0000000A  8B 45 0C			MOV EAX, ArrayDwords						;moves into EAX the address of the output array
+ 0000000D  89 45 FC			MOV addOut, EAX								;moves the address into our local variable for clarity.
+ 00000010  8B 45 08			MOV EAX, StringofChars						;moves into EAX the address of the array with ascii values.
+ 00000013  89 45 F8			MOV addASCII, EAX							;moves the address into our local variable for clarity.
 					
- 00000016  BB 00000000			MOV EBX, 0
- 0000001B  BF 00000000			MOV EDI, 0
+ 00000016  BB 00000000			MOV EBX, 0									;set EBX to 0 to avoid calculation error
+ 0000001B  BF 00000000			MOV EDI, 0									;sets our initial point in bTemps to the first place
 					
- 00000020				lpConvertandMove:
+ 00000020				lpConvertandMove:	
+ 00000020  8B 45 F8				MOV EAX, addASCII						;moves the address of the ascii values into eax so we can reference it
+ 00000023  8A 18				MOV BL, byte ptr [EAX]					;moves into BL the byte at the address position
+ 00000025  80 FB 00				CMP BL, 00								;compares this byte to 00 to test if we are at the end of the array
+ 00000028  74 71				JE finished								;if it is equal to 00, then jump to the finished label. 
 						
- 00000020  8B 45 F8				MOV EAX, addASCII
- 00000023  8A 18				MOV BL, byte ptr [EAX]
- 00000025  80 FB 00				CMP BL, 00
- 00000028  74 71				JE finished
-						
- 0000002A  B9 0000000C				MOV ECX, lengthof WhiteListChars
- 0000002F  BE 00000000				MOV ESI, 0
+ 0000002A  B9 0000000C				MOV ECX, lengthof WhiteListChars		;sets up our loop with the number of elements in the whitelisted characters array
+ 0000002F  BE 00000000				MOV ESI, 0								;sets our initial position in the whitelisted characters array to 0
 						
  00000034					lpCompareWhitelist:
- 00000034  3A 9E 00000000 R				CMP BL, WhiteListChars[ESI]
- 0000003A  74 08					JE ValidChar
- 0000003C  46						INC ESI
- 0000003D  E2 F5				loop lpCompareWhitelist
-						
- 0000003F  FF 45 F8				INC addASCII
- 00000042  EB DC				JMP lpConvertandMove
+ 00000034  3A 9E 00000000 R				CMP BL, WhiteListChars[ESI]			;compares bl to see if it is one of the whitelisted characters
+ 0000003A  74 08					JE ValidChar						;if it is a valid char, jump to the valid section
+ 0000003C  46						INC ESI								;increment esi to the next position in the whitelisted characters array
+ 0000003D  E2 F5				loop lpCompareWhitelist					;decrement ecx and loop back up
+																;if it is not a valid char this executes:
+ 0000003F  FF 45 F8				INC addASCII							;increment addASCII so we get the next byte
+ 00000042  EB DC				JMP lpConvertandMove					;jump back up to the top to start the loop over again
 						
  00000044					ValidChar:
- 00000044  88 9F 0000000C R				MOV bTemps[EDI], BL
- 0000004A  FF 45 F8					INC addASCII
- 0000004D  8B 45 F8					MOV EAX, addASCII
- 00000050  8A 18					MOV BL, byte ptr [EAX]
- 00000052  FF 4D F8					DEC addASCII
+ 00000044  88 9F 00000011 R				MOV bTemps[EDI], BL					;Moves into btemps at position edi the byte in bl to hold that byte of the number that is building
+ 0000004A  FF 45 F8					INC addASCII						;increment to the next position of addascii so we can see if the next char is valid
+ 0000004D  8B 45 F8					MOV EAX, addASCII					;moves into eax the new address of the next byte 
+ 00000050  8A 18					MOV BL, byte ptr [EAX]				;moves the byte into Bl 
+ 00000052  FF 4D F8					DEC addASCII						;change it back to the previous character
 							
- 00000055  B9 0000000C					MOV ECX, lengthof WhiteListChars
- 0000005A  BE 00000000					MOV ESI, 0
+ 00000055  B9 0000000C					MOV ECX, lengthof WhiteListChars	;adds the number of elements in whitelisted characters array into ecx for the loop
+ 0000005A  BE 00000000					MOV ESI, 0							;sets our initial position in the whitelisted characters array to 0
 						
  0000005F						lpCompareNext:
- 0000005F  3A 9E 00000000 R					CMP BL, WhiteListChars[ESI]
- 00000065  74 2E						JE ValidNextChar
- 00000067  46							INC ESI
- 00000068  E2 F5					loop lpCompareNext
+ 0000005F  3A 9E 00000000 R					CMP BL, WhiteListChars[ESI]		;This compares the next byte to see if it is whitelisted too
+ 00000065  74 2E						JE ValidNextChar				;if it is a valid character, jump to the valid next char section
+ 00000067  46							INC ESI							;increment esi if it is not valid to get to the next position in whitelisted characters
+ 00000068  E2 F5					loop lpCompareNext					;decrement ECX and go to the top of the current loop
 							
-							INVOKE ascint32, ADDR bTemps
- 00000074  8B 55 FC					MOV EDX, addOut
- 00000077  89 02					MOV [EDX], EAX
- 00000079  B9 00000004					MOV ECX, 4
+							INVOKE ascint32, ADDR bTemps		;if it is not a valid character, then we know the number is complete and we can execute asc to int conversion
+ 00000074  8B 55 FC					MOV EDX, addOut						;moves the address of the output array into edx so we can reference it
+ 00000077  89 02					MOV [EDX], EAX						;moves the resulting EAX value into the output array at the correct position
+ 00000079  B9 00000004					MOV ECX, 4							;imputs 4 into ECX so we can clear our bTemps variable to prevent curruption
  0000007E						lpClearBTemp:
- 0000007E  C6 81 0000000C R					MOV [bTemps + ECX], 0
+ 0000007E  C6 81 00000011 R					MOV [bTemps + ECX], 0			;moves 0 into the slot ECX of bTemps
 	   00
- 00000085  E2 F7					loop  lpClearBTemp
- 00000087  83 45 FC 04					ADD addOut, 4
- 0000008B  BF 00000000					MOV EDI, 0
- 00000090  FF 45 F8					INC addASCII
- 00000093  EB 8B					JMP lpConvertandMove
+ 00000085  E2 F7					loop  lpClearBTemp					;jump back to the top of the current loop
+ 00000087  83 45 FC 04					ADD addOut, 4						;adds 4 to the output address so we can get the next dword starting point
+ 0000008B  BF 00000000					MOV EDI, 0							;resets edi to 0 so we get a clean bTemps variable
+ 00000090  FF 45 F8					INC addASCII						;increments addASCII so we get the next byte in memory
+ 00000093  EB 8B					JMP lpConvertandMove				;jump back up to the very top of the loop 
 							
  00000095					ValidNextChar:
- 00000095  47						INC EDI
- 00000096  FF 45 F8					INC addASCII
- 00000099  EB 85					JMP lpConvertandMove
+ 00000095  47						INC EDI								;increment edi so we can input in the next position in bTemps
+ 00000096  FF 45 F8					INC addASCII						;increment addASCII so we get the next byte in memory
+ 00000099  EB 85					JMP lpConvertandMove				;jump back up to the very top of the loop
+							
 							
  0000009B				finished:
-						RET
+						RET										;return back to where i was called 
  000000A1			extractDwords ENDP 
 
+				COMMENT %
+				********************************************************************************
+				*Name: displayArray                                                            *
+				*Purpose:                                                                      *
+				*	      *
+				*        *
+				*		     			   *
+				*Date Created: 10/24/2019                                                      *
+				*Date Modified: 10/24/2019                                                     *
+				*                                                                              *
+				*                                                                              *
+				*@param lpArrayDwords:dword                                                    *
+				*@param rows:dword												 	           *
+				*@param cols:dword												 	           *
+				*@param lpStringtoHold:dword									 	           *
+				*******************************************************************************%
+ 000000A1			displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
+					LOCAL startAddr:dword, outAddr:dword
+						
+ 000000AA  8B 45 08			MOV EAX, lpArrayDwords						;moves into EAX the address of the output array
+ 000000AD  89 45 FC			MOV startAddr, EAX							;moves the address into our local variable for clarity.
+ 000000B0  8B 45 14			MOV EAX, lpStringtoHold						;moves into EAX the address of the array with ascii values.
+ 000000B3  89 45 F8			MOV outAddr, EAX							;moves the address into our local variable for clarity.
+					
+ 000000B6  BF 00000000			MOV EDI, 0
+ 000000BB  BE 00000000			MOV ESI, 0
+ 000000C0  B9 00000001			MOV ECX, 1
+ 000000C5  8B 55 F8			MOV EDX, outAddr
+ 000000C8  8B 5D FC			MOV EBX, startAddr
+					
+					
+ 000000CB				lpConvertToASCII:
+ 000000CB  83 7D 0C 00				CMP rows, 0
+ 000000CF  0F 84 000000F9			JE finished
+ 000000D5  8B 5D FC				MOV EBX, startAddr
+ 000000D8  8B 04 1F				MOV EAX, [EBX + EDI]
+ 000000DB  A3 0000000C R			MOV tempNum, EAX
+ 000000E0  8B DA				MOV EBX, EDX
+ 000000E2  53					PUSH EBX
+ 000000E3  03 DE				ADD EBX, ESI
+						INVOKE intasc32, EBX, tempNum	
+ 000000F1  5B					POP EBX
+ 000000F2  83 C7 04				ADD EDI, 4
+						
+ 000000F5  50					PUSH EAX
+						getBytes EDX
+ 000000F6  55		     1		PUSH EBP							;preserves base register
+ 000000F7  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000000F9  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000000FA  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000000FB  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000000FD  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000102		     1		??0000:
+ 00000102  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000106  74 03	     1			JE ??0001							;if it is jump to finished
+ 00000108  46		     1			INC ESI							;if not increment esi
+ 00000109  EB F7	     1			JMP ??0000						;jump to the top of the loop and look at the next char
+ 0000010B		     1		??0001:		
+ 0000010B  46		     1			INC ESI							;increment esi to include the null character in the string
+ 0000010C  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 0000010E  5E		     1		POP ESI								;restore original esi
+ 0000010F  5B		     1		POP EBX								;restore original ebx
+ 00000110  5D		     1		POP EBP								;restore originla ebp
+ 00000111  8B F0				MOV ESI, EAX
+ 00000113  4E					DEC ESI
+ 00000114  58					POP EAX
+						
+ 00000115  3B 4D 10				CMP ECX, cols
+ 00000118  74 72				JE NoComma
+						
+ 0000011A  C7 05 0000000C R			MOV tempNum, 44
+	   0000002C
+ 00000124  8B DA				MOV EBX, EDX
+ 00000126  53					PUSH EBX
+ 00000127  03 DE				ADD EBX, ESI
+ 00000129  50					PUSH EAX
+ 0000012A  A1 0000000C R			MOV EAX, tempNum
+ 0000012F  89 03				MOV [EBX], EAX
+ 00000131  5B					POP EBX
+						getBytes EDX
+ 00000132  55		     1		PUSH EBP							;preserves base register
+ 00000133  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 00000135  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 00000136  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 00000137  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 00000139  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 0000013E		     1		??0002:
+ 0000013E  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000142  74 03	     1			JE ??0003							;if it is jump to finished
+ 00000144  46		     1			INC ESI							;if not increment esi
+ 00000145  EB F7	     1			JMP ??0002						;jump to the top of the loop and look at the next char
+ 00000147		     1		??0003:		
+ 00000147  46		     1			INC ESI							;increment esi to include the null character in the string
+ 00000148  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 0000014A  5E		     1		POP ESI								;restore original esi
+ 0000014B  5B		     1		POP EBX								;restore original ebx
+ 0000014C  5D		     1		POP EBP								;restore originla ebp
+ 0000014D  8B F0				MOV ESI, EAX
+ 0000014F  4E					DEC ESI
+ 00000150  C7 05 0000000C R			MOV tempNum, 32
+	   00000020
+ 0000015A  8B DA				MOV EBX, EDX
+ 0000015C  53					PUSH EBX
+ 0000015D  03 DE				ADD EBX, ESI
+ 0000015F  A1 0000000C R			MOV EAX, tempNum
+ 00000164  89 03				MOV [EBX], EAX
+ 00000166  5B					POP EBX
+						getBytes EDX
+ 00000167  55		     1		PUSH EBP							;preserves base register
+ 00000168  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 0000016A  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 0000016B  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 0000016C  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 0000016E  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000173		     1		??0004:
+ 00000173  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 00000177  74 03	     1			JE ??0005							;if it is jump to finished
+ 00000179  46		     1			INC ESI							;if not increment esi
+ 0000017A  EB F7	     1			JMP ??0004						;jump to the top of the loop and look at the next char
+ 0000017C		     1		??0005:		
+ 0000017C  46		     1			INC ESI							;increment esi to include the null character in the string
+ 0000017D  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 0000017F  5E		     1		POP ESI								;restore original esi
+ 00000180  5B		     1		POP EBX								;restore original ebx
+ 00000181  5D		     1		POP EBP								;restore originla ebp
+ 00000182  8B F0				MOV ESI, EAX
+ 00000184  4E					DEC ESI
+ 00000185  58					POP EAX
+						
+ 00000186  41					INC ECX
+ 00000187  E9 FFFFFF3F				JMP lpConvertToASCII
+						
+ 0000018C				NoComma:
+ 0000018C  B9 00000000				MOV ECX, 0
+ 00000191  FF 4D 0C				DEC rows
+ 00000194  C7 05 0000000C R			MOV tempNum, 10
+	   0000000A
+ 0000019E  53					PUSH EBX
+ 0000019F  03 DE				ADD EBX, ESI
+ 000001A1  50					PUSH EAX
+ 000001A2  A1 0000000C R			MOV EAX, tempNum
+ 000001A7  89 03				MOV [EBX], EAX
+						getBytes EDX
+ 000001A9  55		     1		PUSH EBP							;preserves base register
+ 000001AA  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
+ 000001AC  53		     1		PUSH EBX							;pushes EBX to the stack to store this
+ 000001AD  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
+ 000001AE  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
+ 000001B0  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000001B5		     1		??0006:
+ 000001B5  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+ 000001B9  74 03	     1			JE ??0007							;if it is jump to finished
+ 000001BB  46		     1			INC ESI							;if not increment esi
+ 000001BC  EB F7	     1			JMP ??0006						;jump to the top of the loop and look at the next char
+ 000001BE		     1		??0007:		
+ 000001BE  46		     1			INC ESI							;increment esi to include the null character in the string
+ 000001BF  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
+ 000001C1  5E		     1		POP ESI								;restore original esi
+ 000001C2  5B		     1		POP EBX								;restore original ebx
+ 000001C3  5D		     1		POP EBP								;restore originla ebp
+ 000001C4  8B F0				MOV ESI, EAX
+ 000001C6  4E					DEC ESI
+ 000001C7  58					POP EAX
+ 000001C8  5B					POP EBX
+ 000001C9  E9 FFFFFEFD				JMP lpConvertToASCII
+						
+ 000001CE				finished:
+ 000001CE  C7 05 0000000C R			MOV tempNum, 00
+	   00000000
+ 000001D8  53					PUSH EBX
+ 000001D9  03 DE				ADD EBX, ESI
+ 000001DB  83 EB 04				SUB EBX, 4
+ 000001DE  50					PUSH EAX
+ 000001DF  A1 0000000C R			MOV EAX, tempNum
+ 000001E4  89 03				MOV [EBX], EAX
+ 000001E6  8B 45 F8				MOV EAX, outAddr
+						
+ 000001E9  89 45 14				MOV lpStringToHold, EAX
+						RET
+					
+					
+ 000001F1			displayArray ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/24/19 01:04:37
+Microsoft (R) Macro Assembler Version 6.11		    10/24/19 23:56:34
 proj4procs.asm						     Symbols 2 - 1
 
 
+
+
+Macros:
+
+                N a m e                 Type
+
+getBytes . . . . . . . . . . . .	Proc
 
 
 Segments and Groups:
@@ -136,8 +359,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000000D DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A1 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F1 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -145,6 +368,24 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+displayArray . . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 00000150 Public C
+  lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
+  rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  cols . . . . . . . . . . . . .	DWord	 bp + 00000010
+  lpStringtoHold . . . . . . . .	DWord	 bp + 00000014
+  startAddr  . . . . . . . . . .	DWord	 bp - 00000004
+  outAddr  . . . . . . . . . . .	DWord	 bp - 00000008
+  lpConvertToASCII . . . . . . .	L Near	 000000CB _TEXT	
+  ??0000 . . . . . . . . . . . .	L Near	 00000102 _TEXT	
+  ??0001 . . . . . . . . . . . .	L Near	 0000010B _TEXT	
+  ??0002 . . . . . . . . . . . .	L Near	 0000013E _TEXT	
+  ??0003 . . . . . . . . . . . .	L Near	 00000147 _TEXT	
+  ??0004 . . . . . . . . . . . .	L Near	 00000173 _TEXT	
+  ??0005 . . . . . . . . . . . .	L Near	 0000017C _TEXT	
+  NoComma  . . . . . . . . . . .	L Near	 0000018C _TEXT	
+  ??0006 . . . . . . . . . . . .	L Near	 000001B5 _TEXT	
+  ??0007 . . . . . . . . . . . .	L Near	 000001BE _TEXT	
+  finished . . . . . . . . . . .	L Near	 000001CE _TEXT	
 extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public C
   StringofChars  . . . . . . . .	DWord	 bp + 00000008
   ArrayDwords  . . . . . . . . .	DWord	 bp + 0000000C
@@ -157,6 +398,8 @@ extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public 
   lpClearBTemp . . . . . . . . .	L Near	 0000007E _TEXT	
   ValidNextChar  . . . . . . . .	L Near	 00000095 _TEXT	
   finished . . . . . . . . . . .	L Near	 0000009B _TEXT	
+intasc32Comma  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
 Symbols:
@@ -173,7 +416,10 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 WhiteListChars . . . . . . . . .	Byte	 00000000 _DATA	
-bTemps . . . . . . . . . . . . .	Byte	 0000000C _DATA	
+bNumBytes  . . . . . . . . . . .	Byte	 0000000C _DATA	
+bTemps . . . . . . . . . . . . .	Byte	 00000011 _DATA	
+iColCount  . . . . . . . . . . .	DWord	 0000000D _DATA	
+tempNum  . . . . . . . . . . . .	DWord	 0000000C _DATA	
 
 	   0 Warnings
 	   0 Errors

@@ -18,16 +18,58 @@
 ;  List all necessary prototypes for methods to be called here
 
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
+	intasc32Comma proto Near32 stdcall, lpStringToHold:dword, dval:dword
+	intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword
+;******************************************************************************************
+COMMENT %
+
+******************************************************************************
+*Name: getBytes                                                              *
+*Purpose:                                                                    *
+*	  *
+*                                                                            *
+*Date Created: 10/02/2019                                                    *
+*Date Modified: 10/02/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param String1:byte                                                         *
+*****************************************************************************%
+getBytes MACRO String:REQ
+	LOCAL stLoop
+	LOCAL done
+	PUSH EBP							;preserves base register
+	MOV EBP, ESP						;sets a new stack frame
+	PUSH EBX							;pushes EBX to the stack to store this
+	PUSH ESI							;pushes ESI to the stack to preseve
+	MOV EBX, String						;moves into ebx the first val in the stack that we are going to use
+	MOV ESI, 0							;sets the initial point to 0
+		
+	stLoop:
+		CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+		JE done							;if it is jump to finished
+		INC ESI							;if not increment esi
+		JMP stLoop						;jump to the top of the loop and look at the next char
+	done:		
+		INC ESI							;increment esi to include the null character in the string
+		MOV EAX, ESI					;move the value of esi into eax for proper output and return
+	
+	POP ESI								;restore original esi
+	POP EBX								;restore original ebx
+	POP EBP								;restore originla ebp
+ENDM
 ;******************************************************************************************
 .DATA
+
 	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 + - 
-		
-	bTemps byte ?															;memory to hold the number that is built in extractDwords
+	tempNum dword 0 dup (12)
+	bNumBytes byte ?
+	iColCount dword 0
+	bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
 
 ;******************************************************************************************
 .CODE
 
-	COMMENT %
+COMMENT %
 ********************************************************************************
 *Name: extractDwords                                                           *
 *Purpose:                                                                      *
@@ -108,4 +150,114 @@ extractDwords PROC Near32 C uses EBX ECX EDX EDI , StringofChars:dword, ArrayDwo
 		RET										;return back to where i was called 
 extractDwords ENDP 
 
+COMMENT %
+********************************************************************************
+*Name: displayArray                                                            *
+*Purpose:                                                                      *
+*	      *
+*        *
+*		     			   *
+*Date Created: 10/24/2019                                                      *
+*Date Modified: 10/24/2019                                                     *
+*                                                                              *
+*                                                                              *
+*@param lpArrayDwords:dword                                                    *
+*@param rows:dword												 	           *
+*@param cols:dword												 	           *
+*@param lpStringtoHold:dword									 	           *
+*******************************************************************************%
+displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
+	LOCAL startAddr:dword, outAddr:dword
+		
+	MOV EAX, lpArrayDwords						;moves into EAX the address of the output array
+	MOV startAddr, EAX							;moves the address into our local variable for clarity.
+	MOV EAX, lpStringtoHold						;moves into EAX the address of the array with ascii values.
+	MOV outAddr, EAX							;moves the address into our local variable for clarity.
+	
+	MOV EDI, 0
+	MOV ESI, 0
+	MOV ECX, 1
+	MOV EDX, outAddr
+	MOV EBX, startAddr
+	
+	
+	lpConvertToASCII:
+		CMP rows, 0
+		JE finished
+		MOV EBX, startAddr
+		MOV EAX, [EBX + EDI]
+		MOV tempNum, EAX
+		MOV EBX, EDX
+		PUSH EBX
+		ADD EBX, ESI
+		INVOKE intasc32, EBX, tempNum	
+		POP EBX
+		ADD EDI, 4
+		
+		PUSH EAX
+		getBytes EDX
+		MOV ESI, EAX
+		DEC ESI
+		POP EAX
+		
+		CMP ECX, cols
+		JE NoComma
+		
+		MOV tempNum, 44
+		MOV EBX, EDX
+		PUSH EBX
+		ADD EBX, ESI
+		PUSH EAX
+		MOV EAX, tempNum
+		MOV [EBX], EAX
+		POP EBX
+		getBytes EDX
+		MOV ESI, EAX
+		DEC ESI
+		MOV tempNum, 32
+		MOV EBX, EDX
+		PUSH EBX
+		ADD EBX, ESI
+		MOV EAX, tempNum
+		MOV [EBX], EAX
+		POP EBX
+		getBytes EDX
+		MOV ESI, EAX
+		DEC ESI
+		POP EAX
+		
+		INC ECX
+		JMP lpConvertToASCII
+		
+	NoComma:
+		MOV ECX, 0
+		DEC rows
+		MOV tempNum, 10
+		PUSH EBX
+		ADD EBX, ESI
+		PUSH EAX
+		MOV EAX, tempNum
+		MOV [EBX], EAX
+		getBytes EDX
+		MOV ESI, EAX
+		DEC ESI
+		POP EAX
+		POP EBX
+		JMP lpConvertToASCII
+		
+	finished:
+		MOV tempNum, 00
+		PUSH EBX
+		ADD EBX, ESI
+		SUB EBX, 4
+		PUSH EAX
+		MOV EAX, tempNum
+		MOV [EBX], EAX
+		MOV EAX, outAddr
+		
+		MOV lpStringToHold, EAX
+		RET
+	
+	
+displayArray ENDP
 END

@@ -233,7 +233,6 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
 		DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
 		MOV tempNum, 32							;moves the space ascii value into temp num
-		MOV EBX, EDX							;moves the address in edx into ebx so we can use it 
 		PUSH EBX								;stores our ebx variable so we can get it back later
 		ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
 		MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
@@ -244,8 +243,8 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
 		POP EAX									;restore our original eax
 		
-		INC ECX									;increments we we know we are on the next col
-		JMP lpConvertToASCII					;jumps back to the top
+		INC ECX									;increment ecx so we can signify we are on the next col
+		JMP lpConvertToASCII					;jump back to the top of the loop
 		
 	NoComma:
 		MOV ECX, 1								;reset the col value back to 1
@@ -280,17 +279,17 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		SUB EBX, 5								;subtracts 5 to point to the very end of the string....
 		MOV EAX, tempNum						;moves the value of temp num into eax
 		MOV [EBX], EAX							;moves into the location ebx is pointing to the value of eax
-		RET										;return back to where i was called
+		RET
 		
 	oneByone:
-		MOV EBX, startAddr						;moves the starting address into ebx
-		MOV EAX, [EBX]							;moves the value ebx points to into eax
-		MOV tempNum, EAX						;moves eax into the temp num variable
-		MOV EBX, EDX							;moves the eaddress of edx into ebx so we can modify it
-		PUSH EBX								;pushes ebx to store it
-		ADD EBX, ESI							;adds the offset esi into ebx so we point to the right place
-		INVOKE intasc32, EBX, tempNum			;convert the number into the ascii format and put into where ebx points
-		POP EBX									;restore ebx
+		MOV EBX, startAddr
+		MOV EAX, [EBX]
+		MOV tempNum, EAX
+		MOV EBX, EDX
+		PUSH EBX
+		ADD EBX, ESI
+		INVOKE intasc32, EBX, tempNum	
+		POP EBX
 		JMP finished
 
 displayArray ENDP

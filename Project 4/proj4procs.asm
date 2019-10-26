@@ -28,8 +28,8 @@ COMMENT %
 *Purpose:                                                                    *
 *	  Intakes an address and counts the number of bytes into a string including*
 *     the null char and returns the number.                                  *
-*Date Created: 10/02/2019                                                    *
-*Date Modified: 10/02/2019                                                   *
+*Date Created: 10/24/2019                                                    *
+*Date Modified: 10/25/2019                                                   *
 *                                                                            *
 *                                                                            *
 *@param String1:byte                                                         *
@@ -394,13 +394,15 @@ COMMENT %
 *******************************************************************************%
 smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, cols:dword
 	LOCAL smallestVal:dword
-	
+		
+	MOV EDI, 0									;set the intital offset to 0
 	MOV EAX, rows								;moves the number of rows into eax so we can multiply it to get numElements
 	MUL cols									;Multiplies EAX by the number of cols
 	MOV ECX, EAX								;stores the number of elements 
-	DEC ECX										;decrement ECX so we work with n-1 elements
 	MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
-	MOV EDI, 0									;set the intital offset to 0
+	CMP ECX, 1									;compare ecx to one to see if the user entered 1x1
+	JE oneByone									;if it is then jump to the one by one section
+	DEC ECX										;decrement ECX so we work with n-1 elements
 	
 	MOV EBX, [EAX + EDI]						;moves into ebx the first value
 	MOV smallestVal, EBX						;stores the first value as the smallest one
@@ -425,7 +427,12 @@ smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, c
 	DoneLoop:
 		MOV EAX, smallestVal					;moves into eax the value in smallest value so we can return it
 		RET										;return
-	
+		
+	oneByone:
+		MOV EBX, [EAX + EDI]					;moves into ebx the first value
+		MOV smallestVal, EBX					;stores the first value as the smallest one
+		JMP DoneLoop							;jump to end of loop
+			
 
 smallestValue ENDP
 END

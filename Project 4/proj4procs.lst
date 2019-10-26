@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/26/19 17:23:08
+Microsoft (R) Macro Assembler Version 6.11		    10/26/19 19:30:28
 proj4procs.asm						     Page 1 - 1
 
 
@@ -509,42 +509,50 @@ proj4procs.asm						     Page 1 - 1
 				*******************************************************************************%
  000002EA			smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, cols:dword
 					LOCAL smallestVal:dword
-					
- 000002F3  8B 45 0C			MOV EAX, rows								;moves the number of rows into eax so we can multiply it to get numElements
- 000002F6  F7 65 10			MUL cols									;Multiplies EAX by the number of cols
- 000002F9  8B C8			MOV ECX, EAX								;stores the number of elements 
- 000002FB  49				DEC ECX
- 000002FC  8B 45 08			MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
- 000002FF  BF 00000000			MOV EDI, 0									;set the intital offset to 0
-					
- 00000304  8B 1C 07			MOV EBX, [EAX + EDI]
- 00000307  89 5D FC			MOV smallestVal, EBX
-					
- 0000030A				lpGetSmallest:
- 0000030A  83 C7 04				ADD EDI, 4
- 0000030D  8B 1C 07				MOV EBX, [EAX + EDI]
- 00000310  3B 5D FC				CMP EBX, smallestVal
- 00000313  7C 08				JL newSmallest
- 00000315  49					DEC ECX
- 00000316  83 F9 00				CMP ECX, 0
- 00000319  74 0D				JE DoneLoop
- 0000031B  EB ED				JMP lpGetSmallest
 						
- 0000031D				newSmallest:
- 0000031D  89 5D FC				MOV smallestVal, EBX
- 00000320  49					DEC ECX
- 00000321  83 F9 00				CMP ECX, 0
- 00000324  74 02				JE DoneLoop
- 00000326  EB E2				JMP lpGetSmallest
-						
- 00000328				DoneLoop:
- 00000328  8B 45 FC				MOV EAX, smallestVal
-						RET
-					
+ 000002F3  BF 00000000			MOV EDI, 0									;set the intital offset to 0
+ 000002F8  8B 45 0C			MOV EAX, rows								;moves the number of rows into eax so we can multiply it to get numElements
+ 000002FB  F7 65 10			MUL cols									;Multiplies EAX by the number of cols
+ 000002FE  8B C8			MOV ECX, EAX								;stores the number of elements 
+ 00000300  8B 45 08			MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
+ 00000303  83 F9 01			CMP ECX, 1
+ 00000306  74 2D			JE oneByone
+ 00000308  49				DEC ECX										;decrement ECX so we work with n-1 elements
 
- 00000330			smallestValue ENDP
+					
+ 00000309  8B 1C 07			MOV EBX, [EAX + EDI]						;moves into ebx the first value
+ 0000030C  89 5D FC			MOV smallestVal, EBX						;stores the first value as the smallest one
+					
+ 0000030F				lpGetSmallest:
+ 0000030F  83 C7 04				ADD EDI, 4								;increments the offset by 4 so we get the next dword
+ 00000312  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx the value located at that location
+ 00000315  3B 5D FC				CMP EBX, smallestVal					;compare that value to the current smallest number
+ 00000318  7C 08				JL newSmallest							;if the register is less than the current smallest value jump to new smallest
+ 0000031A  49					DEC ECX									;decrement ecx so we can terminate the loop eventually 
+ 0000031B  83 F9 00				CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
+ 0000031E  74 0D				JE DoneLoop								;if it is 0 then jump to done loop
+ 00000320  EB ED				JMP lpGetSmallest						;if it is not then jump back to the top
+						
+ 00000322				newSmallest:
+ 00000322  89 5D FC				MOV smallestVal, EBX					;moves the value currently in ebx into our smallest value variable
+ 00000325  49					DEC ECX									;decrement ecx so we can terminate the loop eventually 
+ 00000326  83 F9 00				CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
+ 00000329  74 02				JE DoneLoop								;if it is 0 then jump to done loop
+ 0000032B  EB E2				JMP lpGetSmallest						;if it is not then jump back to the top
+						
+ 0000032D				DoneLoop:
+ 0000032D  8B 45 FC				MOV EAX, smallestVal					;moves into eax the value in smallest value so we can return it
+						RET										;return
+						
+ 00000335				oneByone:
+ 00000335  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx the first value
+ 00000338  89 5D FC				MOV smallestVal, EBX					;stores the first value as the smallest one
+ 0000033B  EB F0				JMP DoneLoop
+							
+
+ 0000033D			smallestValue ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/26/19 17:23:08
+Microsoft (R) Macro Assembler Version 6.11		    10/26/19 19:30:28
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -564,7 +572,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000330 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000033D DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -611,14 +619,15 @@ extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public 
   finished . . . . . . . . . . .	L Near	 0000009B _TEXT	
 intasc32Comma  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-smallestValue  . . . . . . . . .	P Near	 000002EA _TEXT	Length= 00000046 Public C
+smallestValue  . . . . . . . . .	P Near	 000002EA _TEXT	Length= 00000053 Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
   cols . . . . . . . . . . . . .	DWord	 bp + 00000010
   smallestVal  . . . . . . . . .	DWord	 bp - 00000004
-  lpGetSmallest  . . . . . . . .	L Near	 0000030A _TEXT	
-  newSmallest  . . . . . . . . .	L Near	 0000031D _TEXT	
-  DoneLoop . . . . . . . . . . .	L Near	 00000328 _TEXT	
+  lpGetSmallest  . . . . . . . .	L Near	 0000030F _TEXT	
+  newSmallest  . . . . . . . . .	L Near	 00000322 _TEXT	
+  DoneLoop . . . . . . . . . . .	L Near	 0000032D _TEXT	
+  oneByone . . . . . . . . . . .	L Near	 00000335 _TEXT	
 sortedArray  . . . . . . . . . .	P Near	 00000279 _TEXT	Length= 0000003E Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   numElts  . . . . . . . . . . .	DWord	 bp + 0000000C

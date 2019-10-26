@@ -26,8 +26,8 @@ COMMENT %
 ******************************************************************************
 *Name: getBytes                                                              *
 *Purpose:                                                                    *
-*	  *
-*                                                                            *
+*	  Intakes an address and counts the number of bytes into a string including*
+*     the null char and returns the number.                                  *
 *Date Created: 10/02/2019                                                    *
 *Date Modified: 10/02/2019                                                   *
 *                                                                            *
@@ -154,9 +154,10 @@ COMMENT %
 ********************************************************************************
 *Name: displayArray                                                            *
 *Purpose:                                                                      *
-*	      *
-*        *
-*		     			   *
+*	      Intakes beginning address of dwords and converts it into the appropriate*
+*        matrix display for output and returns the address to the string 	   *
+*		 generated.															   *
+*		     			   													   *
 *Date Created: 10/24/2019                                                      *
 *Date Modified: 10/25/2019                                                     *
 *                                                                              *
@@ -279,20 +280,7 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		JMP lpConvertToASCII					;jump back to the top of the loop
 		
 	finished:
-		CMP tempNumRow, 1						;compare the number of rows to 1 to check for 1xM
-		JE FixRowCol							;if it is equal to 1 go to fix
-		CMP tempNumCol, 1						;;compare the number of cols to 1 to check for Mx1
-		JE FixRowCol							;if it is equal to 1 go to fix
-	
-		MOV tempNum, 00							;moves the null character into tempNum
-		ADD EBX, ESI							;adds the offset esi into ebx so we point to the right byte
-		SUB EBX, 5								;subtracts 5 to point to the very end of the string....
-		MOV EAX, tempNum						;moves the value of temp num into eax
-		MOV [EBX], EAX							;moves into the location ebx is pointing to the value of eax
-		RET										;return back to where i was called
-		
-		FixRowCol:
-			RET									;return back to where i was called.
+		RET
 		
 	oneByone:
 		MOV EBX, startAddr						;moves the starting address into ebx
@@ -306,4 +294,106 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		JMP finished							;jump to the finished section
 
 displayArray ENDP
+
+COMMENT %
+********************************************************************************
+*Name: sortedArray                                                             *
+*Purpose:                                                                      *
+*	           This method accepts the address of a dword array and the number *
+*		of dwords in that array. It returns TRUE (1 in AL register) if the array*
+*		is in ascending sorted order, and 0 otherwise. 						   *
+*																			   *
+*Date Created: 10/26/2019                                                      *
+*Date Modified: 10/26/2019                                                     *
+*                                                                              *
+*                                                                              *
+*@param lpArrayDwords:dword                                                    *
+*@param numElts:dword												 	       *
+*@return Boolean:Byte												 	       *
+*******************************************************************************%
+sortedArray PROC Near32 C uses EBX ECX EDX EDI, lpArrayDwords:dword, numElts:dword
+	LOCAL bool:byte
+	
+	MOV ECX, numElts							;Moves the number of elements into othe ecx register so we can track our loop
+	DEC ECX										;decrements the number of elements so dont grab outside of your area
+	MOV EDI, 0									;sets initial offset to 0
+	MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
+	
+	lpCheckAscending:
+		MOV EBX, [EAX + EDI]					;Move the value located at eax + edi into ebx
+		ADD EDI, 4								;increment our offset by 4 to get the next dword
+		MOV EDX, [EAX + EDI]					;Move the value located at eax + edi into edx
+		CMP EBX, EDX							;compare the two registers to see if ebx is less than or equal to edx
+		JLE LessThan							;if it is jump to appropriate section
+		MOV bool, 0								;if it is not, we can move 0 into our bool byte and assume it is not in sorted ascending order
+		JMP done								;jump to done
+		
+	done:
+		MOV AL, bool							;moves into AL the result of the loop above
+		RET										;returns back to where this method was called from
+		
+	LessThan:
+		MOV bool, 1								;move a 1 into our byte 
+		DEC ECX									;decrement our number of elements we have left
+		CMP ECX, 0								;compare to 0 to see if we are at the end of our loop 
+		JE done									;if it equals 0, then jump to done
+		JMP lpCheckAscending					;if not, then jump back to the top of the loop
+
+sortedArray ENDP
+
+COMMENT %
+********************************************************************************
+*Name: sumUpArray                                                              *
+*Purpose:                                                                      *
+*	       Adds up all the values in the matrix, and return the answer		   *
+*																			   *
+*Date Created: 10/26/2019                                                      *
+*Date Modified: 10/26/2019                                                     *
+*                                                                              *
+*                                                                              *
+*@param lpArrayDwords:dword                                                    *
+*@param rows:dword													 	       *
+*@param cols:dword 													 	       *
+*@return sum:dword															   *
+*******************************************************************************%
+sumUpArray PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, cols:dword
+	LOCAL sum:dword
+	
+	MOV EAX, rows								;moves the number of rows into eax so we can multiply it to get numElements
+	MUL cols									;Multiplies EAX by the number of cols
+	MOV ECX, EAX								;stores the number of elements 
+	MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
+	MOV EDI, 0									;set the intital offset to 0
+	MOV sum, 0									;set the intital sum to 0
+	
+	lpSumArray:
+		MOV EBX, [EAX + EDI]					;moves into ebx, the value located at eax offset edi
+		ADD sum, EBX							;add the value into the sum
+		ADD EDI, 4								;add 4 to edi so we get the next number in the sequence
+	loop lpSumArray								;decrement ecx and jump back to the top
+	
+	MOV EAX, sum								;move our sum into eax for return
+	RET											;return
+	
+sumUpArray ENDP
+
+COMMENT %
+********************************************************************************
+*Name: smallestValue                                                           *
+*Purpose:                                                                      *
+*	       Determine the smallest Value in the array and return the answer     *
+*																			   *
+*Date Created: 10/26/2019                                                      *
+*Date Modified: 10/26/2019                                                     *
+*                                                                              *
+*                                                                              *
+*@param lpArrayDwords:dword                                                    *
+*@param rows:dword													 	       *
+*@param cols:dword 													 	       *
+*@return smallestVal:dword													   *
+*******************************************************************************%
+smallestValue PROC Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
+	;LOCAL ??:byte
+
+smallestValue ENDP
 END

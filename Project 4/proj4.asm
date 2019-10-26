@@ -31,6 +31,10 @@
 	extractDwords PROTO Near32 C, StringofChars:dword, ArrayDwords:dword
 	
 	displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
+	
+	sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword
+	
+	sumUpArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
 
 ;******************************************************************************************
 
@@ -308,6 +312,9 @@ choiceC:
 	MOV row, EAX
 	
 	INVOKE displayArray, OFFSET arrayA, row, col, OFFSET strDisplay
+	
+	;INVOKE sortedArray, OFFSET arrayA, 6
+	INVOKE sumUpArray, OFFSET arrayA, row, col
 	DisplayString crlf
 	DisplayString crlf
 	DisplayString strDisplay

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/26/19 16:57:46
+Microsoft (R) Macro Assembler Version 6.11		    10/26/19 17:23:08
 proj4procs.asm						     Page 1 - 1
 
 
@@ -477,18 +477,19 @@ proj4procs.asm						     Page 1 - 1
  000002C3  F7 65 10			MUL cols									;Multiplies EAX by the number of cols
  000002C6  8B C8			MOV ECX, EAX								;stores the number of elements 
  000002C8  8B 45 08			MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
- 000002CB  BF 00000000			MOV EDI, 0
- 000002D0  C7 45 FC			MOV sum, 0
+ 000002CB  BF 00000000			MOV EDI, 0									;set the intital offset to 0
+ 000002D0  C7 45 FC			MOV sum, 0									;set the intital sum to 0
 	   00000000
 					
  000002D7				lpSumArray:
- 000002D7  8B 1C 07				MOV EBX, [EAX + EDI]
- 000002DA  01 5D FC				ADD sum, EBX
- 000002DD  83 C7 04				ADD EDI, 4
- 000002E0  E2 F5			loop lpSumArray
+ 000002D7  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx, the value located at eax offset edi
+ 000002DA  01 5D FC				ADD sum, EBX							;add the value into the sum
+ 000002DD  83 C7 04				ADD EDI, 4								;add 4 to edi so we get the next number in the sequence
+ 000002E0  E2 F5			loop lpSumArray								;decrement ecx and jump back to the top
 					
- 000002E2  8B 45 FC			MOV EAX, sum
-					RET
+ 000002E2  8B 45 FC			MOV EAX, sum								;move our sum into eax for return
+					RET											;return
+					
  000002EA			sumUpArray ENDP
 
 				COMMENT %
@@ -506,12 +507,44 @@ proj4procs.asm						     Page 1 - 1
 				*@param cols:dword 													 	       *
 				*@return smallestVal:dword													   *
 				*******************************************************************************%
- 000002EA			smallestValue PROC Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
-					;LOCAL ??:byte
+ 000002EA			smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, cols:dword
+					LOCAL smallestVal:dword
+					
+ 000002F3  8B 45 0C			MOV EAX, rows								;moves the number of rows into eax so we can multiply it to get numElements
+ 000002F6  F7 65 10			MUL cols									;Multiplies EAX by the number of cols
+ 000002F9  8B C8			MOV ECX, EAX								;stores the number of elements 
+ 000002FB  49				DEC ECX
+ 000002FC  8B 45 08			MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
+ 000002FF  BF 00000000			MOV EDI, 0									;set the intital offset to 0
+					
+ 00000304  8B 1C 07			MOV EBX, [EAX + EDI]
+ 00000307  89 5D FC			MOV smallestVal, EBX
+					
+ 0000030A				lpGetSmallest:
+ 0000030A  83 C7 04				ADD EDI, 4
+ 0000030D  8B 1C 07				MOV EBX, [EAX + EDI]
+ 00000310  3B 5D FC				CMP EBX, smallestVal
+ 00000313  7C 08				JL newSmallest
+ 00000315  49					DEC ECX
+ 00000316  83 F9 00				CMP ECX, 0
+ 00000319  74 0D				JE DoneLoop
+ 0000031B  EB ED				JMP lpGetSmallest
+						
+ 0000031D				newSmallest:
+ 0000031D  89 5D FC				MOV smallestVal, EBX
+ 00000320  49					DEC ECX
+ 00000321  83 F9 00				CMP ECX, 0
+ 00000324  74 02				JE DoneLoop
+ 00000326  EB E2				JMP lpGetSmallest
+						
+ 00000328				DoneLoop:
+ 00000328  8B 45 FC				MOV EAX, smallestVal
+						RET
+					
 
- 000002EA			smallestValue ENDP
+ 00000330			smallestValue ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/26/19 16:57:46
+Microsoft (R) Macro Assembler Version 6.11		    10/26/19 17:23:08
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -531,7 +564,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000002EA DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000330 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -578,10 +611,14 @@ extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public 
   finished . . . . . . . . . . .	L Near	 0000009B _TEXT	
 intasc32Comma  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-smallestValue  . . . . . . . . .	P Near	 000002EA _TEXT	Length= 00000000 Public C
+smallestValue  . . . . . . . . .	P Near	 000002EA _TEXT	Length= 00000046 Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
   cols . . . . . . . . . . . . .	DWord	 bp + 00000010
+  smallestVal  . . . . . . . . .	DWord	 bp - 00000004
+  lpGetSmallest  . . . . . . . .	L Near	 0000030A _TEXT	
+  newSmallest  . . . . . . . . .	L Near	 0000031D _TEXT	
+  DoneLoop . . . . . . . . . . .	L Near	 00000328 _TEXT	
 sortedArray  . . . . . . . . . .	P Near	 00000279 _TEXT	Length= 0000003E Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   numElts  . . . . . . . . . . .	DWord	 bp + 0000000C

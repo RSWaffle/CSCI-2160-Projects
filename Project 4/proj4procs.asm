@@ -392,8 +392,40 @@ COMMENT %
 *@param cols:dword 													 	       *
 *@return smallestVal:dword													   *
 *******************************************************************************%
-smallestValue PROC Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
-	;LOCAL ??:byte
+smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, cols:dword
+	LOCAL smallestVal:dword
+	
+	MOV EAX, rows								;moves the number of rows into eax so we can multiply it to get numElements
+	MUL cols									;Multiplies EAX by the number of cols
+	MOV ECX, EAX								;stores the number of elements 
+	DEC ECX										;decrement ECX so we work with n-1 elements
+	MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
+	MOV EDI, 0									;set the intital offset to 0
+	
+	MOV EBX, [EAX + EDI]						;moves into ebx the first value
+	MOV smallestVal, EBX						;stores the first value as the smallest one
+	
+	lpGetSmallest:
+		ADD EDI, 4								;increments the offset by 4 so we get the next dword
+		MOV EBX, [EAX + EDI]					;moves into ebx the value located at that location
+		CMP EBX, smallestVal					;compare that value to the current smallest number
+		JL newSmallest							;if the register is less than the current smallest value jump to new smallest
+		DEC ECX									;decrement ecx so we can terminate the loop eventually 
+		CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
+		JE DoneLoop								;if it is 0 then jump to done loop
+		JMP lpGetSmallest						;if it is not then jump back to the top
+		
+	newSmallest:
+		MOV smallestVal, EBX					;moves the value currently in ebx into our smallest value variable
+		DEC ECX									;decrement ecx so we can terminate the loop eventually 
+		CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
+		JE DoneLoop								;if it is 0 then jump to done loop
+		JMP lpGetSmallest						;if it is not then jump back to the top
+		
+	DoneLoop:
+		MOV EAX, smallestVal					;moves into eax the value in smallest value so we can return it
+		RET										;return
+	
 
 smallestValue ENDP
 END

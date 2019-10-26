@@ -35,6 +35,8 @@
 	sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword
 	
 	sumUpArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
+	
+	smallestValue PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
 
 ;******************************************************************************************
 
@@ -314,7 +316,8 @@ choiceC:
 	INVOKE displayArray, OFFSET arrayA, row, col, OFFSET strDisplay
 	
 	;INVOKE sortedArray, OFFSET arrayA, 6
-	INVOKE sumUpArray, OFFSET arrayA, row, col
+	;INVOKE sumUpArray, OFFSET arrayA, row, col
+	;INVOKE smallestValue, OFFSET arrayA, row, col
 	DisplayString crlf
 	DisplayString crlf
 	DisplayString strDisplay

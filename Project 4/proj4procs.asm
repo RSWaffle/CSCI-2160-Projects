@@ -18,9 +18,32 @@
 ;  List all necessary prototypes for methods to be called here
 
 	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-	intasc32Comma proto Near32 stdcall, lpStringToHold:dword, dval:dword
-	intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword
+	intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword			;converts ints to ascii
+	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
+	sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword			;returns 1 if the array passed in is sorted in ascending order
+	smallestValue PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword ;returns the smallest value in an array	
+	displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, ;converts an array passed in into ascii and formatting for display	
+	lpStringtoHold:dword
 ;******************************************************************************************
+COMMENT %
+
+******************************************************************************
+*Name: DisplayString                                                         *
+*Purpose:                                                                    *
+*	The purpose of this macro is to display a set of strings to the console  *
+*                                                                            *
+*Date Created: 10/02/2019                                                    *
+*Date Modified: 10/02/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param String1:byte                                                         *
+*****************************************************************************%
+DisplayString MACRO String:REQ
+
+	INVOKE putstring, ADDR String    				;;display The string passed in 
+
+ENDM
+
 COMMENT %
 
 ******************************************************************************
@@ -61,10 +84,16 @@ ENDM
 .DATA
 
 	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 + - 
-	tempNum dword 0 dup (12)
-	bNumBytes byte ?
-	iColCount dword 0
+	crlf byte  10,13,0														;Null-terminated string to skip to new line
+	strSortAlready byte 10,10,13, "!!! The data is already sorted !!!",0
+	strSortComplete byte 10,10,13, "Sort Complete!",0
+	tempNum dword 0 dup (12)												;memory to hold a temp number that is built
+	bNumBytes byte ?														;memory to hold the number of bytes in a string
+	iColCount dword 0														;memory to keep track of the col count
+	tempSelectionSortASCII dword 100 dup(0), 00								;memory to hold the string generated in ascii
 	bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
+	
+
 
 ;******************************************************************************************
 .CODE
@@ -280,7 +309,7 @@ displayArray PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, rows:dword, co
 		JMP lpConvertToASCII					;jump back to the top of the loop
 		
 	finished:
-		RET
+		RET										;return back to where i was called
 		
 	oneByone:
 		MOV EBX, startAddr						;moves the starting address into ebx
@@ -402,7 +431,7 @@ smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, c
 	MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
 	CMP ECX, 1									;compare ecx to one to see if the user entered 1x1
 	JE oneByone									;if it is then jump to the one by one section
-	DEC ECX										;decrement ECX so we work with n-1 elements
+	;DEC ECX									;decrement ECX so we work with n-1 elements
 	
 	MOV EBX, [EAX + EDI]						;moves into ebx the first value
 	MOV smallestVal, EBX						;stores the first value as the smallest one
@@ -435,4 +464,116 @@ smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, c
 			
 
 smallestValue ENDP
+
+COMMENT %
+********************************************************************************
+*Name: selectionSort                                                           *
+*Purpose:                                                                      *
+*	      Takes in an array, and sorts it displaying each pass 				   *
+*																			   *
+*Date Created: 10/26/2019                                                      *
+*Date Modified: 10/27/2019                                                     *
+*                                                                              *
+*                                                                              *
+*@param lpArrayDwords:dword                                                    *
+*@param iLegth:dword													 	   *
+*******************************************************************************%
+selectionSort PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, iLength:dword
+	LOCAL smallestVal:dword, startAddr:dword, offsetAddr:Dword, storedNum:Dword, counter:dword
+	
+	MOV EAX, lpArrayDwords						;moves the address into eax						
+	MOV startAddr, EAX							;stores this address into a different variable for clarity
+	MOV ECX, 0									;sets ecx to 0 to set our initial counter
+	MOV EDI, 0									;sets the initial offset to 0
+	MOV EAX, iLength							;moves ilength to eax so we dont do mem to mem
+	MOV counter, EAX 							;stores this as a seperate counter variable seperete from ecx
+	
+	MOV EAX, startAddr							;moves the starting address into eax
+	MOV offsetAddr, EAX							;moves the intital offset address into eax
+	MOV EBX, [EAX]								;moves into ebx the valuew located at what eax points to
+	MOV storedNum, EBX							;moves ebx into a variable as this is the first number we are storing
+	
+	INVOKE sortedArray, lpArrayDwords, iLength	;invoke the sorted array method to check if the array is already sorted
+	CMP AL, 1									;compares the result al to 1
+	JE alreadySorted							;if it equals 1 then the data is already sorted and we can jump to the appropriate section
+	
+	lpSelectionSort:
+		INVOKE sortedArray, lpArrayDwords, iLength		;check if the array is sorted.
+		CMP AL, 1								;compare al to 1 to see if the data is sorted
+		JE SortComplete							;if it equals 1 then we jump to sort complete
+		DisplayString crlf						;display the characters to skip to a new line
+		PUSH EDI								;preserve our edi so it doesnt get trashed when we invoke these methods
+		PUSH EBX								;preserve our ebx so it doesnt get trashed when we invoke these methods
+		INVOKE displayArray, startAddr, 1, 		;display the array with 1 row and ilength cols
+		iLength, addr tempSelectionSortASCII
+		DisplayString tempSelectionSortASCII	;display the address that gets returns previously
+		;INVOKE sortedArray, lpArrayDwords, 		;check if the array is sorted.
+
+		POP EBX									;return our original ebx
+		POP EDI									;return our orginal edi
+		INC ECX									;increment ecx so we know how what pass we are on
+		;CMP AL, 1								;compare al to 1 to see if the data is sorted
+		;JE SortComplete							;if it equals 1 then we jump to sort complete
+		DEC counter								;decrement our counter so we know how many swaps we have left to do
+		CMP counter, 0							;if it equals 0, then the sort is complete
+		JE SortComplete							;jump to sort complete
+		CMP counter, 1							;if it equals 1
+		JE swap									;jump to the section to swap the last two numbers. 
+		INVOKE smallestValue, offsetAddr, 1, 	;get the smallest value starting at the offset address (the values before offset address should already be sorted so we can ignore them)
+		counter
+		MOV smallestVal, EAX					;moves the returning eax value into smallestVal
+		PUSH EDI								;store our edi so it doesnt get trashed (we could lose our offset)
+		MOV EDI, 0								;move intial offset to 0 (going to get offset of the smallest number found)
+		
+		lpGetPosofSmallest:
+			MOV EBX, offsetAddr					;moves the offset address into ebx so we can reference it
+			MOV EAX, [EBX + EDI]				;moves the value that ebx + edi points to into eax
+			CMP EAX, smallestVal				;compares this number to the smallest value to check if we found it 
+			JE foundOffset						;if we have we have our offset in edi
+			ADD EDI, 4							;if not we can add 4 to edi to get the next number
+			JMP lpGetPosofSmallest				;jump to the top of the loop
+			
+			foundOffset:
+			CMP counter, 1						;compare the counter to 1 to see if we only need to swap the last two 
+			JE swap								;if it equals 1 then we jump to the swap section
+			MOV EAX, [EBX + EDI]				;if not, we move ointo eax the number found
+			MOV EDX, storedNum					;move into edx the stored number
+			MOV [EBX + EDI], EDX				;moves the stored number into the position where the smallest was found
+			MOV [EBX], EAX						;then we move the smallest number into the first position
+			POP EDI								;restore our original edi
+
+		MOV EAX, offsetAddr						;moves the offset address into eax			
+		ADD EAX, 4								;adds 4 into eax to get the next number
+		ADD EDI, 4								;add 4 to edi so we keep track of the offset from the original address
+		MOV offsetAddr, EAX						;moves into offset address our new addres
+		MOV EBX, [EAX]							;moves into oebx the first value that eax points to
+		MOV storedNum, EBX						;this is our new stored number
+	JMP lpSelectionSort							;jump back to the top of the loop
+			
+	swap:
+		MOV EBX, offsetAddr						;moves into ebx the offset address
+		MOV EAX, [EBX + 4]						;moves into eax the next number in offset address
+		MOV EDX, storedNum						;moves into edx our stored number
+		MOV [EBX + 4], EDX						;moves the stored number into offset 4
+		MOV [EBX], EAX							;moves eax into the first value ebx points to
+		JMP SortComplete						;the sort is complete and we can jump to the section
+		
+	alreadySorted:
+		DisplayString crlf								;display the characters that skip to a new line
+		INVOKE displayArray, startAddr, 1, iLength, 	;call display array method to get the string
+		addr tempSelectionSortASCII
+		DisplayString tempSelectionSortASCII			;display the string that was given back to us
+		DisplayString strSortAlready					;display the string telling the user that the data is already in sorted order
+		DisplayString crlf								;display the characters that skip to a new line						
+		RET												;return
+	
+	SortComplete:	
+		DisplayString crlf								;display the characters that skip to a new line
+		INVOKE displayArray, lpArrayDwords, 1, iLength, ;call display array method to get the string
+		addr tempSelectionSortASCII
+		DisplayString tempSelectionSortASCII			;display the string that was given back to us
+		DisplayString strSortComplete					;display the string telling the user that the data is sorted
+		DisplayString crlf								;display the characters that skip to a new line	
+		RET
+selectionSort ENDP
 END

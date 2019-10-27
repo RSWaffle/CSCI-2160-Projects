@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/26/19 19:30:28
+Microsoft (R) Macro Assembler Version 6.11		    10/27/19 13:46:43
 proj4procs.asm						     Page 1 - 1
 
 
@@ -22,9 +22,32 @@ proj4procs.asm						     Page 1 - 1
 				;  List all necessary prototypes for methods to be called here
 
 					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-					intasc32Comma proto Near32 stdcall, lpStringToHold:dword, dval:dword
-					intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword
+					intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword			;converts ints to ascii
+					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
+					sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword			;returns 1 if the array passed in is sorted in ascending order
+					smallestValue PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword ;returns the smallest value in an array	
+					displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, ;converts an array passed in into ascii and formatting for display	
+					lpStringtoHold:dword
 				;******************************************************************************************
+				COMMENT %
+
+				******************************************************************************
+				*Name: DisplayString                                                         *
+				*Purpose:                                                                    *
+				*	The purpose of this macro is to display a set of strings to the console  *
+				*                                                                            *
+				*Date Created: 10/02/2019                                                    *
+				*Date Modified: 10/02/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*****************************************************************************%
+				DisplayString MACRO String:REQ
+
+					INVOKE putstring, ADDR String    				;;display The string passed in 
+
+				ENDM
+
 				COMMENT %
 
 				******************************************************************************
@@ -32,8 +55,8 @@ proj4procs.asm						     Page 1 - 1
 				*Purpose:                                                                    *
 				*	  Intakes an address and counts the number of bytes into a string including*
 				*     the null char and returns the number.                                  *
-				*Date Created: 10/02/2019                                                    *
-				*Date Modified: 10/02/2019                                                   *
+				*Date Created: 10/24/2019                                                    *
+				*Date Modified: 10/25/2019                                                   *
 				*                                                                            *
 				*                                                                            *
 				*@param String1:byte                                                         *
@@ -67,10 +90,28 @@ proj4procs.asm						     Page 1 - 1
  00000000 30 31 32 33 34		WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 + - 
 	   35 36 37 38 39
 	   2D 2B
- 0000000C				tempNum dword 0 dup (12)
- 0000000C 00				bNumBytes byte ?
- 0000000D 00000000			iColCount dword 0
- 00000011				bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
+ 0000000C 0A 0D 00			crlf byte  10,13,0														;Null-terminated string to skip to new line
+ 0000000F 0A 0A 0D 21 21		strSortAlready byte 10,10,13, "!!! The data is already sorted !!!",0
+	   21 20 54 68 65
+	   20 64 61 74 61
+	   20 69 73 20 61
+	   6C 72 65 61 64
+	   79 20 73 6F 72
+	   74 65 64 20 21
+	   21 21 00
+ 00000035 0A 0A 0D 53 6F		strSortComplete byte 10,10,13, "Sort Complete!",0
+	   72 74 20 43 6F
+	   6D 70 6C 65 74
+	   65 21 00
+ 00000047				tempNum dword 0 dup (12)												;memory to hold a temp number that is built
+ 00000047 00				bNumBytes byte ?														;memory to hold the number of bytes in a string
+ 00000048 00000000			iColCount dword 0														;memory to keep track of the col count
+ 0000004C  00000064 [			tempSelectionSortASCII dword 100 dup(0), 00								;memory to hold the string generated in ascii
+	    00000000
+	   ] 00000000
+ 000001E0				bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
+					
+
 
 				;******************************************************************************************
  00000000			.CODE
@@ -119,7 +160,7 @@ proj4procs.asm						     Page 1 - 1
  00000042  EB DC				JMP lpConvertandMove					;jump back up to the top to start the loop over again
 						
  00000044					ValidChar:
- 00000044  88 9F 00000011 R				MOV bTemps[EDI], BL					;Moves into btemps at position edi the byte in bl to hold that byte of the number that is building
+ 00000044  88 9F 000001E0 R				MOV bTemps[EDI], BL					;Moves into btemps at position edi the byte in bl to hold that byte of the number that is building
  0000004A  FF 45 F8					INC addASCII						;increment to the next position of addascii so we can see if the next char is valid
  0000004D  8B 45 F8					MOV EAX, addASCII					;moves into eax the new address of the next byte 
  00000050  8A 18					MOV BL, byte ptr [EAX]				;moves the byte into Bl 
@@ -139,7 +180,7 @@ proj4procs.asm						     Page 1 - 1
  00000077  89 02					MOV [EDX], EAX						;moves the resulting EAX value into the output array at the correct position
  00000079  B9 00000004					MOV ECX, 4							;imputs 4 into ECX so we can clear our bTemps variable to prevent curruption
  0000007E						lpClearBTemp:
- 0000007E  C6 81 00000011 R					MOV [bTemps + ECX], 0			;moves 0 into the slot ECX of bTemps
+ 0000007E  C6 81 000001E0 R					MOV [bTemps + ECX], 0			;moves 0 into the slot ECX of bTemps
 	   00
  00000085  E2 F7					loop  lpClearBTemp					;jump back to the top of the current loop
  00000087  83 45 FC 04					ADD addOut, 4						;adds 4 to the output address so we can get the next dword starting point
@@ -192,13 +233,13 @@ proj4procs.asm						     Page 1 - 1
  000000D1  8B 55 F8			MOV EDX, outAddr							;moves the address of out address to edx so we can derefrence the address
  000000D4  8B 5D FC			MOV EBX, startAddr							;moves the address of out address to edx so we can derefrence the address
 					
- 000000D7  C7 05 0000000C R		MOV tempNum, 09								;set the temp number to the tab character
+ 000000D7  C7 05 00000047 R		MOV tempNum, 09								;set the temp number to the tab character
 	   00000009
  000000E1  8B DA			MOV EBX, EDX								;moves the address of out address into ebx so we can use it to put the character
  000000E3  53				PUSH EBX									;store ebx so we can have the unaffected value later
  000000E4  03 DE			ADD EBX, ESI								;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
  000000E6  50				PUSH EAX									;preserve EAX so we can restore it later
- 000000E7  A1 0000000C R		MOV EAX, tempNum							;move into eax the temp number which is tab
+ 000000E7  A1 00000047 R		MOV EAX, tempNum							;move into eax the temp number which is tab
  000000EC  89 03			MOV [EBX], EAX								;moves into the location ebx points to the temp number 
  000000EE  5B				POP EBX										;restore our unaffected EBX
 					getBytes EDX								;call the get bytes macro where we count the number of bytes used in the output address
@@ -234,7 +275,7 @@ proj4procs.asm						     Page 1 - 1
  00000122  0F 84 0000012E			JE finished								;if it is equal to 0, jump to the finished section
  00000128  8B 5D FC				MOV EBX, startAddr						;moves the address of out address to edx so we can derefrence the address
  0000012B  8B 04 1F				MOV EAX, [EBX + EDI]					;moves into eax the address of ebx + edi so we can get the correct number to convert
- 0000012E  A3 0000000C R			MOV tempNum, EAX						;stores the number obtained in EAX into tempNum so we can use it in invoke, cant use eax
+ 0000012E  A3 00000047 R			MOV tempNum, EAX						;stores the number obtained in EAX into tempNum so we can use it in invoke, cant use eax
  00000133  8B DA				MOV EBX, EDX							;moves into ebx, the adress of the outaddress
  00000135  53					PUSH EBX								;stores our ebx variable so we can get it back later
  00000136  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
@@ -268,13 +309,13 @@ proj4procs.asm						     Page 1 - 1
  00000168  3B 4D 10				CMP ECX, cols							;compare ecx to the number of cols to check if we are at the end of the row
  0000016B  74 72				JE NoComma								;if there is no more numbers to the row, the jump to the no comma section 
 						
- 0000016D  C7 05 0000000C R			MOV tempNum, 44							;moves the comma ascii value into temp num
+ 0000016D  C7 05 00000047 R			MOV tempNum, 44							;moves the comma ascii value into temp num
 	   0000002C
  00000177  8B DA				MOV EBX, EDX							;moves into ebx, the adress of the outaddress
  00000179  53					PUSH EBX								;stores our ebx variable so we can get it back later
  0000017A  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
  0000017C  50					PUSH EAX								;store our EAX so we can get it back 
- 0000017D  A1 0000000C R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
+ 0000017D  A1 00000047 R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
  00000182  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
  00000184  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
@@ -297,12 +338,12 @@ proj4procs.asm						     Page 1 - 1
  0000019F  5D		     1		POP EBP								;restore originla ebp
  000001A0  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
  000001A2  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
- 000001A3  C7 05 0000000C R			MOV tempNum, 32							;moves the space ascii value into temp num
+ 000001A3  C7 05 00000047 R			MOV tempNum, 32							;moves the space ascii value into temp num
 	   00000020
  000001AD  8B DA				MOV EBX, EDX							;moves the address in edx into ebx so we can use it 
  000001AF  53					PUSH EBX								;stores our ebx variable so we can get it back later
  000001B0  03 DE				ADD EBX, ESI							;adds into ebx the offset of ebx esi, so we get the correct byte to place a character
- 000001B2  A1 0000000C R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
+ 000001B2  A1 00000047 R			MOV EAX, tempNum						;moves into EAX the value temp num so we can but it into place without calling mem to mem
  000001B7  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
  000001B9  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
@@ -333,12 +374,12 @@ proj4procs.asm						     Page 1 - 1
  000001DF				NoComma:
  000001DF  B9 00000001				MOV ECX, 1								;reset the col value back to 1
  000001E4  FF 4D 0C				DEC rows								;decrement the number of rows so we can terminate this loop eventually
- 000001E7  C7 05 0000000C R			MOV tempNum, 10							;moves the new line character into tempNum
+ 000001E7  C7 05 00000047 R			MOV tempNum, 10							;moves the new line character into tempNum
 	   0000000A
  000001F1  53					PUSH EBX								;pushes ebx to the stack so we can have the unaffected value later
  000001F2  03 DE				ADD EBX, ESI							;add the offset esi into ebx so we point to the right byte to place
  000001F4  50					PUSH EAX								;push eax to store it
- 000001F5  A1 0000000C R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
+ 000001F5  A1 00000047 R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
  000001FA  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
  000001FC  55		     1		PUSH EBP							;preserves base register
@@ -362,12 +403,12 @@ proj4procs.asm						     Page 1 - 1
  00000219  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
  0000021A  58					POP EAX									;restore original eax
  0000021B  5B					POP EBX									;restore original ebx
- 0000021C  C7 05 0000000C R			MOV tempNum, 09							;moves the tab character into tempNum
+ 0000021C  C7 05 00000047 R			MOV tempNum, 09							;moves the tab character into tempNum
 	   00000009
  00000226  53					PUSH EBX								;pushes ebx to the stack so we can have the unaffected value later
  00000227  03 DE				ADD EBX, ESI							;add the offset esi into ebx so we point to the right byte to place
  00000229  50					PUSH EAX								;push eax to store it
- 0000022A  A1 0000000C R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
+ 0000022A  A1 00000047 R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
  0000022F  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
  00000231  55		     1		PUSH EBP							;preserves base register
@@ -394,12 +435,12 @@ proj4procs.asm						     Page 1 - 1
  00000251  E9 FFFFFEC8				JMP lpConvertToASCII					;jump back to the top of the loop
 						
  00000256				finished:
-						RET
+						RET										;return back to where i was called
 						
  0000025B				oneByone:
  0000025B  8B 5D FC				MOV EBX, startAddr						;moves the starting address into ebx
  0000025E  8B 03				MOV EAX, [EBX]							;moves the value ebx points to into eax
- 00000260  A3 0000000C R			MOV tempNum, EAX						;moves eax into the temp num variable
+ 00000260  A3 00000047 R			MOV tempNum, EAX						;moves eax into the temp num variable
  00000265  8B DA				MOV EBX, EDX							;moves the eaddress of edx into ebx so we can modify it
  00000267  53					PUSH EBX								;pushes ebx to store it
  00000268  03 DE				ADD EBX, ESI							;adds the offset esi into ebx so we point to the right place
@@ -515,44 +556,155 @@ proj4procs.asm						     Page 1 - 1
  000002FB  F7 65 10			MUL cols									;Multiplies EAX by the number of cols
  000002FE  8B C8			MOV ECX, EAX								;stores the number of elements 
  00000300  8B 45 08			MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
- 00000303  83 F9 01			CMP ECX, 1
- 00000306  74 2D			JE oneByone
- 00000308  49				DEC ECX										;decrement ECX so we work with n-1 elements
-
+ 00000303  83 F9 01			CMP ECX, 1									;compare ecx to one to see if the user entered 1x1
+ 00000306  74 2C			JE oneByone									;if it is then jump to the one by one section
+					;DEC ECX									;decrement ECX so we work with n-1 elements
 					
- 00000309  8B 1C 07			MOV EBX, [EAX + EDI]						;moves into ebx the first value
- 0000030C  89 5D FC			MOV smallestVal, EBX						;stores the first value as the smallest one
+ 00000308  8B 1C 07			MOV EBX, [EAX + EDI]						;moves into ebx the first value
+ 0000030B  89 5D FC			MOV smallestVal, EBX						;stores the first value as the smallest one
 					
- 0000030F				lpGetSmallest:
- 0000030F  83 C7 04				ADD EDI, 4								;increments the offset by 4 so we get the next dword
- 00000312  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx the value located at that location
- 00000315  3B 5D FC				CMP EBX, smallestVal					;compare that value to the current smallest number
- 00000318  7C 08				JL newSmallest							;if the register is less than the current smallest value jump to new smallest
- 0000031A  49					DEC ECX									;decrement ecx so we can terminate the loop eventually 
- 0000031B  83 F9 00				CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
- 0000031E  74 0D				JE DoneLoop								;if it is 0 then jump to done loop
- 00000320  EB ED				JMP lpGetSmallest						;if it is not then jump back to the top
+ 0000030E				lpGetSmallest:
+ 0000030E  83 C7 04				ADD EDI, 4								;increments the offset by 4 so we get the next dword
+ 00000311  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx the value located at that location
+ 00000314  3B 5D FC				CMP EBX, smallestVal					;compare that value to the current smallest number
+ 00000317  7C 08				JL newSmallest							;if the register is less than the current smallest value jump to new smallest
+ 00000319  49					DEC ECX									;decrement ecx so we can terminate the loop eventually 
+ 0000031A  83 F9 00				CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
+ 0000031D  74 0D				JE DoneLoop								;if it is 0 then jump to done loop
+ 0000031F  EB ED				JMP lpGetSmallest						;if it is not then jump back to the top
 						
- 00000322				newSmallest:
- 00000322  89 5D FC				MOV smallestVal, EBX					;moves the value currently in ebx into our smallest value variable
- 00000325  49					DEC ECX									;decrement ecx so we can terminate the loop eventually 
- 00000326  83 F9 00				CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
- 00000329  74 02				JE DoneLoop								;if it is 0 then jump to done loop
- 0000032B  EB E2				JMP lpGetSmallest						;if it is not then jump back to the top
+ 00000321				newSmallest:
+ 00000321  89 5D FC				MOV smallestVal, EBX					;moves the value currently in ebx into our smallest value variable
+ 00000324  49					DEC ECX									;decrement ecx so we can terminate the loop eventually 
+ 00000325  83 F9 00				CMP ECX, 0								;compares ecx to 0, so we check to see if the loop is done
+ 00000328  74 02				JE DoneLoop								;if it is 0 then jump to done loop
+ 0000032A  EB E2				JMP lpGetSmallest						;if it is not then jump back to the top
 						
- 0000032D				DoneLoop:
- 0000032D  8B 45 FC				MOV EAX, smallestVal					;moves into eax the value in smallest value so we can return it
+ 0000032C				DoneLoop:
+ 0000032C  8B 45 FC				MOV EAX, smallestVal					;moves into eax the value in smallest value so we can return it
 						RET										;return
 						
- 00000335				oneByone:
- 00000335  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx the first value
- 00000338  89 5D FC				MOV smallestVal, EBX					;stores the first value as the smallest one
- 0000033B  EB F0				JMP DoneLoop
+ 00000334				oneByone:
+ 00000334  8B 1C 07				MOV EBX, [EAX + EDI]					;moves into ebx the first value
+ 00000337  89 5D FC				MOV smallestVal, EBX					;stores the first value as the smallest one
+ 0000033A  EB F0				JMP DoneLoop							;jump to end of loop
 							
 
- 0000033D			smallestValue ENDP
+ 0000033C			smallestValue ENDP
+
+				COMMENT %
+				********************************************************************************
+				*Name: selectionSort                                                           *
+				*Purpose:                                                                      *
+				*	      Takes in an array, and sorts it displaying each pass 				   *
+				*																			   *
+				*Date Created: 10/26/2019                                                      *
+				*Date Modified: 10/27/2019                                                     *
+				*                                                                              *
+				*                                                                              *
+				*@param lpArrayDwords:dword                                                    *
+				*@param iLegth:dword													 	   *
+				*******************************************************************************%
+ 0000033C			selectionSort PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, iLength:dword
+					LOCAL smallestVal:dword, startAddr:dword, offsetAddr:Dword, storedNum:Dword, counter:dword
+					
+ 00000345  8B 45 08			MOV EAX, lpArrayDwords						;moves the address into eax						
+ 00000348  89 45 F8			MOV startAddr, EAX							;stores this address into a different variable for clarity
+ 0000034B  B9 00000000			MOV ECX, 0									;sets ecx to 0 to set our initial counter
+ 00000350  BF 00000000			MOV EDI, 0									;sets the initial offset to 0
+ 00000355  8B 45 0C			MOV EAX, iLength							;moves ilength to eax so we dont do mem to mem
+ 00000358  89 45 EC			MOV counter, EAX 							;stores this as a seperate counter variable seperete from ecx
+					
+ 0000035B  8B 45 F8			MOV EAX, startAddr							;moves the starting address into eax
+ 0000035E  89 45 F4			MOV offsetAddr, EAX							;moves the intital offset address into eax
+ 00000361  8B 18			MOV EBX, [EAX]								;moves into ebx the valuew located at what eax points to
+ 00000363  89 5D F0			MOV storedNum, EBX							;moves ebx into a variable as this is the first number we are storing
+					
+					INVOKE sortedArray, lpArrayDwords, iLength	;invoke the sorted array method to check if the array is already sorted
+ 00000374  3C 01			CMP AL, 1									;compares the result al to 1
+ 00000376  0F 84 000000B8		JE alreadySorted							;if it equals 1 then the data is already sorted and we can jump to the appropriate section
+					
+ 0000037C				lpSelectionSort:
+						INVOKE sortedArray, lpArrayDwords, iLength		;check if the array is sorted.
+ 0000038A  3C 01				CMP AL, 1								;compare al to 1 to see if the data is sorted
+ 0000038C  0F 84 000000E4			JE SortComplete							;if it equals 1 then we jump to sort complete
+						DisplayString crlf						;display the characters to skip to a new line
+ 0000039C  57					PUSH EDI								;preserve our edi so it doesnt get trashed when we invoke these methods
+ 0000039D  53					PUSH EBX								;preserve our ebx so it doesnt get trashed when we invoke these methods
+						INVOKE displayArray, startAddr, 1, 		;display the array with 1 row and ilength cols
+						iLength, addr tempSelectionSortASCII
+						DisplayString tempSelectionSortASCII	;display the address that gets returns previously
+						;INVOKE sortedArray, lpArrayDwords, 		;check if the array is sorted.
+
+ 000003BD  5B					POP EBX									;return our original ebx
+ 000003BE  5F					POP EDI									;return our orginal edi
+ 000003BF  41					INC ECX									;increment ecx so we know how what pass we are on
+						;CMP AL, 1								;compare al to 1 to see if the data is sorted
+						;JE SortComplete							;if it equals 1 then we jump to sort complete
+ 000003C0  FF 4D EC				DEC counter								;decrement our counter so we know how many swaps we have left to do
+ 000003C3  83 7D EC 00				CMP counter, 0							;if it equals 0, then the sort is complete
+ 000003C7  0F 84 000000A9			JE SortComplete							;jump to sort complete
+ 000003CD  83 7D EC 01				CMP counter, 1							;if it equals 1
+ 000003D1  74 51				JE swap									;jump to the section to swap the last two numbers. 
+						INVOKE smallestValue, offsetAddr, 1, 	;get the smallest value starting at the offset address (the values before offset address should already be sorted so we can ignore them)
+						counter
+ 000003E3  89 45 FC				MOV smallestVal, EAX					;moves the returning eax value into smallestVal
+ 000003E6  57					PUSH EDI								;store our edi so it doesnt get trashed (we could lose our offset)
+ 000003E7  BF 00000000				MOV EDI, 0								;move intial offset to 0 (going to get offset of the smallest number found)
+						
+ 000003EC					lpGetPosofSmallest:
+ 000003EC  8B 5D F4					MOV EBX, offsetAddr					;moves the offset address into ebx so we can reference it
+ 000003EF  8B 04 1F					MOV EAX, [EBX + EDI]				;moves the value that ebx + edi points to into eax
+ 000003F2  3B 45 FC					CMP EAX, smallestVal				;compares this number to the smallest value to check if we found it 
+ 000003F5  74 05					JE foundOffset						;if we have we have our offset in edi
+ 000003F7  83 C7 04					ADD EDI, 4							;if not we can add 4 to edi to get the next number
+ 000003FA  EB F0					JMP lpGetPosofSmallest				;jump to the top of the loop
+							
+ 000003FC						foundOffset:
+ 000003FC  83 7D EC 01					CMP counter, 1						;compare the counter to 1 to see if we only need to swap the last two 
+ 00000400  74 22					JE swap								;if it equals 1 then we jump to the swap section
+ 00000402  8B 04 1F					MOV EAX, [EBX + EDI]				;if not, we move ointo eax the number found
+ 00000405  8B 55 F0					MOV EDX, storedNum					;move into edx the stored number
+ 00000408  89 14 1F					MOV [EBX + EDI], EDX				;moves the stored number into the position where the smallest was found
+ 0000040B  89 03					MOV [EBX], EAX						;then we move the smallest number into the first position
+ 0000040D  5F						POP EDI								;restore our original edi
+
+ 0000040E  8B 45 F4				MOV EAX, offsetAddr						;moves the offset address into eax			
+ 00000411  83 C0 04				ADD EAX, 4								;adds 4 into eax to get the next number
+ 00000414  83 C7 04				ADD EDI, 4								;add 4 to edi so we keep track of the offset from the original address
+ 00000417  89 45 F4				MOV offsetAddr, EAX						;moves into offset address our new addres
+ 0000041A  8B 18				MOV EBX, [EAX]							;moves into oebx the first value that eax points to
+ 0000041C  89 5D F0				MOV storedNum, EBX						;this is our new stored number
+ 0000041F  E9 FFFFFF58			JMP lpSelectionSort							;jump back to the top of the loop
+							
+ 00000424				swap:
+ 00000424  8B 5D F4				MOV EBX, offsetAddr						;moves into ebx the offset address
+ 00000427  8B 43 04				MOV EAX, [EBX + 4]						;moves into eax the next number in offset address
+ 0000042A  8B 55 F0				MOV EDX, storedNum						;moves into edx our stored number
+ 0000042D  89 53 04				MOV [EBX + 4], EDX						;moves the stored number into offset 4
+ 00000430  89 03				MOV [EBX], EAX							;moves eax into the first value ebx points to
+ 00000432  EB 42				JMP SortComplete						;the sort is complete and we can jump to the section
+						
+ 00000434				alreadySorted:
+						DisplayString crlf								;display the characters that skip to a new line
+						INVOKE displayArray, startAddr, 1, iLength, 	;call display array method to get the string
+						addr tempSelectionSortASCII
+						DisplayString tempSelectionSortASCII			;display the string that was given back to us
+						DisplayString strSortAlready					;display the string telling the user that the data is already in sorted order
+						DisplayString crlf								;display the characters that skip to a new line						
+						RET												;return
+					
+ 00000476				SortComplete:	
+						DisplayString crlf								;display the characters that skip to a new line
+						INVOKE displayArray, lpArrayDwords, 1, iLength, ;call display array method to get the string
+						addr tempSelectionSortASCII
+						DisplayString tempSelectionSortASCII			;display the string that was given back to us
+						DisplayString strSortComplete					;display the string telling the user that the data is sorted
+						DisplayString crlf								;display the characters that skip to a new line	
+						RET
+ 000004B8			selectionSort ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/26/19 19:30:28
+Microsoft (R) Macro Assembler Version 6.11		    10/27/19 13:46:43
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -562,6 +714,7 @@ Macros:
 
                 N a m e                 Type
 
+DisplayString  . . . . . . . . .	Proc
 getBytes . . . . . . . . . . . .	Proc
 
 
@@ -571,8 +724,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000033D DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001E0 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000004B8 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -617,17 +770,31 @@ extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public 
   lpClearBTemp . . . . . . . . .	L Near	 0000007E _TEXT	
   ValidNextChar  . . . . . . . .	L Near	 00000095 _TEXT	
   finished . . . . . . . . . . .	L Near	 0000009B _TEXT	
-intasc32Comma  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-smallestValue  . . . . . . . . .	P Near	 000002EA _TEXT	Length= 00000053 Public C
+putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+selectionSort  . . . . . . . . .	P Near	 0000033C _TEXT	Length= 0000017C Public C
+  lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
+  iLength  . . . . . . . . . . .	DWord	 bp + 0000000C
+  smallestVal  . . . . . . . . .	DWord	 bp - 00000004
+  startAddr  . . . . . . . . . .	DWord	 bp - 00000008
+  offsetAddr . . . . . . . . . .	DWord	 bp - 0000000C
+  storedNum  . . . . . . . . . .	DWord	 bp - 00000010
+  counter  . . . . . . . . . . .	DWord	 bp - 00000014
+  lpSelectionSort  . . . . . . .	L Near	 0000037C _TEXT	
+  lpGetPosofSmallest . . . . . .	L Near	 000003EC _TEXT	
+  foundOffset  . . . . . . . . .	L Near	 000003FC _TEXT	
+  swap . . . . . . . . . . . . .	L Near	 00000424 _TEXT	
+  alreadySorted  . . . . . . . .	L Near	 00000434 _TEXT	
+  SortComplete . . . . . . . . .	L Near	 00000476 _TEXT	
+smallestValue  . . . . . . . . .	P Near	 000002EA _TEXT	Length= 00000052 Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   rows . . . . . . . . . . . . .	DWord	 bp + 0000000C
   cols . . . . . . . . . . . . .	DWord	 bp + 00000010
   smallestVal  . . . . . . . . .	DWord	 bp - 00000004
-  lpGetSmallest  . . . . . . . .	L Near	 0000030F _TEXT	
-  newSmallest  . . . . . . . . .	L Near	 00000322 _TEXT	
-  DoneLoop . . . . . . . . . . .	L Near	 0000032D _TEXT	
-  oneByone . . . . . . . . . . .	L Near	 00000335 _TEXT	
+  lpGetSmallest  . . . . . . . .	L Near	 0000030E _TEXT	
+  newSmallest  . . . . . . . . .	L Near	 00000321 _TEXT	
+  DoneLoop . . . . . . . . . . .	L Near	 0000032C _TEXT	
+  oneByone . . . . . . . . . . .	L Near	 00000334 _TEXT	
 sortedArray  . . . . . . . . . .	P Near	 00000279 _TEXT	Length= 0000003E Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008
   numElts  . . . . . . . . . . .	DWord	 bp + 0000000C
@@ -657,10 +824,14 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 WhiteListChars . . . . . . . . .	Byte	 00000000 _DATA	
-bNumBytes  . . . . . . . . . . .	Byte	 0000000C _DATA	
-bTemps . . . . . . . . . . . . .	Byte	 00000011 _DATA	
-iColCount  . . . . . . . . . . .	DWord	 0000000D _DATA	
-tempNum  . . . . . . . . . . . .	DWord	 0000000C _DATA	
+bNumBytes  . . . . . . . . . . .	Byte	 00000047 _DATA	
+bTemps . . . . . . . . . . . . .	Byte	 000001E0 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 0000000C _DATA	
+iColCount  . . . . . . . . . . .	DWord	 00000048 _DATA	
+strSortAlready . . . . . . . . .	Byte	 0000000F _DATA	
+strSortComplete  . . . . . . . .	Byte	 00000035 _DATA	
+tempNum  . . . . . . . . . . . .	DWord	 00000047 _DATA	
+tempSelectionSortASCII . . . . .	DWord	 0000004C _DATA	
 
 	   0 Warnings
 	   0 Errors

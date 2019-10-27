@@ -32,7 +32,7 @@
 	
 	displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, lpStringtoHold:dword
 	
-	sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword
+	selectionSort PROTO Near32 C, lpArrayDwords:dword, iLength:dword
 	
 	sumUpArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword
 	
@@ -96,6 +96,43 @@ CvtoNum MACRO String:REQ
 	
 ENDM
 
+COMMENT %
+
+******************************************************************************
+*Name: getBytes                                                              *
+*Purpose:                                                                    *
+*	  Intakes an address and counts the number of bytes into a string including*
+*     the null char and returns the number.                                  *
+*Date Created: 10/24/2019                                                    *
+*Date Modified: 10/25/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param String1:byte                                                         *
+*****************************************************************************%
+getBytes MACRO String:REQ
+	LOCAL stLoop
+	LOCAL done
+	PUSH EBP							;preserves base register
+	MOV EBP, ESP						;sets a new stack frame
+	PUSH EBX							;pushes EBX to the stack to store this
+	PUSH ESI							;pushes ESI to the stack to preseve
+	MOV EBX, String						;moves into ebx the first val in the stack that we are going to use
+	MOV ESI, 0							;sets the initial point to 0
+		
+	stLoop:
+		CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+		JE done							;if it is jump to finished
+		INC ESI							;if not increment esi
+		JMP stLoop						;jump to the top of the loop and look at the next char
+	done:		
+		INC ESI							;increment esi to include the null character in the string
+		MOV EAX, ESI					;move the value of esi into eax for proper output and return
+	
+	POP ESI								;restore original esi
+	POP EBX								;restore original ebx
+	POP EBP								;restore originla ebp
+ENDM
+
 ;******************************************************************************************
 .DATA
 	strProjInfo byte  10,13,9,
@@ -134,6 +171,7 @@ ENDM
 	enterValRow byte 10,10,13, "Enter a value for row: ",0
 	strSum byte 10,10,13, "The sum of the values in the array is: ", 0
 	strSmallestNum byte 10,10,13, "The smallest value in the array is: ", 0
+	strSortLength byte 10,10,13, "Enter the number of elements you want to sort in the array: ",0
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
 	choiceASCII byte 0
 	strDisplay dword 100 dup(0)
@@ -142,8 +180,11 @@ ENDM
 	arrayB dword 100 dup (?)
 	strEnter byte 0
 	tempNum dword 0
-	row dword ?
-	col dword ?
+	numValues dword 0
+	rowA dword 0
+	colA dword 0
+	rowB dword 0
+	colB dword 0
 
 
 ;******************************************************************************************
@@ -259,9 +300,10 @@ choiceA: ;input a
 	OFFSET arrayA
 	
 	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored. 
-	DisplayString crlf
-	DisplayString crlf
+	DisplayString crlf								;display characters to go to next line.
+	DisplayString crlf								;display characters to go to next line.
 	DisplayString enterToCont						;display the press enter to continue message
 	PullString strEnter, 0							;wait for the user to press enter
 	DisplayString clearScr							;display the characters to clear the screen
@@ -278,6 +320,7 @@ choiceB: ;input b
 	OFFSET arrayB
 	
 	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
 	DisplayString crlf								;display characters to go to next line.
 	DisplayString crlf								;display characters to go to next line.
@@ -287,18 +330,18 @@ choiceB: ;input b
 	JMP getUserChoice								;jump back up to display the menu
 choiceC: ;display a
 	DisplayString enterValRow						;Displays the string asking for the number of rows
-	PullString row, 10								;get the number input and put into variable
-	CvtoNum row										;convert the ascii value into dec
-	MOV row, EAX									;store this in vairiable
+	PullString rowA, 10								;get the number input and put into variable
+	CvtoNum rowA									;convert the ascii value into dec
+	MOV rowA, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
-	PullString col, 10								;get the number input and put into variable
-	CvtoNum col										;convert the ascii value into dec
-	MOV col, EAX									;store this in vairiable
+	PullString colA, 10								;get the number input and put into variable
+	CvtoNum colA									;convert the ascii value into dec
+	MOV colA, EAX									;store this in vairiable
 	
-	INVOKE displayArray, OFFSET arrayA, row, col, 	;call the display array method so we have the set of characters in the strdisplay address
+	INVOKE displayArray, OFFSET arrayA, rowA, colA, ;call the display array method so we have the set of characters in the strdisplay address
 	OFFSET strDisplay
 	
-	;INVOKE sortedArray, OFFSET arrayA, 6
+	DisplayString crlf								;display characters to go to next line.
 	DisplayString crlf								;display characters to go to next line.
 	DisplayString crlf								;display characters to go to next line.
 	DisplayString strDisplay						;display the characters inside ofo the str display vairiable
@@ -308,17 +351,17 @@ choiceC: ;display a
 	JMP getUserChoice								;jump back up to display the menu
 choiceD: ;display b
 	DisplayString enterValRow						;Displays the string asking for the number of rows
-	PullString row, 10								;get the number input and put into variable
-	CvtoNum row										;convert the ascii value into dec
-	MOV row, EAX									;store this in vairiable
+	PullString rowB, 10								;get the number input and put into variable
+	CvtoNum rowB									;convert the ascii value into dec
+	MOV rowB, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
-	PullString col, 10								;get the number input and put into variable
-	CvtoNum col										;convert the ascii value into dec
-	MOV col, EAX									;store this in vairiable
+	PullString colB, 10								;get the number input and put into variable
+	CvtoNum colB									;convert the ascii value into dec
+	MOV colB, EAX									;store this in vairiable
 	
-	INVOKE displayArray, OFFSET arrayB, row, col,	;call the display array method so we have the set of characters in the strdisplay address
+	INVOKE displayArray, OFFSET arrayB, rowB, colB,	;call the display array method so we have the set of characters in the strdisplay address
 	OFFSET strDisplay
-	
+	DisplayString crlf								;display characters to go to next line.	
 	DisplayString crlf								;display characters to go to next line.
 	DisplayString crlf								;display characters to go to next line.
 	DisplayString strDisplay						;display the characters inside ofo the str display vairiable
@@ -328,15 +371,15 @@ choiceD: ;display b
 	JMP getUserChoice								;jump back up to display the menu							
 choiceE: ;add up A
 	DisplayString enterValRow						;Displays the string asking for the number of rows
-	PullString row, 10								;get the number input and put into variable
-	CvtoNum row										;convert the ascii value into dec
-	MOV row, EAX									;store this in vairiable
+	PullString rowA, 10								;get the number input and put into variable
+	CvtoNum rowA									;convert the ascii value into dec
+	MOV rowA, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
-	PullString col, 10								;get the number input and put into variable
-	CvtoNum col										;convert the ascii value into dec
-	MOV col, EAX									;store this in vairiable
+	PullString colA, 10								;get the number input and put into variable
+	CvtoNum colA									;convert the ascii value into dec
+	MOV colA, EAX									;store this in vairiable
 	
-	INVOKE sumUpArray, OFFSET arrayA, row, col		;call the sum up array method which returns the value in eax
+	INVOKE sumUpArray, OFFSET arrayA, rowA, colA	;call the sum up array method which returns the value in eax
 	MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 		
 	INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
@@ -349,15 +392,15 @@ choiceE: ;add up A
 	JMP getUserChoice								;jump back up to display the menu		
 choiceF: ;Add up B
 	DisplayString enterValRow						;Displays the string asking for the number of rows
-	PullString row, 10								;get the number input and put into variable
-	CvtoNum row										;convert the ascii value into dec
-	MOV row, EAX									;store this in vairiable
+	PullString rowB, 10								;get the number input and put into variable
+	CvtoNum rowB									;convert the ascii value into dec
+	MOV rowB, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
-	PullString col, 10								;get the number input and put into variable
-	CvtoNum col										;convert the ascii value into dec
-	MOV col, EAX									;store this in vairiable
+	PullString colB, 10								;get the number input and put into variable
+	CvtoNum colB									;convert the ascii value into dec
+	MOV colB, EAX									;store this in vairiable
 	
-	INVOKE sumUpArray, OFFSET arrayB, row, col		;call the sum up array method which returns the value in eax
+	INVOKE sumUpArray, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
 	MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 		
 	INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
@@ -369,16 +412,34 @@ choiceF: ;Add up B
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu		
 choiceG: ;sort and display A
+	DisplayString strSortLength						;display a string asking how many elements to sort
+	PullString numValues, 10						;pull the string the user types in 
+	CvtoNum numValues								;convert the ascii number to decimal
+	MOV numValues, EAX								;move eax into a variable so we dont invoke it
+	DisplayString crlf								;display characters to go to next line.
+	DisplayString crlf								;display characters to go to next line.
+	INVOKE selectionSort, OFFSET arrayA, numValues  ;call the selection sort method to sort the array
+	DisplayString enterToCont						;display the press enter to continue message
+	PullString strEnter, 0							;wait for user to press enter
 	DisplayString clearScr							;display the characters to clear the screen
-	JMP getUserChoice								;jump back up to display the menu
+	JMP getUserChoice								;jump back up to display the menu		
 choiceH: ;sort and display B
+	DisplayString strSortLength						;display a string asking how many elements to sort
+	PullString numValues, 10						;pull the string the user types in 
+	CvtoNum numValues								;convert the ascii number to decimal
+	MOV numValues, EAX								;move eax into a variable so we dont invoke it
+	DisplayString crlf								;display characters to go to next line.
+	DisplayString crlf								;display characters to go to next line.
+	INVOKE selectionSort, OFFSET arrayB, numValues  ;call the selection sort method to sort the array
+	DisplayString enterToCont						;display the press enter to continue message
+	PullString strEnter, 0							;wait for user to press enter
 	DisplayString clearScr							;display the characters to clear the screen
-	JMP getUserChoice								;jump back up to display the menu
+	JMP getUserChoice								;jump back up to display the menu			
 choiceI: ;multiply
 	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
 	JMP getUserChoice								;jump back up to display the menu
-choiceJ: ;c
+choiceJ: ;display c
 	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
 	JMP getUserChoice								;jump back up to display the menu
@@ -392,15 +453,15 @@ choiceL: ;sort c
 	JMP getUserChoice								;jump back up to display the menu
 choiceM: ;smallest a
 	DisplayString enterValRow						;Displays the string asking for the number of rows
-	PullString row, 10								;get the number input and put into variable
-	CvtoNum row										;convert the ascii value into dec
-	MOV row, EAX									;store this in vairiable
+	PullString rowA, 10								;get the number input and put into variable
+	CvtoNum rowA									;convert the ascii value into dec
+	MOV rowA, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
-	PullString col, 10								;get the number input and put into variable
-	CvtoNum col										;convert the ascii value into dec
-	MOV col, EAX									;store this in vairiable
+	PullString colA, 10								;get the number input and put into variable
+	CvtoNum colA									;convert the ascii value into dec
+	MOV colA, EAX									;store this in vairiable
 	
-	INVOKE smallestValue, OFFSET arrayA, row, col	;call the sum up array method which returns the value in eax
+	INVOKE smallestValue, OFFSET arrayA, rowA, colA	;call the sum up array method which returns the value in eax
 	MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 		
 	INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
@@ -413,15 +474,15 @@ choiceM: ;smallest a
 	JMP getUserChoice								;jump back up to display the menu	
 choiceN: ;smallest b
 	DisplayString enterValRow						;Displays the string asking for the number of rows
-	PullString row, 10								;get the number input and put into variable
-	CvtoNum row										;convert the ascii value into dec
-	MOV row, EAX									;store this in vairiable
+	PullString rowB, 10								;get the number input and put into variable
+	CvtoNum rowB										;convert the ascii value into dec
+	MOV rowB, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
-	PullString col, 10								;get the number input and put into variable
-	CvtoNum col										;convert the ascii value into dec
-	MOV col, EAX									;store this in vairiable
+	PullString colB, 10								;get the number input and put into variable
+	CvtoNum colB										;convert the ascii value into dec
+	MOV colB, EAX									;store this in vairiable
 	
-	INVOKE smallestValue, OFFSET arrayB, row, col	;call the sum up array method which returns the value in eax
+	INVOKE smallestValue, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
 	MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 		
 	INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay

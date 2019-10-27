@@ -174,20 +174,20 @@ ENDM
 	strSortLength byte 10,10,13, "Enter the number of elements you want to sort in the array: ",0
 	strLocked byte 10,10,13, "ERROR: This method is currently locked!", 0
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
-	choiceASCII byte 0
-	strDisplay dword 100 dup(0)
-	numbersASCII byte 100 dup (?), 00
-	arrayA dword 100 dup (?)
-	arrayB dword 100 dup (?)
-	strEnter byte 0
-	tempNum dword 0
-	numValues dword 0
-	rowA dword 0
-	colA dword 0
-	rowB dword 0
-	colB dword 0
-	matrixAActive byte 0
-	matrixBActive byte 0
+	choiceASCII byte 0								;Holds the ascii number choice 
+	strDisplay dword 200 dup(0)						;memory to hold a display string
+	numbersASCII byte 200 dup (?), 00				;memory to hold the ascii numbers
+	arrayA dword 100 dup (?)						;memory to hold dwords in an array
+	arrayB dword 100 dup (?)						;memory to hold dwords in an array
+	strEnter byte 0									;something to signify that the user pressing nothing but enter
+	tempNum dword 0									;memory to hold a temp number
+	numValues dword 0								;the number of values in array
+	rowA dword 0									;number of rows in A
+	colA dword 0									;numbers of cols in B
+	rowB dword 0									;numbers of rows in B
+	colB dword 0									;numbers of cols in B
+	matrixAActive byte 0							;byte to signify if A is active
+	matrixBActive byte 0							;byte to signify if B is active
 
 
 ;******************************************************************************************

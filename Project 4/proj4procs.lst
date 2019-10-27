@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/27/19 13:46:43
+Microsoft (R) Macro Assembler Version 6.11		    10/27/19 14:12:48
 proj4procs.asm						     Page 1 - 1
 
 
@@ -8,7 +8,7 @@ proj4procs.asm						     Page 1 - 1
 				;*  Class:        CSCI 2160-001
 				;*  Lab:          Proj3
 				;*  Date:         11/02/2019
-				;*  Purpose:      This handles the manipulation of matrices. 
+				;*  Purpose:      This handles the manipulation of arrays and matricies. 
 				;******************************************************************************************
 
 					.486						;This tells assembler to generate 32-bit code
@@ -21,10 +21,10 @@ proj4procs.asm						     Page 1 - 1
 
 				;  List all necessary prototypes for methods to be called here
 
-					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-					intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword			;converts ints to ascii
-					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
-					sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword			;returns 1 if the array passed in is sorted in ascending order
+					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				  ;This converts ASCII characters to the dword value
+					intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword			  ;converts ints to ascii
+					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				  ;Will display ;characters until the NULL character is found
+					sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword			  ;returns 1 if the array passed in is sorted in ascending order
 					smallestValue PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword ;returns the smallest value in an array	
 					displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, ;converts an array passed in into ascii and formatting for display	
 					lpStringtoHold:dword
@@ -62,27 +62,27 @@ proj4procs.asm						     Page 1 - 1
 				*@param String1:byte                                                         *
 				*****************************************************************************%
 				getBytes MACRO String:REQ
-					LOCAL stLoop
-					LOCAL done
-					PUSH EBP							;preserves base register
-					MOV EBP, ESP						;sets a new stack frame
-					PUSH EBX							;pushes EBX to the stack to store this
-					PUSH ESI							;pushes ESI to the stack to preseve
-					MOV EBX, String						;moves into ebx the first val in the stack that we are going to use
-					MOV ESI, 0							;sets the initial point to 0
+					LOCAL stLoop						;add a local label so the assembler doesnt yell when this is called more than once
+					LOCAL done							;add a local label so the assembler doesnt yell when this is called more than once
+					PUSH EBP							;preserves base register
+					MOV EBP, ESP						;sets a new stack frame
+					PUSH EBX							;pushes EBX to the stack to store this
+					PUSH ESI							;pushes ESI to the stack to preseve
+					MOV EBX, String						;;moves into ebx the first val in the stack that we are going to use
+					MOV ESI, 0							;;sets the initial point to 0
 						
 					stLoop:
-						CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
-						JE done							;if it is jump to finished
-						INC ESI							;if not increment esi
-						JMP stLoop						;jump to the top of the loop and look at the next char
+						CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+						JE done							;;if it is jump to finished
+						INC ESI							;if not increment esi
+						JMP stLoop						;;jump to the top of the loop and look at the next char
 					done:		
-						INC ESI							;increment esi to include the null character in the string
-						MOV EAX, ESI					;move the value of esi into eax for proper output and return
+						INC ESI							;increment esi to include the null character in the string
+						MOV EAX, ESI					;move the value of esi into eax for proper output and return
 					
-					POP ESI								;restore original esi
-					POP EBX								;restore original ebx
-					POP EBP								;restore originla ebp
+					POP ESI								;restore original esi
+					POP EBX								;restore original ebx
+					POP EBP								;restore originla ebp
 				ENDM
 				;******************************************************************************************
  00000000			.DATA
@@ -111,8 +111,6 @@ proj4procs.asm						     Page 1 - 1
 	   ] 00000000
  000001E0				bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
 					
-
-
 				;******************************************************************************************
  00000000			.CODE
 
@@ -243,23 +241,23 @@ proj4procs.asm						     Page 1 - 1
  000000EC  89 03			MOV [EBX], EAX								;moves into the location ebx points to the temp number 
  000000EE  5B				POP EBX										;restore our unaffected EBX
 					getBytes EDX								;call the get bytes macro where we count the number of bytes used in the output address
- 000000EF  55		     1		PUSH EBP							;preserves base register
- 000000F0  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000000F2  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000000F3  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000000F4  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000000F6  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000000EF  55		     1		PUSH EBP							
+ 000000F0  8B EC	     1		MOV EBP, ESP						
+ 000000F2  53		     1		PUSH EBX							
+ 000000F3  56		     1		PUSH ESI							
+ 000000F4  8B DA	     1		MOV EBX, EDX						
+ 000000F6  BE 00000000	     1		MOV ESI, 0							
  000000FB		     1		??0000:
- 000000FB  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 000000FF  74 03	     1			JE ??0001							;if it is jump to finished
- 00000101  46		     1			INC ESI							;if not increment esi
- 00000102  EB F7	     1			JMP ??0000						;jump to the top of the loop and look at the next char
+ 000000FB  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 000000FF  74 03	     1			JE ??0001							
+ 00000101  46		     1			INC ESI							
+ 00000102  EB F7	     1			JMP ??0000						
  00000104		     1		??0001:		
- 00000104  46		     1			INC ESI							;increment esi to include the null character in the string
- 00000105  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000107  5E		     1		POP ESI								;restore original esi
- 00000108  5B		     1		POP EBX								;restore original ebx
- 00000109  5D		     1		POP EBP								;restore originla ebp
+ 00000104  46		     1			INC ESI							
+ 00000105  8B C6	     1			MOV EAX, ESI					
+ 00000107  5E		     1		POP ESI								
+ 00000108  5B		     1		POP EBX								
+ 00000109  5D		     1		POP EBP								
  0000010A  8B F0			MOV ESI, EAX								;moves into ESI the offset that the previous macro returns
  0000010C  4E				DEC ESI										;decrement ESI to take into acount the null character the macro counts for.
 					
@@ -285,23 +283,23 @@ proj4procs.asm						     Page 1 - 1
 						
  00000148  50					PUSH EAX								;store our EAX so we can get it back 
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 00000149  55		     1		PUSH EBP							;preserves base register
- 0000014A  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 0000014C  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 0000014D  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 0000014E  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 00000150  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000149  55		     1		PUSH EBP							
+ 0000014A  8B EC	     1		MOV EBP, ESP						
+ 0000014C  53		     1		PUSH EBX							
+ 0000014D  56		     1		PUSH ESI							
+ 0000014E  8B DA	     1		MOV EBX, EDX						
+ 00000150  BE 00000000	     1		MOV ESI, 0							
  00000155		     1		??0002:
- 00000155  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000159  74 03	     1			JE ??0003							;if it is jump to finished
- 0000015B  46		     1			INC ESI							;if not increment esi
- 0000015C  EB F7	     1			JMP ??0002						;jump to the top of the loop and look at the next char
+ 00000155  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 00000159  74 03	     1			JE ??0003							
+ 0000015B  46		     1			INC ESI							
+ 0000015C  EB F7	     1			JMP ??0002						
  0000015E		     1		??0003:		
- 0000015E  46		     1			INC ESI							;increment esi to include the null character in the string
- 0000015F  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000161  5E		     1		POP ESI								;restore original esi
- 00000162  5B		     1		POP EBX								;restore original ebx
- 00000163  5D		     1		POP EBP								;restore originla ebp
+ 0000015E  46		     1			INC ESI							
+ 0000015F  8B C6	     1			MOV EAX, ESI					
+ 00000161  5E		     1		POP ESI								
+ 00000162  5B		     1		POP EBX								
+ 00000163  5D		     1		POP EBP								
  00000164  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
  00000166  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
  00000167  58					POP EAX									;restore our original eax
@@ -319,23 +317,23 @@ proj4procs.asm						     Page 1 - 1
  00000182  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
  00000184  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 00000185  55		     1		PUSH EBP							;preserves base register
- 00000186  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 00000188  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 00000189  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 0000018A  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 0000018C  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000185  55		     1		PUSH EBP							
+ 00000186  8B EC	     1		MOV EBP, ESP						
+ 00000188  53		     1		PUSH EBX							
+ 00000189  56		     1		PUSH ESI							
+ 0000018A  8B DA	     1		MOV EBX, EDX						
+ 0000018C  BE 00000000	     1		MOV ESI, 0							
  00000191		     1		??0004:
- 00000191  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000195  74 03	     1			JE ??0005							;if it is jump to finished
- 00000197  46		     1			INC ESI							;if not increment esi
- 00000198  EB F7	     1			JMP ??0004						;jump to the top of the loop and look at the next char
+ 00000191  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 00000195  74 03	     1			JE ??0005							
+ 00000197  46		     1			INC ESI							
+ 00000198  EB F7	     1			JMP ??0004						
  0000019A		     1		??0005:		
- 0000019A  46		     1			INC ESI							;increment esi to include the null character in the string
- 0000019B  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 0000019D  5E		     1		POP ESI								;restore original esi
- 0000019E  5B		     1		POP EBX								;restore original ebx
- 0000019F  5D		     1		POP EBP								;restore originla ebp
+ 0000019A  46		     1			INC ESI							
+ 0000019B  8B C6	     1			MOV EAX, ESI					
+ 0000019D  5E		     1		POP ESI								
+ 0000019E  5B		     1		POP EBX								
+ 0000019F  5D		     1		POP EBP								
  000001A0  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
  000001A2  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
  000001A3  C7 05 00000047 R			MOV tempNum, 32							;moves the space ascii value into temp num
@@ -347,23 +345,23 @@ proj4procs.asm						     Page 1 - 1
  000001B7  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value of eax, which is temp num
  000001B9  5B					POP EBX									;restore our original ebx that is unaffected by the addition earlier.
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 000001BA  55		     1		PUSH EBP							;preserves base register
- 000001BB  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000001BD  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 000001BE  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 000001BF  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 000001C1  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000001BA  55		     1		PUSH EBP							
+ 000001BB  8B EC	     1		MOV EBP, ESP						
+ 000001BD  53		     1		PUSH EBX							
+ 000001BE  56		     1		PUSH ESI							
+ 000001BF  8B DA	     1		MOV EBX, EDX						
+ 000001C1  BE 00000000	     1		MOV ESI, 0							
  000001C6		     1		??0006:
- 000001C6  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 000001CA  74 03	     1			JE ??0007							;if it is jump to finished
- 000001CC  46		     1			INC ESI							;if not increment esi
- 000001CD  EB F7	     1			JMP ??0006						;jump to the top of the loop and look at the next char
+ 000001C6  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 000001CA  74 03	     1			JE ??0007							
+ 000001CC  46		     1			INC ESI							
+ 000001CD  EB F7	     1			JMP ??0006						
  000001CF		     1		??0007:		
- 000001CF  46		     1			INC ESI							;increment esi to include the null character in the string
- 000001D0  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 000001D2  5E		     1		POP ESI								;restore original esi
- 000001D3  5B		     1		POP EBX								;restore original ebx
- 000001D4  5D		     1		POP EBP								;restore originla ebp
+ 000001CF  46		     1			INC ESI							
+ 000001D0  8B C6	     1			MOV EAX, ESI					
+ 000001D2  5E		     1		POP ESI								
+ 000001D3  5B		     1		POP EBX								
+ 000001D4  5D		     1		POP EBP								
  000001D5  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
  000001D7  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
  000001D8  58					POP EAX									;restore our original eax
@@ -382,23 +380,23 @@ proj4procs.asm						     Page 1 - 1
  000001F5  A1 00000047 R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
  000001FA  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 000001FC  55		     1		PUSH EBP							;preserves base register
- 000001FD  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 000001FF  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 00000200  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 00000201  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 00000203  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 000001FC  55		     1		PUSH EBP							
+ 000001FD  8B EC	     1		MOV EBP, ESP						
+ 000001FF  53		     1		PUSH EBX							
+ 00000200  56		     1		PUSH ESI							
+ 00000201  8B DA	     1		MOV EBX, EDX						
+ 00000203  BE 00000000	     1		MOV ESI, 0							
  00000208		     1		??0008:
- 00000208  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 0000020C  74 03	     1			JE ??0009							;if it is jump to finished
- 0000020E  46		     1			INC ESI							;if not increment esi
- 0000020F  EB F7	     1			JMP ??0008						;jump to the top of the loop and look at the next char
+ 00000208  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 0000020C  74 03	     1			JE ??0009							
+ 0000020E  46		     1			INC ESI							
+ 0000020F  EB F7	     1			JMP ??0008						
  00000211		     1		??0009:		
- 00000211  46		     1			INC ESI							;increment esi to include the null character in the string
- 00000212  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000214  5E		     1		POP ESI								;restore original esi
- 00000215  5B		     1		POP EBX								;restore original ebx
- 00000216  5D		     1		POP EBP								;restore originla ebp
+ 00000211  46		     1			INC ESI							
+ 00000212  8B C6	     1			MOV EAX, ESI					
+ 00000214  5E		     1		POP ESI								
+ 00000215  5B		     1		POP EBX								
+ 00000216  5D		     1		POP EBP								
  00000217  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
  00000219  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
  0000021A  58					POP EAX									;restore original eax
@@ -411,23 +409,23 @@ proj4procs.asm						     Page 1 - 1
  0000022A  A1 00000047 R			MOV EAX, tempNum						;moves the new line char into eax (avoid mem to mem)
  0000022F  89 03				MOV [EBX], EAX							;moves into the location ebx points to the value eax which is new line
 						getBytes EDX							;call the get bytes macro where we count the number of bytes used in the output address
- 00000231  55		     1		PUSH EBP							;preserves base register
- 00000232  8B EC	     1		MOV EBP, ESP						;sets a new stack frame
- 00000234  53		     1		PUSH EBX							;pushes EBX to the stack to store this
- 00000235  56		     1		PUSH ESI							;pushes ESI to the stack to preseve
- 00000236  8B DA	     1		MOV EBX, EDX						;moves into ebx the first val in the stack that we are going to use
- 00000238  BE 00000000	     1		MOV ESI, 0							;sets the initial point to 0
+ 00000231  55		     1		PUSH EBP							
+ 00000232  8B EC	     1		MOV EBP, ESP						
+ 00000234  53		     1		PUSH EBX							
+ 00000235  56		     1		PUSH ESI							
+ 00000236  8B DA	     1		MOV EBX, EDX						
+ 00000238  BE 00000000	     1		MOV ESI, 0							
  0000023D		     1		??000A:
- 0000023D  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
- 00000241  74 03	     1			JE ??000B							;if it is jump to finished
- 00000243  46		     1			INC ESI							;if not increment esi
- 00000244  EB F7	     1			JMP ??000A						;jump to the top of the loop and look at the next char
+ 0000023D  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 00000241  74 03	     1			JE ??000B							
+ 00000243  46		     1			INC ESI							
+ 00000244  EB F7	     1			JMP ??000A						
  00000246		     1		??000B:		
- 00000246  46		     1			INC ESI							;increment esi to include the null character in the string
- 00000247  8B C6	     1			MOV EAX, ESI					;move the value of esi into eax for proper output and return
- 00000249  5E		     1		POP ESI								;restore original esi
- 0000024A  5B		     1		POP EBX								;restore original ebx
- 0000024B  5D		     1		POP EBP								;restore originla ebp
+ 00000246  46		     1			INC ESI							
+ 00000247  8B C6	     1			MOV EAX, ESI					
+ 00000249  5E		     1		POP ESI								
+ 0000024A  5B		     1		POP EBX								
+ 0000024B  5D		     1		POP EBP								
  0000024C  8B F0				MOV ESI, EAX							;moves into ESI the offset that the previous macro returns
  0000024E  4E					DEC ESI									;decrement ESI to take into acount the null character the macro counts for.
  0000024F  58					POP EAX									;restore original eax
@@ -558,7 +556,6 @@ proj4procs.asm						     Page 1 - 1
  00000300  8B 45 08			MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
  00000303  83 F9 01			CMP ECX, 1									;compare ecx to one to see if the user entered 1x1
  00000306  74 2C			JE oneByone									;if it is then jump to the one by one section
-					;DEC ECX									;decrement ECX so we work with n-1 elements
 					
  00000308  8B 1C 07			MOV EBX, [EAX + EDI]						;moves into ebx the first value
  0000030B  89 5D FC			MOV smallestVal, EBX						;stores the first value as the smallest one
@@ -625,7 +622,8 @@ proj4procs.asm						     Page 1 - 1
  00000376  0F 84 000000B8		JE alreadySorted							;if it equals 1 then the data is already sorted and we can jump to the appropriate section
 					
  0000037C				lpSelectionSort:
-						INVOKE sortedArray, lpArrayDwords, iLength		;check if the array is sorted.
+						INVOKE sortedArray, lpArrayDwords,		;check if the array is sorted.
+						iLength		
  0000038A  3C 01				CMP AL, 1								;compare al to 1 to see if the data is sorted
  0000038C  0F 84 000000E4			JE SortComplete							;if it equals 1 then we jump to sort complete
 						DisplayString crlf						;display the characters to skip to a new line
@@ -634,13 +632,11 @@ proj4procs.asm						     Page 1 - 1
 						INVOKE displayArray, startAddr, 1, 		;display the array with 1 row and ilength cols
 						iLength, addr tempSelectionSortASCII
 						DisplayString tempSelectionSortASCII	;display the address that gets returns previously
-						;INVOKE sortedArray, lpArrayDwords, 		;check if the array is sorted.
+
 
  000003BD  5B					POP EBX									;return our original ebx
  000003BE  5F					POP EDI									;return our orginal edi
  000003BF  41					INC ECX									;increment ecx so we know how what pass we are on
-						;CMP AL, 1								;compare al to 1 to see if the data is sorted
-						;JE SortComplete							;if it equals 1 then we jump to sort complete
  000003C0  FF 4D EC				DEC counter								;decrement our counter so we know how many swaps we have left to do
  000003C3  83 7D EC 00				CMP counter, 0							;if it equals 0, then the sort is complete
  000003C7  0F 84 000000A9			JE SortComplete							;jump to sort complete
@@ -701,10 +697,10 @@ proj4procs.asm						     Page 1 - 1
 						DisplayString tempSelectionSortASCII			;display the string that was given back to us
 						DisplayString strSortComplete					;display the string telling the user that the data is sorted
 						DisplayString crlf								;display the characters that skip to a new line	
-						RET
+						RET												;return
  000004B8			selectionSort ENDP
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/27/19 13:46:43
+Microsoft (R) Macro Assembler Version 6.11		    10/27/19 14:12:48
 proj4procs.asm						     Symbols 2 - 1
 
 

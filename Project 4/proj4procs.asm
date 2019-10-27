@@ -4,7 +4,7 @@
 ;*  Class:        CSCI 2160-001
 ;*  Lab:          Proj3
 ;*  Date:         11/02/2019
-;*  Purpose:      This handles the manipulation of matrices. 
+;*  Purpose:      This handles the manipulation of arrays and matricies. 
 ;******************************************************************************************
 
 	.486						;This tells assembler to generate 32-bit code
@@ -17,10 +17,10 @@
 
 ;  List all necessary prototypes for methods to be called here
 
-	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-	intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword			;converts ints to ascii
-	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
-	sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword			;returns 1 if the array passed in is sorted in ascending order
+	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				  ;This converts ASCII characters to the dword value
+	intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword			  ;converts ints to ascii
+	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				  ;Will display ;characters until the NULL character is found
+	sortedArray PROTO Near32 C, lpArrayDwords:dword, numElts:dword			  ;returns 1 if the array passed in is sorted in ascending order
 	smallestValue PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword ;returns the smallest value in an array	
 	displayArray PROTO Near32 C, lpArrayDwords:dword, rows:dword, cols:dword, ;converts an array passed in into ascii and formatting for display	
 	lpStringtoHold:dword
@@ -58,27 +58,27 @@ COMMENT %
 *@param String1:byte                                                         *
 *****************************************************************************%
 getBytes MACRO String:REQ
-	LOCAL stLoop
-	LOCAL done
-	PUSH EBP							;preserves base register
-	MOV EBP, ESP						;sets a new stack frame
-	PUSH EBX							;pushes EBX to the stack to store this
-	PUSH ESI							;pushes ESI to the stack to preseve
-	MOV EBX, String						;moves into ebx the first val in the stack that we are going to use
-	MOV ESI, 0							;sets the initial point to 0
+	LOCAL stLoop						;;add a local label so the assembler doesnt yell when this is called more than once
+	LOCAL done							;;add a local label so the assembler doesnt yell when this is called more than once
+	PUSH EBP							;;preserves base register
+	MOV EBP, ESP						;;sets a new stack frame
+	PUSH EBX							;;pushes EBX to the stack to store this
+	PUSH ESI							;;pushes ESI to the stack to preseve
+	MOV EBX, String						;;moves into ebx the first val in the stack that we are going to use
+	MOV ESI, 0							;;sets the initial point to 0
 		
 	stLoop:
-		CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
-		JE done							;if it is jump to finished
-		INC ESI							;if not increment esi
-		JMP stLoop						;jump to the top of the loop and look at the next char
+		CMP byte ptr [EBX + ESI], 0		;;compares the two positions to determine if this is the end of the string
+		JE done							;;if it is jump to finished
+		INC ESI							;;if not increment esi
+		JMP stLoop						;;jump to the top of the loop and look at the next char
 	done:		
-		INC ESI							;increment esi to include the null character in the string
-		MOV EAX, ESI					;move the value of esi into eax for proper output and return
+		INC ESI							;;increment esi to include the null character in the string
+		MOV EAX, ESI					;;move the value of esi into eax for proper output and return
 	
-	POP ESI								;restore original esi
-	POP EBX								;restore original ebx
-	POP EBP								;restore originla ebp
+	POP ESI								;;restore original esi
+	POP EBX								;;restore original ebx
+	POP EBP								;;restore originla ebp
 ENDM
 ;******************************************************************************************
 .DATA
@@ -93,8 +93,6 @@ ENDM
 	tempSelectionSortASCII dword 100 dup(0), 00								;memory to hold the string generated in ascii
 	bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
 	
-
-
 ;******************************************************************************************
 .CODE
 
@@ -431,7 +429,6 @@ smallestValue PROC Near32 C uses EBX ECX EDI, lpArrayDwords:dword, rows:dword, c
 	MOV EAX, lpArrayDwords						;move the address into EAX so we can reference it
 	CMP ECX, 1									;compare ecx to one to see if the user entered 1x1
 	JE oneByone									;if it is then jump to the one by one section
-	;DEC ECX									;decrement ECX so we work with n-1 elements
 	
 	MOV EBX, [EAX + EDI]						;moves into ebx the first value
 	MOV smallestVal, EBX						;stores the first value as the smallest one
@@ -498,7 +495,8 @@ selectionSort PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, iLength:dword
 	JE alreadySorted							;if it equals 1 then the data is already sorted and we can jump to the appropriate section
 	
 	lpSelectionSort:
-		INVOKE sortedArray, lpArrayDwords, iLength		;check if the array is sorted.
+		INVOKE sortedArray, lpArrayDwords,		;check if the array is sorted.
+		iLength		
 		CMP AL, 1								;compare al to 1 to see if the data is sorted
 		JE SortComplete							;if it equals 1 then we jump to sort complete
 		DisplayString crlf						;display the characters to skip to a new line
@@ -507,13 +505,11 @@ selectionSort PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, iLength:dword
 		INVOKE displayArray, startAddr, 1, 		;display the array with 1 row and ilength cols
 		iLength, addr tempSelectionSortASCII
 		DisplayString tempSelectionSortASCII	;display the address that gets returns previously
-		;INVOKE sortedArray, lpArrayDwords, 		;check if the array is sorted.
+
 
 		POP EBX									;return our original ebx
 		POP EDI									;return our orginal edi
 		INC ECX									;increment ecx so we know how what pass we are on
-		;CMP AL, 1								;compare al to 1 to see if the data is sorted
-		;JE SortComplete							;if it equals 1 then we jump to sort complete
 		DEC counter								;decrement our counter so we know how many swaps we have left to do
 		CMP counter, 0							;if it equals 0, then the sort is complete
 		JE SortComplete							;jump to sort complete
@@ -574,6 +570,6 @@ selectionSort PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, iLength:dword
 		DisplayString tempSelectionSortASCII			;display the string that was given back to us
 		DisplayString strSortComplete					;display the string telling the user that the data is sorted
 		DisplayString crlf								;display the characters that skip to a new line	
-		RET
+		RET												;return
 selectionSort ENDP
 END

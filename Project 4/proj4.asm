@@ -172,6 +172,7 @@ ENDM
 	strSum byte 10,10,13, "The sum of the values in the array is: ", 0
 	strSmallestNum byte 10,10,13, "The smallest value in the array is: ", 0
 	strSortLength byte 10,10,13, "Enter the number of elements you want to sort in the array: ",0
+	strLocked byte 10,10,13, "ERROR: This method is currently locked!", 0
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
 	choiceASCII byte 0
 	strDisplay dword 100 dup(0)
@@ -185,6 +186,8 @@ ENDM
 	colA dword 0
 	rowB dword 0
 	colB dword 0
+	matrixAActive byte 0
+	matrixBActive byte 0
 
 
 ;******************************************************************************************
@@ -307,6 +310,7 @@ choiceA: ;input a
 	DisplayString enterToCont						;display the press enter to continue message
 	PullString strEnter, 0							;wait for the user to press enter
 	DisplayString clearScr							;display the characters to clear the screen
+	MOV matrixAActive, 1 							;set the matrix as active so it unlocks the other methods
 	JMP getUserChoice								;jump back up to display the menu
 choiceB: ;input b
 	MOV ECX, lengthof arrayB						;moves the length of array a into ECX so we can clear that amount to clear the array
@@ -327,8 +331,11 @@ choiceB: ;input b
 	DisplayString enterToCont						;display the press enter to continue message
 	PullString strEnter, 0							;wait for the user to press enter
 	DisplayString clearScr							;display the characters to clear the screen
+	MOV matrixBActive, 1 							;set the matrix as active so it unlocks the other methods
 	JMP getUserChoice								;jump back up to display the menu
 choiceC: ;display a
+	CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString enterValRow						;Displays the string asking for the number of rows
 	PullString rowA, 10								;get the number input and put into variable
 	CvtoNum rowA									;convert the ascii value into dec
@@ -350,6 +357,8 @@ choiceC: ;display a
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu
 choiceD: ;display b
+	CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString enterValRow						;Displays the string asking for the number of rows
 	PullString rowB, 10								;get the number input and put into variable
 	CvtoNum rowB									;convert the ascii value into dec
@@ -370,6 +379,8 @@ choiceD: ;display b
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu							
 choiceE: ;add up A
+	CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString enterValRow						;Displays the string asking for the number of rows
 	PullString rowA, 10								;get the number input and put into variable
 	CvtoNum rowA									;convert the ascii value into dec
@@ -391,6 +402,8 @@ choiceE: ;add up A
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu		
 choiceF: ;Add up B
+	CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString enterValRow						;Displays the string asking for the number of rows
 	PullString rowB, 10								;get the number input and put into variable
 	CvtoNum rowB									;convert the ascii value into dec
@@ -412,6 +425,8 @@ choiceF: ;Add up B
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu		
 choiceG: ;sort and display A
+	CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString strSortLength						;display a string asking how many elements to sort
 	PullString numValues, 10						;pull the string the user types in 
 	CvtoNum numValues								;convert the ascii number to decimal
@@ -424,6 +439,8 @@ choiceG: ;sort and display A
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu		
 choiceH: ;sort and display B
+	CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString strSortLength						;display a string asking how many elements to sort
 	PullString numValues, 10						;pull the string the user types in 
 	CvtoNum numValues								;convert the ascii number to decimal
@@ -436,22 +453,16 @@ choiceH: ;sort and display B
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu			
 choiceI: ;multiply
-	DisplayString clearScr							;display the characters to clear the screen
-	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
-	JMP getUserChoice								;jump back up to display the menu
+	JMP notImplemented								;jump to the not implemented section
 choiceJ: ;display c
-	DisplayString clearScr							;display the characters to clear the screen
-	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
-	JMP getUserChoice								;jump back up to display the menu
+	JMP notImplemented								;jump to the not implemented section
 choiceK: ;add up c
-	DisplayString clearScr							;display the characters to clear the screen
-	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
-	JMP getUserChoice								;jump back up to display the menu
+	JMP notImplemented								;jump to the not implemented section
 choiceL: ;sort c
-	DisplayString clearScr							;display the characters to clear the screen
-	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
-	JMP getUserChoice								;jump back up to display the menu
+	JMP notImplemented								;jump to the not implemented section
 choiceM: ;smallest a
+	CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString enterValRow						;Displays the string asking for the number of rows
 	PullString rowA, 10								;get the number input and put into variable
 	CvtoNum rowA									;convert the ascii value into dec
@@ -473,13 +484,15 @@ choiceM: ;smallest a
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu	
 choiceN: ;smallest b
+	CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+	JNE lockedMethod								;if it is not active, then jump to display it is locked
 	DisplayString enterValRow						;Displays the string asking for the number of rows
 	PullString rowB, 10								;get the number input and put into variable
-	CvtoNum rowB										;convert the ascii value into dec
+	CvtoNum rowB									;convert the ascii value into dec
 	MOV rowB, EAX									;store this in vairiable
 	DisplayString enterValCol						;Displays the string asking for the number of cols
 	PullString colB, 10								;get the number input and put into variable
-	CvtoNum colB										;convert the ascii value into dec
+	CvtoNum colB									;convert the ascii value into dec
 	MOV colB, EAX									;store this in vairiable
 	
 	INVOKE smallestValue, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
@@ -494,11 +507,18 @@ choiceN: ;smallest b
 	DisplayString clearScr							;display the characters to clear the screen
 	JMP getUserChoice								;jump back up to display the menu
 choiceO: ;smallest c
+	JMP notImplemented								;jump to the not implemented section
+choiceQ:
+	JMP finished									;Jump to the end of the program, terminate.
+	
+lockedMethod:
+	DisplayString clearScr							;display the characters to clear the screen
+	DisplayString strLocked							;show a message telling the user that this method is currently locked
+	JMP getUserChoice								;jump back up to display the menu	
+notImplemented:
 	DisplayString clearScr							;display the characters to clear the screen
 	DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
 	JMP getUserChoice								;jump back up to display the menu
-choiceQ:
-	JMP finished									;Jump to the end of the program, terminate.
 
 ;************************************* the instructions below calls for "normal termination"	
 finished:

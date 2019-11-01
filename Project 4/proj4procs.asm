@@ -572,4 +572,25 @@ selectionSort PROC Near32 C uses EBX EDX EDI, lpArrayDwords:dword, iLength:dword
 		DisplayString crlf								;display the characters that skip to a new line	
 		RET												;return
 selectionSort ENDP
+
+COMMENT %
+********************************************************************************
+*Name: multArrays                                                              *
+*Purpose:                                                                      *
+*	      NOT IMPLEMENTED								     				   *
+*																			   *
+*Date Created: 10/26/2019                                                      *
+*Date Modified: 10/27/2019                                                     *
+*                                                                              *
+*                                                                              *
+*@param lpArrayA:dword                                                         *
+*@param rowsA:dword													 	  	   *
+*@param colsA:dword															   *
+*@param lpArrayB:dword														   *
+*@param colsB:dword															   *
+*******************************************************************************%
+multArrays PROC stdcall, lpArrayA:dword, rowsA:dword, colsA:dword, lpArrayB:dword, colsB:dword
+    RET
+multArrays endp
+
 END

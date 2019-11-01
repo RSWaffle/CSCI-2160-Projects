@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/27/19 14:12:48
+Microsoft (R) Macro Assembler Version 6.11		    11/01/19 16:09:55
 proj4procs.asm						     Page 1 - 1
 
 
@@ -699,8 +699,29 @@ proj4procs.asm						     Page 1 - 1
 						DisplayString crlf								;display the characters that skip to a new line	
 						RET												;return
  000004B8			selectionSort ENDP
+
+				COMMENT %
+				********************************************************************************
+				*Name: multArrays                                                              *
+				*Purpose:                                                                      *
+				*	      NOT IMPLEMENTED								     				   *
+				*																			   *
+				*Date Created: 10/26/2019                                                      *
+				*Date Modified: 10/27/2019                                                     *
+				*                                                                              *
+				*                                                                              *
+				*@param lpArrayA:dword                                                         *
+				*@param rowsA:dword													 	  	   *
+				*@param colsA:dword															   *
+				*@param lpArrayB:dword														   *
+				*@param colsB:dword															   *
+				*******************************************************************************%
+ 000004B8			multArrays PROC stdcall, lpArrayA:dword, rowsA:dword, colsA:dword, lpArrayB:dword, colsB:dword
+				    RET
+ 000004BF			multArrays endp
+
 				END
-Microsoft (R) Macro Assembler Version 6.11		    10/27/19 14:12:48
+Microsoft (R) Macro Assembler Version 6.11		    11/01/19 16:09:55
 proj4procs.asm						     Symbols 2 - 1
 
 
@@ -721,7 +742,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000001E0 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000004B8 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000004BF DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -767,6 +788,12 @@ extractDwords  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A1 Public 
   ValidNextChar  . . . . . . . .	L Near	 00000095 _TEXT	
   finished . . . . . . . . . . .	L Near	 0000009B _TEXT	
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+multArrays . . . . . . . . . . .	P Near	 000004B8 _TEXT	Length= 00000007 Public STDCALL
+  lpArrayA . . . . . . . . . . .	DWord	 bp + 00000008
+  rowsA  . . . . . . . . . . . .	DWord	 bp + 0000000C
+  colsA  . . . . . . . . . . . .	DWord	 bp + 00000010
+  lpArrayB . . . . . . . . . . .	DWord	 bp + 00000014
+  colsB  . . . . . . . . . . . .	DWord	 bp + 00000018
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 selectionSort  . . . . . . . . .	P Near	 0000033C _TEXT	Length= 0000017C Public C
   lpArrayDwords  . . . . . . . .	DWord	 bp + 00000008

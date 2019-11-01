@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    10/27/19 14:12:49
+Microsoft (R) Macro Assembler Version 6.11		    11/01/19 16:09:53
 proj4.asm						     Page 1 - 1
 
 
@@ -382,28 +382,28 @@ proj4.asm						     Page 1 - 1
 	   6C 6F 63 6B 65
 	   64 21 00
  0000042D 0A 0D 00			crlf byte  10,13,0								;Null-terminated string to skip to new line
- 00000430 00				choiceASCII byte 0
- 00000431  00000064 [			strDisplay dword 100 dup(0)
+ 00000430 00				choiceASCII byte 0								;Holds the ascii number choice 
+ 00000431  000000C8 [			strDisplay dword 200 dup(0)						;memory to hold a display string
 	    00000000
 	   ]
- 000005C1  00000064 [			numbersASCII byte 100 dup (?), 00
+ 00000751  000000C8 [			numbersASCII byte 200 dup (?), 00				;memory to hold the ascii numbers
 	    00
 	   ] 00
- 00000626  00000064 [			arrayA dword 100 dup (?)
+ 0000081A  00000064 [			arrayA dword 100 dup (?)						;memory to hold dwords in an array
 	    00000000
 	   ]
- 000007B6  00000064 [			arrayB dword 100 dup (?)
+ 000009AA  00000064 [			arrayB dword 100 dup (?)						;memory to hold dwords in an array
 	    00000000
 	   ]
- 00000946 00				strEnter byte 0
- 00000947 00000000			tempNum dword 0
- 0000094B 00000000			numValues dword 0
- 0000094F 00000000			rowA dword 0
- 00000953 00000000			colA dword 0
- 00000957 00000000			rowB dword 0
- 0000095B 00000000			colB dword 0
- 0000095F 00				matrixAActive byte 0
- 00000960 00				matrixBActive byte 0
+ 00000B3A 00				strEnter byte 0									;something to signify that the user pressing nothing but enter
+ 00000B3B 00000000			tempNum dword 0									;memory to hold a temp number
+ 00000B3F 00000000			numValues dword 0								;the number of values in array
+ 00000B43 00000000			rowA dword 0									;number of rows in A
+ 00000B47 00000000			colA dword 0									;numbers of cols in B
+ 00000B4B 00000000			rowB dword 0									;numbers of rows in B
+ 00000B4F 00000000			colB dword 0									;numbers of cols in B
+ 00000B53 00				matrixAActive byte 0							;byte to signify if A is active
+ 00000B54 00				matrixBActive byte 0							;byte to signify if B is active
 
 
 				;******************************************************************************************
@@ -542,7 +542,7 @@ proj4.asm						     Page 1 - 1
  000001E8			choiceA: ;input a
  000001E8  B9 00000064			MOV ECX, lengthof arrayA						;moves the length of array a into ECX so we can clear that amount to clear the array
  000001ED				lpClearA:
- 000001ED  C7 81 00000626 R		MOV arrayA[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+ 000001ED  C7 81 0000081A R		MOV arrayA[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
 	   00000000
  000001F7  E2 F4			loop lpClearA									;decrement ECX and go to the top of the loop
 					DisplayString strAskValues						;display the string asking which values to store
@@ -559,13 +559,13 @@ proj4.asm						     Page 1 - 1
 					DisplayString enterToCont						;display the press enter to continue message
 					PullString strEnter, 0							;wait for the user to press enter
 					DisplayString clearScr							;display the characters to clear the screen
- 00000273  C6 05 0000095F R		MOV matrixAActive, 1 							;set the matrix as active so it unlocks the other methods
+ 00000273  C6 05 00000B53 R		MOV matrixAActive, 1 							;set the matrix as active so it unlocks the other methods
 	   01
  0000027A  E9 FFFFFD90			JMP getUserChoice								;jump back up to display the menu
  0000027F			choiceB: ;input b
  0000027F  B9 00000064			MOV ECX, lengthof arrayB						;moves the length of array a into ECX so we can clear that amount to clear the array
  00000284				lpClearB:
- 00000284  C7 81 000007B6 R		MOV arrayB[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
+ 00000284  C7 81 000009AA R		MOV arrayB[ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
 	   00000000
  0000028E  E2 F4			loop lpClearB									;decrement ECX and go to the top of the loop
 					DisplayString strAskValues						;display the string asking which values to store
@@ -577,28 +577,26 @@ proj4.asm						     Page 1 - 1
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString clearScr							;display the characters to clear the screen
 					DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
-
 					DisplayString crlf								;display characters to go to next line.
 					DisplayString crlf								;display characters to go to next line.
 					DisplayString enterToCont						;display the press enter to continue message
 					PullString strEnter, 0							;wait for the user to press enter
 					DisplayString clearScr							;display the characters to clear the screen
- 0000030A  C6 05 00000960 R		MOV matrixBActive, 1 							;set the matrix as active so it unlocks the other methods
+ 0000030A  C6 05 00000B54 R		MOV matrixBActive, 1 							;set the matrix as active so it unlocks the other methods
 	   01
  00000311  E9 FFFFFCF9			JMP getUserChoice								;jump back up to display the menu
  00000316			choiceC: ;display a
- 00000316  80 3D 0000095F R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+ 00000316  80 3D 00000B53 R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000031D  0F 85 00000583		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
 					PullString rowA, 10								;get the number input and put into variable
-
 					CvtoNum rowA									;convert the ascii value into dec
- 00000343  A3 0000094F R		MOV rowA, EAX									;store this in vairiable
+ 00000343  A3 00000B43 R		MOV rowA, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
 					PullString colA, 10								;get the number input and put into variable
 					CvtoNum colA									;convert the ascii value into dec
- 00000368  A3 00000953 R		MOV colA, EAX									;store this in vairiable
+ 00000368  A3 00000B47 R		MOV colA, EAX									;store this in vairiable
 					
 					INVOKE displayArray, OFFSET arrayA, rowA, colA, ;call the display array method so we have the set of characters in the strdisplay address
 					OFFSET strDisplay
@@ -612,17 +610,18 @@ proj4.asm						     Page 1 - 1
 					DisplayString clearScr							;display the characters to clear the screen
  000003D3  E9 FFFFFC37			JMP getUserChoice								;jump back up to display the menu
  000003D8			choiceD: ;display b
- 000003D8  80 3D 00000960 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+ 000003D8  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  000003DF  0F 85 000004C1		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
+
 					PullString rowB, 10								;get the number input and put into variable
 					CvtoNum rowB									;convert the ascii value into dec
- 00000405  A3 00000957 R		MOV rowB, EAX									;store this in vairiable
+ 00000405  A3 00000B4B R		MOV rowB, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
 					PullString colB, 10								;get the number input and put into variable
 					CvtoNum colB									;convert the ascii value into dec
- 0000042A  A3 0000095B R		MOV colB, EAX									;store this in vairiable
+ 0000042A  A3 00000B4F R		MOV colB, EAX									;store this in vairiable
 					
 					INVOKE displayArray, OFFSET arrayB, rowB, colB,	;call the display array method so we have the set of characters in the strdisplay address
 					OFFSET strDisplay
@@ -635,20 +634,20 @@ proj4.asm						     Page 1 - 1
 					DisplayString clearScr							;display the characters to clear the screen
  00000495  E9 FFFFFB75			JMP getUserChoice								;jump back up to display the menu							
  0000049A			choiceE: ;add up A
- 0000049A  80 3D 0000095F R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+ 0000049A  80 3D 00000B53 R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  000004A1  0F 85 000003FF		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
 					PullString rowA, 10								;get the number input and put into variable
 					CvtoNum rowA									;convert the ascii value into dec
- 000004C7  A3 0000094F R		MOV rowA, EAX									;store this in vairiable
+ 000004C7  A3 00000B43 R		MOV rowA, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
 					PullString colA, 10								;get the number input and put into variable
 					CvtoNum colA									;convert the ascii value into dec
- 000004EC  A3 00000953 R		MOV colA, EAX									;store this in vairiable
+ 000004EC  A3 00000B47 R		MOV colA, EAX									;store this in vairiable
 					
 					INVOKE sumUpArray, OFFSET arrayA, rowA, colA	;call the sum up array method which returns the value in eax
- 0000050A  A3 00000947 R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
+ 0000050A  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
 
@@ -659,21 +658,20 @@ proj4.asm						     Page 1 - 1
 					DisplayString clearScr							;display the characters to clear the screen
  00000553  E9 FFFFFAB7			JMP getUserChoice								;jump back up to display the menu		
  00000558			choiceF: ;Add up B
- 00000558  80 3D 00000960 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+ 00000558  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000055F  0F 85 00000341		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
 					PullString rowB, 10								;get the number input and put into variable
 					CvtoNum rowB									;convert the ascii value into dec
-
- 00000585  A3 00000957 R		MOV rowB, EAX									;store this in vairiable
+ 00000585  A3 00000B4B R		MOV rowB, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
 					PullString colB, 10								;get the number input and put into variable
 					CvtoNum colB									;convert the ascii value into dec
- 000005AA  A3 0000095B R		MOV colB, EAX									;store this in vairiable
+ 000005AA  A3 00000B4F R		MOV colB, EAX									;store this in vairiable
 					
 					INVOKE sumUpArray, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
- 000005C8  A3 00000947 R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
+ 000005C8  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
 
@@ -681,17 +679,16 @@ proj4.asm						     Page 1 - 1
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
 					DisplayString enterToCont						;display the press enter to continue message
 					PullString strEnter, 0							;wait for user to press enter
-
 					DisplayString clearScr							;display the characters to clear the screen
  00000611  E9 FFFFF9F9			JMP getUserChoice								;jump back up to display the menu		
  00000616			choiceG: ;sort and display A
- 00000616  80 3D 0000095F R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+ 00000616  80 3D 00000B53 R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000061D  0F 85 00000283		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString strSortLength						;display a string asking how many elements to sort
 					PullString numValues, 10						;pull the string the user types in 
 					CvtoNum numValues								;convert the ascii number to decimal
- 00000643  A3 0000094B R		MOV numValues, EAX								;move eax into a variable so we dont invoke it
+ 00000643  A3 00000B3F R		MOV numValues, EAX								;move eax into a variable so we dont invoke it
 					DisplayString crlf								;display characters to go to next line.
 					DisplayString crlf								;display characters to go to next line.
 					INVOKE selectionSort, OFFSET arrayA, numValues  ;call the selection sort method to sort the array
@@ -700,13 +697,13 @@ proj4.asm						     Page 1 - 1
 					DisplayString clearScr							;display the characters to clear the screen
  0000068F  E9 FFFFF97B			JMP getUserChoice								;jump back up to display the menu		
  00000694			choiceH: ;sort and display B
- 00000694  80 3D 00000960 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+ 00000694  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000069B  0F 85 00000205		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString strSortLength						;display a string asking how many elements to sort
 					PullString numValues, 10						;pull the string the user types in 
 					CvtoNum numValues								;convert the ascii number to decimal
- 000006C1  A3 0000094B R		MOV numValues, EAX								;move eax into a variable so we dont invoke it
+ 000006C1  A3 00000B3F R		MOV numValues, EAX								;move eax into a variable so we dont invoke it
 					DisplayString crlf								;display characters to go to next line.
 					DisplayString crlf								;display characters to go to next line.
 					INVOKE selectionSort, OFFSET arrayB, numValues  ;call the selection sort method to sort the array
@@ -723,20 +720,20 @@ proj4.asm						     Page 1 - 1
  00000721			choiceL: ;sort c
  00000721  E9 00000199			JMP notImplemented								;jump to the not implemented section
  00000726			choiceM: ;smallest a
- 00000726  80 3D 0000095F R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
+ 00000726  80 3D 00000B53 R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000072D  0F 85 00000173		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
 					PullString rowA, 10								;get the number input and put into variable
 					CvtoNum rowA									;convert the ascii value into dec
- 00000753  A3 0000094F R		MOV rowA, EAX									;store this in vairiable
+ 00000753  A3 00000B43 R		MOV rowA, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
 					PullString colA, 10								;get the number input and put into variable
 					CvtoNum colA									;convert the ascii value into dec
- 00000778  A3 00000953 R		MOV colA, EAX									;store this in vairiable
+ 00000778  A3 00000B47 R		MOV colA, EAX									;store this in vairiable
 					
 					INVOKE smallestValue, OFFSET arrayA, rowA, colA	;call the sum up array method which returns the value in eax
- 00000796  A3 00000947 R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
+ 00000796  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
 
@@ -747,20 +744,20 @@ proj4.asm						     Page 1 - 1
 					DisplayString clearScr							;display the characters to clear the screen
  000007DF  E9 FFFFF82B			JMP getUserChoice								;jump back up to display the menu	
  000007E4			choiceN: ;smallest b
- 000007E4  80 3D 00000960 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
+ 000007E4  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  000007EB  0F 85 000000B5		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
 					PullString rowB, 10								;get the number input and put into variable
 					CvtoNum rowB									;convert the ascii value into dec
- 00000811  A3 00000957 R		MOV rowB, EAX									;store this in vairiable
+ 00000811  A3 00000B4B R		MOV rowB, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
 					PullString colB, 10								;get the number input and put into variable
 					CvtoNum colB									;convert the ascii value into dec
- 00000836  A3 0000095B R		MOV colB, EAX									;store this in vairiable
+ 00000836  A3 00000B4F R		MOV colB, EAX									;store this in vairiable
 					
 					INVOKE smallestValue, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
- 00000854  A3 00000947 R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
+ 00000854  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
 
@@ -792,7 +789,7 @@ proj4.asm						     Page 1 - 1
  000008DF			main ENDP
 
 					END												;Signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    10/27/19 14:12:49
+Microsoft (R) Macro Assembler Version 6.11		    11/01/19 16:09:53
 proj4.asm						     Symbols 2 - 1
 
 
@@ -814,7 +811,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000961 DWord	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000B55 DWord	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 000008DF DWord	  Public  'CODE'	
 
 
@@ -872,25 +869,25 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
-arrayA . . . . . . . . . . . . .	DWord	 00000626 _DATA	
-arrayB . . . . . . . . . . . . .	DWord	 000007B6 _DATA	
+arrayA . . . . . . . . . . . . .	DWord	 0000081A _DATA	
+arrayB . . . . . . . . . . . . .	DWord	 000009AA _DATA	
 choiceASCII  . . . . . . . . . .	Byte	 00000430 _DATA	
 clearScr . . . . . . . . . . . .	Byte	 00000273 _DATA	
-colA . . . . . . . . . . . . . .	DWord	 00000953 _DATA	
-colB . . . . . . . . . . . . . .	DWord	 0000095B _DATA	
+colA . . . . . . . . . . . . . .	DWord	 00000B47 _DATA	
+colB . . . . . . . . . . . . . .	DWord	 00000B4F _DATA	
 crlf . . . . . . . . . . . . . .	Byte	 0000042D _DATA	
 enterToCont  . . . . . . . . . .	Byte	 0000031B _DATA	
 enterValCol  . . . . . . . . . .	Byte	 00000339 _DATA	
 enterValRow  . . . . . . . . . .	Byte	 00000354 _DATA	
-matrixAActive  . . . . . . . . .	Byte	 0000095F _DATA	
-matrixBActive  . . . . . . . . .	Byte	 00000960 _DATA	
-numValues  . . . . . . . . . . .	DWord	 0000094B _DATA	
-numbersASCII . . . . . . . . . .	Byte	 000005C1 _DATA	
-rowA . . . . . . . . . . . . . .	DWord	 0000094F _DATA	
-rowB . . . . . . . . . . . . . .	DWord	 00000957 _DATA	
+matrixAActive  . . . . . . . . .	Byte	 00000B53 _DATA	
+matrixBActive  . . . . . . . . .	Byte	 00000B54 _DATA	
+numValues  . . . . . . . . . . .	DWord	 00000B3F _DATA	
+numbersASCII . . . . . . . . . .	Byte	 00000751 _DATA	
+rowA . . . . . . . . . . . . . .	DWord	 00000B43 _DATA	
+rowB . . . . . . . . . . . . . .	DWord	 00000B4B _DATA	
 strAskValues . . . . . . . . . .	Byte	 000002A7 _DATA	
 strDisplay . . . . . . . . . . .	DWord	 00000431 _DATA	
-strEnter . . . . . . . . . . . .	Byte	 00000946 _DATA	
+strEnter . . . . . . . . . . . .	Byte	 00000B3A _DATA	
 strLocked  . . . . . . . . . . .	Byte	 00000402 _DATA	
 strMenu2 . . . . . . . . . . . .	Byte	 00000172 _DATA	
 strMenu  . . . . . . . . . . . .	Byte	 00000061 _DATA	
@@ -901,7 +898,7 @@ strSortLength  . . . . . . . . .	Byte	 000003C2 _DATA
 strSum . . . . . . . . . . . . .	Byte	 0000036F _DATA	
 strTypeChoice  . . . . . . . . .	Byte	 00000284 _DATA	
 strValuesStored  . . . . . . . .	Byte	 000002DC _DATA	
-tempNum  . . . . . . . . . . . .	DWord	 00000947 _DATA	
+tempNum  . . . . . . . . . . . .	DWord	 00000B3B _DATA	
 
 	   0 Warnings
 	   0 Errors

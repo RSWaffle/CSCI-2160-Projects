@@ -67,70 +67,100 @@ getsTime proc  Near32 stdcall, lpSystemTime:dword, lpTimeString:dword
 	MOV outputAddress, EAX						;moves the address in eax into the output address
 	MOV EDX, outputAddress						;moves the output address into edx
 
-	ASSUME EBX:ptr SYSTEMTIME
-	MOVSX EAX, word ptr [EBX].wMonth
+	ASSUME EBX:ptr SYSTEMTIME					;assume that ebx is a systemtime so we can reference it easier
+	MOVSX EAX, word ptr [EBX].wMonth			;moves the month number into eax so we can compare it to the correct month
 	
-	CMP EAX, 1
-	;JE January
-	CMP EAX, 2
-	;JE February
-	CMP EAX, 3
-	;JE March
-	CMP EAX, 4
-	;JE April
-	CMP EAX, 5
-	;JE May
-	CMP EAX, 6
-	;JE June
-	CMP EAX, 7
-	;JE July	
-	CMP EAX, 8
-	;JE August	
-	CMP EAX, 9
-	;JE September	
-	CMP EAX, 10
-	JE October
-	CMP EAX, 11
-	;JE November
-	CMP EAX, 12
-	;JE December
-		
+	CMP EAX, 1									;compares the month number to 1
+	JE January									;if it is 1 then jump to the january section
+	CMP EAX, 2									;compares the month number to 2
+	JE February									;if it is the month number then jump to the appropriate section
+	CMP EAX, 3									;compares the month number to 3
+	JE March									;if it is the month number then jump to the appropriate section
+	CMP EAX, 4									;compares the month number to 4
+	JE April									;if it is the month number then jump to the appropriate section
+	CMP EAX, 5									;compares the month number to 5
+	JE May										;if it is the month number then jump to the appropriate section
+	CMP EAX, 6									;compares the month number to 6
+	JE June										;if it is the month number then jump to the appropriate section
+	CMP EAX, 7									;compares the month number to 7
+	JE July										;if it is the month number then jump to the appropriate section
+	CMP EAX, 8									;compares the month number to 8
+	JE August									;if it is the month number then jump to the appropriate section
+	CMP EAX, 9									;compares the month number to 9
+	JE September								;if it is the month number then jump to the appropriate section
+	CMP EAX, 10									;compares the month number to 10
+	JE October									;if it is the month number then jump to the appropriate section
+	CMP EAX, 11									;compares the month number to 11
+	JE November									;if it is the month number then jump to the appropriate section
+	CMP EAX, 12									;compares the month number to 12
+	JE December									;if it is the month number then jump to the appropriate section
+	
+	January:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	February:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	March:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	April:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	May:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	June:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	July:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	August:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	September:
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest		
 	October:
 		;INVOKE appendString, lpTimeString, addr strOctober
 		JMP InsertRest
 	November:
-		;INVOKE appendString, lpTimeString, addr strOctober
+		;INVOKE appendString, lpTimeString, addr strNovember
+		JMP InsertRest
+	December:
+		;INVOKE appendString, lpTimeString, addr strNovember
 		JMP InsertRest
 		
 	InsertRest:
-	INVOKE intasc32Comma, ADDR strTempString, [EBX].wDay
-	;INVOKE appendString, lpTimeString, addr strTempString
-	MOVSX EDX, word ptr [EBX].wYear
-	INVOKE intasc32, ADDR strTempString, EDX
-	;INVOKE appendString, lpTimeString, addr strTempString
-	;INVOKE appendString, lpTimeString, addr strAt
+		INVOKE intasc32Comma, ADDR strTempString, [EBX].wDay
+		;INVOKE appendString, lpTimeString, addr strTempString
+		MOVSX EDX, word ptr [EBX].wYear
+		INVOKE intasc32, ADDR strTempString, EDX
+		;INVOKE appendString, lpTimeString, addr strTempString
+		;INVOKE appendString, lpTimeString, addr strAt
 	
-	MOVSX EDX, word ptr [EBX].wHour
-	INVOKE intasc32, ADDR strTempString, EDX
-	;INVOKE appendString, lpTimeString, addr strTempString
-	;INVOKE appendString, lpTimeString, addr strCol
+		MOVSX EDX, word ptr [EBX].wHour
+		INVOKE intasc32, ADDR strTempString, EDX
+		;INVOKE appendString, lpTimeString, addr strTempString
+		;INVOKE appendString, lpTimeString, addr strCol
 	
-	MOVSX EDX, word ptr [EBX].wMinute
-	INVOKE intasc32, ADDR strTempString, EDX
-	;INVOKE appendString, lpTimeString, addr strTempString
-	;INVOKE appendString, lpTimeString, addr strCol
+		MOVSX EDX, word ptr [EBX].wMinute
+		INVOKE intasc32, ADDR strTempString, EDX
+		;INVOKE appendString, lpTimeString, addr strTempString
+		;INVOKE appendString, lpTimeString, addr strCol
 	
-	MOVSX EDX, word ptr [EBX].wSecond
-	INVOKE intasc32, ADDR strTempString, EDX
-	;INVOKE appendString, lpTimeString, addr strTempString
-	;INVOKE appendString, lpTimeString, addr strCol
-	
-	MOVSX EDX, word ptr [EBX].wMillisecs
-	INVOKE intasc32, ADDR strTempString, EDX
-	;INVOKE appendString, lpTimeString, addr strTempString
+		MOVSX EDX, word ptr [EBX].wSecond
+		INVOKE intasc32, ADDR strTempString, EDX
+		;INVOKE appendString, lpTimeString, addr strTempString
+		;INVOKE appendString, lpTimeString, addr strCol
 		
-	ASSUME EBX: ptr nothing
-	MOV EAX, lpTimeString
+		MOVSX EDX, word ptr [EBX].wMillisecs
+		INVOKE intasc32, ADDR strTempString, EDX
+		;INVOKE appendString, lpTimeString, addr strTempString
+			
+		ASSUME EBX: ptr nothing
+		MOV EAX, lpTimeString
 	RET
 getsTime	endp
 

@@ -1,0 +1,78 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/01/19 23:47:45
+driver.asm						     Page 1 - 1
+
+
+				;******************************************************************************************
+				;*  Program Name: proj4.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160-001 
+				;*  Lab:          Proj5a
+				;*  Date:         11/02/2019
+				;*  Purpose:      
+				;******************************************************************************************
+					.486						;This tells assembler to generate 32-bit code
+					.model flat					;This tells assembler that all addresses are real addresses
+					.stack 100h					;EVERY program needs to have a stack allocated
+				;*****************************************************************************************
+				;  List all necessary prototypes for methods to be called here
+
+					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD 
+						getTime				PROTO Near32 stdcall
+
+				;*****************************************************************************************
+ 00000000			.DATA
+				;*****************************************************************************************
+ 00000000			.CODE
+ 00000000			_start:
+ 00000000
+ 00000000  B8 00000000			MOV EAX, 0
+					
+					INVOKE getTime
+					
+ 0000000A  B8 FFFFFFFF			MOV EAX, -1
+					
+				INVOKE ExitProcess, 0
+ 00000016			PUBLIC _start
+				END
+Microsoft (R) Macro Assembler Version 6.11		    11/01/19 23:47:45
+driver.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000016 DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+getTime  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+
+	   0 Warnings
+	   0 Errors

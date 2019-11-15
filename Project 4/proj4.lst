@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/01/19 16:09:53
+Microsoft (R) Macro Assembler Version 6.11		    11/06/19 21:07:10
 proj4.asm						     Page 1 - 1
 
 
@@ -17,6 +17,7 @@ proj4.asm						     Page 1 - 1
 					.model flat					;This tells assembler that all addresses are real addresses
 
 					.stack 100h					;EVERY program needs to have a stack allocated
+					.listall
 
 				;******************************************************************************************
 
@@ -415,13 +416,39 @@ proj4.asm						     Page 1 - 1
  00000005 00000005		main PROC
 
 					DisplayString strProjInfo						;display the string that contains the project information
+			     1	
+ 00000005  68 00000000 R   *	    push   OFFSET strProjInfo
+ 0000000A  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strProjInfo    				
+			     1	
 					
  0000000F			getUserChoice:	
 					DisplayString strMenu							;display the first part of the menu
+			     1	
+ 0000000F  68 00000061 R   *	    push   OFFSET strMenu
+ 00000014  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strMenu    				
+			     1	
 					DisplayString strMenu2							;display the second part of the menu
+			     1	
+ 00000019  68 00000172 R   *	    push   OFFSET strMenu2
+ 0000001E  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strMenu2    				
+			     1	
 					DisplayString strTypeChoice						;display the message "enter choice"
+			     1	
+ 00000023  68 00000284 R   *	    push   OFFSET strTypeChoice
+ 00000028  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strTypeChoice    				
+			     1	
 					
 					PullString choiceASCII, 1						;read in the next line that the user inputs and store the ascii value.
+			     1	
+ 0000002D  6A 01	   *	    push   +000000001h
+ 0000002F  68 00000430 R   *	    push   OFFSET choiceASCII
+ 00000034  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR choiceASCII, 1		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					
  00000039  80 3D 00000430 R		CMP choiceASCII, 65								;compare the ascii value to a capital A
 	   41
@@ -536,6 +563,11 @@ proj4.asm						     Page 1 - 1
  000001D3  0F 84 000006CB		JE choiceQ										;if it is equal to this number then jump to the choiceQ section.
 						
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000001D9  68 00000273 R   *	    push   OFFSET clearScr
+ 000001DE  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  000001E3  E9 FFFFFE27			JMP getUserChoice								;jump back up to display the menu
 					
 					
@@ -546,19 +578,75 @@ proj4.asm						     Page 1 - 1
 	   00000000
  000001F7  E2 F4			loop lpClearA									;decrement ECX and go to the top of the loop
 					DisplayString strAskValues						;display the string asking which values to store
+			     1	
+ 000001F9  68 000002A7 R   *	    push   OFFSET strAskValues
+ 000001FE  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strAskValues    				
+			     1	
 					PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
+			     1	
+ 00000203  6A 32	   *	    push   +000000032h
+ 00000205  68 00000751 R   *	    push   OFFSET numbersASCII
+ 0000020A  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR numbersASCII, 50		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					
 					INVOKE extractDwords, OFFSET numbersASCII, 		;call the extract dwords function so we have our array properly loaded into mem
 					OFFSET arrayA
+ 0000020F  68 0000081A R   *	    push   dword  ptr OFFSET FLAT:arrayA
+ 00000214  68 00000751 R   *	    push   dword  ptr OFFSET FLAT:numbersASCII
+ 00000219  E8 00000000 E   *	    call   extractDwords
+ 0000021E  83 C4 08	   *	    add    esp, 000000008h
 					
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000221  68 00000273 R   *	    push   OFFSET clearScr
+ 00000226  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 0000022B  68 00000273 R   *	    push   OFFSET clearScr
+ 00000230  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
 					DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored. 
+			     1	
+ 00000235  68 000002DC R   *	    push   OFFSET strValuesStored
+ 0000023A  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strValuesStored    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 0000023F  68 0000042D R   *	    push   OFFSET crlf
+ 00000244  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 00000249  68 0000042D R   *	    push   OFFSET crlf
+ 0000024E  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 00000253  68 0000031B R   *	    push   OFFSET enterToCont
+ 00000258  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for the user to press enter
+			     1	
+ 0000025D  6A 00	   *	    push   +000000000h
+ 0000025F  68 00000B3A R   *	    push   OFFSET strEnter
+ 00000264  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000269  68 00000273 R   *	    push   OFFSET clearScr
+ 0000026E  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  00000273  C6 05 00000B53 R		MOV matrixAActive, 1 							;set the matrix as active so it unlocks the other methods
 	   01
  0000027A  E9 FFFFFD90			JMP getUserChoice								;jump back up to display the menu
@@ -569,19 +657,75 @@ proj4.asm						     Page 1 - 1
 	   00000000
  0000028E  E2 F4			loop lpClearB									;decrement ECX and go to the top of the loop
 					DisplayString strAskValues						;display the string asking which values to store
+			     1	
+ 00000290  68 000002A7 R   *	    push   OFFSET strAskValues
+ 00000295  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strAskValues    				
+			     1	
 					PullString numbersASCII, 50						;get what the user typed and store into numbersASCII
+			     1	
+ 0000029A  6A 32	   *	    push   +000000032h
+ 0000029C  68 00000751 R   *	    push   OFFSET numbersASCII
+ 000002A1  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR numbersASCII, 50		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 						
 					INVOKE extractDwords, OFFSET numbersASCII, 		;call the extract dwords function so we have our array properly loaded into mem
 					OFFSET arrayB
+ 000002A6  68 000009AA R   *	    push   dword  ptr OFFSET FLAT:arrayB
+ 000002AB  68 00000751 R   *	    push   dword  ptr OFFSET FLAT:numbersASCII
+ 000002B0  E8 00000000 E   *	    call   extractDwords
+ 000002B5  83 C4 08	   *	    add    esp, 000000008h
 					
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000002B8  68 00000273 R   *	    push   OFFSET clearScr
+ 000002BD  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000002C2  68 00000273 R   *	    push   OFFSET clearScr
+ 000002C7  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
 					DisplayString strValuesStored					;display a helpful message telling the user that the values have been stored.
+			     1	
+ 000002CC  68 000002DC R   *	    push   OFFSET strValuesStored
+ 000002D1  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strValuesStored    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 000002D6  68 0000042D R   *	    push   OFFSET crlf
+ 000002DB  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 000002E0  68 0000042D R   *	    push   OFFSET crlf
+ 000002E5  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 000002EA  68 0000031B R   *	    push   OFFSET enterToCont
+ 000002EF  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for the user to press enter
+			     1	
+ 000002F4  6A 00	   *	    push   +000000000h
+ 000002F6  68 00000B3A R   *	    push   OFFSET strEnter
+ 000002FB  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000300  68 00000273 R   *	    push   OFFSET clearScr
+ 00000305  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  0000030A  C6 05 00000B54 R		MOV matrixBActive, 1 							;set the matrix as active so it unlocks the other methods
 	   01
  00000311  E9 FFFFFCF9			JMP getUserChoice								;jump back up to display the menu
@@ -590,126 +734,497 @@ proj4.asm						     Page 1 - 1
 	   01
  0000031D  0F 85 00000583		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
+			     1	
+ 00000323  68 00000354 R   *	    push   OFFSET enterValRow
+ 00000328  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValRow    				
+			     1	
 					PullString rowA, 10								;get the number input and put into variable
+			     1	
+ 0000032D  6A 0A	   *	    push   +00000000Ah
+ 0000032F  68 00000B43 R   *	    push   OFFSET rowA
+ 00000334  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR rowA, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum rowA									;convert the ascii value into dec
+			     1	
+ 00000339  68 00000B43 R   *	    push   OFFSET rowA
+ 0000033E  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR rowA					;Convert the ASCII value to its true decimal number
+			     1		
  00000343  A3 00000B43 R		MOV rowA, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
+			     1	
+ 00000348  68 00000339 R   *	    push   OFFSET enterValCol
+ 0000034D  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValCol    				
+			     1	
 					PullString colA, 10								;get the number input and put into variable
+			     1	
+ 00000352  6A 0A	   *	    push   +00000000Ah
+ 00000354  68 00000B47 R   *	    push   OFFSET colA
+ 00000359  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR colA, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum colA									;convert the ascii value into dec
+			     1	
+ 0000035E  68 00000B47 R   *	    push   OFFSET colA
+ 00000363  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR colA					;Convert the ASCII value to its true decimal number
+			     1		
  00000368  A3 00000B47 R		MOV colA, EAX									;store this in vairiable
 					
 					INVOKE displayArray, OFFSET arrayA, rowA, colA, ;call the display array method so we have the set of characters in the strdisplay address
 					OFFSET strDisplay
+ 0000036D  68 00000431 R   *	    push   dword  ptr OFFSET FLAT:strDisplay
+ 00000372  FF 35 00000B47 R *	    push   colA
+ 00000378  FF 35 00000B43 R *	    push   rowA
+ 0000037E  68 0000081A R   *	    push   dword  ptr OFFSET FLAT:arrayA
+ 00000383  E8 00000000 E   *	    call   displayArray
+ 00000388  83 C4 10	   *	    add    esp, 000000010h
 					
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 0000038B  68 0000042D R   *	    push   OFFSET crlf
+ 00000390  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 00000395  68 0000042D R   *	    push   OFFSET crlf
+ 0000039A  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 0000039F  68 0000042D R   *	    push   OFFSET crlf
+ 000003A4  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
+			     1	
+ 000003A9  68 00000431 R   *	    push   OFFSET strDisplay
+ 000003AE  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strDisplay    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 000003B3  68 0000031B R   *	    push   OFFSET enterToCont
+ 000003B8  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for the user to press enter
+			     1	
+ 000003BD  6A 00	   *	    push   +000000000h
+ 000003BF  68 00000B3A R   *	    push   OFFSET strEnter
+ 000003C4  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000003C9  68 00000273 R   *	    push   OFFSET clearScr
+ 000003CE  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  000003D3  E9 FFFFFC37			JMP getUserChoice								;jump back up to display the menu
  000003D8			choiceD: ;display b
  000003D8  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  000003DF  0F 85 000004C1		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
-
+			     1	
+ 000003E5  68 00000354 R   *	    push   OFFSET enterValRow
+ 000003EA  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValRow    				
+			     1	
 					PullString rowB, 10								;get the number input and put into variable
+			     1	
+ 000003EF  6A 0A	   *	    push   +00000000Ah
+ 000003F1  68 00000B4B R   *	    push   OFFSET rowB
+ 000003F6  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR rowB, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum rowB									;convert the ascii value into dec
+			     1	
+ 000003FB  68 00000B4B R   *	    push   OFFSET rowB
+ 00000400  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR rowB					;Convert the ASCII value to its true decimal number
+			     1		
  00000405  A3 00000B4B R		MOV rowB, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
+			     1	
+ 0000040A  68 00000339 R   *	    push   OFFSET enterValCol
+ 0000040F  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValCol    				
+			     1	
 					PullString colB, 10								;get the number input and put into variable
+			     1	
+ 00000414  6A 0A	   *	    push   +00000000Ah
+ 00000416  68 00000B4F R   *	    push   OFFSET colB
+ 0000041B  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR colB, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum colB									;convert the ascii value into dec
+			     1	
+ 00000420  68 00000B4F R   *	    push   OFFSET colB
+ 00000425  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR colB					;Convert the ASCII value to its true decimal number
+			     1		
  0000042A  A3 00000B4F R		MOV colB, EAX									;store this in vairiable
 					
 					INVOKE displayArray, OFFSET arrayB, rowB, colB,	;call the display array method so we have the set of characters in the strdisplay address
 					OFFSET strDisplay
+ 0000042F  68 00000431 R   *	    push   dword  ptr OFFSET FLAT:strDisplay
+ 00000434  FF 35 00000B4F R *	    push   colB
+ 0000043A  FF 35 00000B4B R *	    push   rowB
+ 00000440  68 000009AA R   *	    push   dword  ptr OFFSET FLAT:arrayB
+ 00000445  E8 00000000 E   *	    call   displayArray
+ 0000044A  83 C4 10	   *	    add    esp, 000000010h
 					DisplayString crlf								;display characters to go to next line.	
+			     1	
+ 0000044D  68 0000042D R   *	    push   OFFSET crlf
+ 00000452  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 00000457  68 0000042D R   *	    push   OFFSET crlf
+ 0000045C  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 00000461  68 0000042D R   *	    push   OFFSET crlf
+ 00000466  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
+			     1	
+ 0000046B  68 00000431 R   *	    push   OFFSET strDisplay
+ 00000470  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strDisplay    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 00000475  68 0000031B R   *	    push   OFFSET enterToCont
+ 0000047A  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 0000047F  6A 00	   *	    push   +000000000h
+ 00000481  68 00000B3A R   *	    push   OFFSET strEnter
+ 00000486  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 0000048B  68 00000273 R   *	    push   OFFSET clearScr
+ 00000490  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  00000495  E9 FFFFFB75			JMP getUserChoice								;jump back up to display the menu							
  0000049A			choiceE: ;add up A
  0000049A  80 3D 00000B53 R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  000004A1  0F 85 000003FF		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
+			     1	
+ 000004A7  68 00000354 R   *	    push   OFFSET enterValRow
+ 000004AC  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValRow    				
+			     1	
 					PullString rowA, 10								;get the number input and put into variable
+			     1	
+ 000004B1  6A 0A	   *	    push   +00000000Ah
+ 000004B3  68 00000B43 R   *	    push   OFFSET rowA
+ 000004B8  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR rowA, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum rowA									;convert the ascii value into dec
+			     1	
+ 000004BD  68 00000B43 R   *	    push   OFFSET rowA
+ 000004C2  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR rowA					;Convert the ASCII value to its true decimal number
+			     1		
  000004C7  A3 00000B43 R		MOV rowA, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
+			     1	
+ 000004CC  68 00000339 R   *	    push   OFFSET enterValCol
+ 000004D1  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValCol    				
+			     1	
 					PullString colA, 10								;get the number input and put into variable
+			     1	
+ 000004D6  6A 0A	   *	    push   +00000000Ah
+ 000004D8  68 00000B47 R   *	    push   OFFSET colA
+ 000004DD  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR colA, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum colA									;convert the ascii value into dec
+			     1	
+ 000004E2  68 00000B47 R   *	    push   OFFSET colA
+ 000004E7  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR colA					;Convert the ASCII value to its true decimal number
+			     1		
  000004EC  A3 00000B47 R		MOV colA, EAX									;store this in vairiable
 					
 					INVOKE sumUpArray, OFFSET arrayA, rowA, colA	;call the sum up array method which returns the value in eax
+ 000004F1  FF 35 00000B47 R *	    push   colA
+ 000004F7  FF 35 00000B43 R *	    push   rowA
+ 000004FD  68 0000081A R   *	    push   dword  ptr OFFSET FLAT:arrayA
+ 00000502  E8 00000000 E   *	    call   sumUpArray
+ 00000507  83 C4 0C	   *	    add    esp, 00000000Ch
  0000050A  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
+ 0000050F  FF 35 00000B3B R *	    push   tempNum
+ 00000515  68 00000431 R   *	    push   OFFSET strDisplay
+ 0000051A  E8 00000000 E   *	    call   intasc32
 
 					DisplayString strSum							;display the sum message
+			     1	
+ 0000051F  68 0000036F R   *	    push   OFFSET strSum
+ 00000524  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strSum    				
+			     1	
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
+			     1	
+ 00000529  68 00000431 R   *	    push   OFFSET strDisplay
+ 0000052E  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strDisplay    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 00000533  68 0000031B R   *	    push   OFFSET enterToCont
+ 00000538  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 0000053D  6A 00	   *	    push   +000000000h
+ 0000053F  68 00000B3A R   *	    push   OFFSET strEnter
+ 00000544  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000549  68 00000273 R   *	    push   OFFSET clearScr
+ 0000054E  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  00000553  E9 FFFFFAB7			JMP getUserChoice								;jump back up to display the menu		
  00000558			choiceF: ;Add up B
  00000558  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000055F  0F 85 00000341		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
+			     1	
+ 00000565  68 00000354 R   *	    push   OFFSET enterValRow
+ 0000056A  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValRow    				
+			     1	
 					PullString rowB, 10								;get the number input and put into variable
+			     1	
+ 0000056F  6A 0A	   *	    push   +00000000Ah
+ 00000571  68 00000B4B R   *	    push   OFFSET rowB
+ 00000576  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR rowB, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum rowB									;convert the ascii value into dec
+			     1	
+ 0000057B  68 00000B4B R   *	    push   OFFSET rowB
+ 00000580  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR rowB					;Convert the ASCII value to its true decimal number
+			     1		
  00000585  A3 00000B4B R		MOV rowB, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
+			     1	
+ 0000058A  68 00000339 R   *	    push   OFFSET enterValCol
+ 0000058F  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValCol    				
+			     1	
 					PullString colB, 10								;get the number input and put into variable
+			     1	
+ 00000594  6A 0A	   *	    push   +00000000Ah
+ 00000596  68 00000B4F R   *	    push   OFFSET colB
+ 0000059B  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR colB, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum colB									;convert the ascii value into dec
+			     1	
+ 000005A0  68 00000B4F R   *	    push   OFFSET colB
+ 000005A5  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR colB					;Convert the ASCII value to its true decimal number
+			     1		
  000005AA  A3 00000B4F R		MOV colB, EAX									;store this in vairiable
 					
 					INVOKE sumUpArray, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
+ 000005AF  FF 35 00000B4F R *	    push   colB
+ 000005B5  FF 35 00000B4B R *	    push   rowB
+ 000005BB  68 000009AA R   *	    push   dword  ptr OFFSET FLAT:arrayB
+ 000005C0  E8 00000000 E   *	    call   sumUpArray
+ 000005C5  83 C4 0C	   *	    add    esp, 00000000Ch
  000005C8  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
+ 000005CD  FF 35 00000B3B R *	    push   tempNum
+ 000005D3  68 00000431 R   *	    push   OFFSET strDisplay
+ 000005D8  E8 00000000 E   *	    call   intasc32
 
 					DisplayString strSum							;display the sum message
+			     1	
+ 000005DD  68 0000036F R   *	    push   OFFSET strSum
+ 000005E2  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strSum    				
+			     1	
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
+			     1	
+ 000005E7  68 00000431 R   *	    push   OFFSET strDisplay
+ 000005EC  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strDisplay    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 000005F1  68 0000031B R   *	    push   OFFSET enterToCont
+ 000005F6  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 000005FB  6A 00	   *	    push   +000000000h
+ 000005FD  68 00000B3A R   *	    push   OFFSET strEnter
+ 00000602  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000607  68 00000273 R   *	    push   OFFSET clearScr
+ 0000060C  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  00000611  E9 FFFFF9F9			JMP getUserChoice								;jump back up to display the menu		
  00000616			choiceG: ;sort and display A
  00000616  80 3D 00000B53 R		CMP matrixAActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000061D  0F 85 00000283		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString strSortLength						;display a string asking how many elements to sort
+			     1	
+ 00000623  68 000003C2 R   *	    push   OFFSET strSortLength
+ 00000628  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strSortLength    				
+			     1	
 					PullString numValues, 10						;pull the string the user types in 
+			     1	
+ 0000062D  6A 0A	   *	    push   +00000000Ah
+ 0000062F  68 00000B3F R   *	    push   OFFSET numValues
+ 00000634  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR numValues, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum numValues								;convert the ascii number to decimal
+			     1	
+ 00000639  68 00000B3F R   *	    push   OFFSET numValues
+ 0000063E  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR numValues					;Convert the ASCII value to its true decimal number
+			     1		
  00000643  A3 00000B3F R		MOV numValues, EAX								;move eax into a variable so we dont invoke it
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 00000648  68 0000042D R   *	    push   OFFSET crlf
+ 0000064D  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 00000652  68 0000042D R   *	    push   OFFSET crlf
+ 00000657  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					INVOKE selectionSort, OFFSET arrayA, numValues  ;call the selection sort method to sort the array
+ 0000065C  FF 35 00000B3F R *	    push   numValues
+ 00000662  68 0000081A R   *	    push   dword  ptr OFFSET FLAT:arrayA
+ 00000667  E8 00000000 E   *	    call   selectionSort
+ 0000066C  83 C4 08	   *	    add    esp, 000000008h
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 0000066F  68 0000031B R   *	    push   OFFSET enterToCont
+ 00000674  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 00000679  6A 00	   *	    push   +000000000h
+ 0000067B  68 00000B3A R   *	    push   OFFSET strEnter
+ 00000680  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000685  68 00000273 R   *	    push   OFFSET clearScr
+ 0000068A  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  0000068F  E9 FFFFF97B			JMP getUserChoice								;jump back up to display the menu		
  00000694			choiceH: ;sort and display B
  00000694  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  0000069B  0F 85 00000205		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString strSortLength						;display a string asking how many elements to sort
+			     1	
+ 000006A1  68 000003C2 R   *	    push   OFFSET strSortLength
+ 000006A6  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strSortLength    				
+			     1	
 					PullString numValues, 10						;pull the string the user types in 
+			     1	
+ 000006AB  6A 0A	   *	    push   +00000000Ah
+ 000006AD  68 00000B3F R   *	    push   OFFSET numValues
+ 000006B2  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR numValues, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum numValues								;convert the ascii number to decimal
+			     1	
+ 000006B7  68 00000B3F R   *	    push   OFFSET numValues
+ 000006BC  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR numValues					;Convert the ASCII value to its true decimal number
+			     1		
  000006C1  A3 00000B3F R		MOV numValues, EAX								;move eax into a variable so we dont invoke it
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 000006C6  68 0000042D R   *	    push   OFFSET crlf
+ 000006CB  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					DisplayString crlf								;display characters to go to next line.
+			     1	
+ 000006D0  68 0000042D R   *	    push   OFFSET crlf
+ 000006D5  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR crlf    				
+			     1	
 					INVOKE selectionSort, OFFSET arrayB, numValues  ;call the selection sort method to sort the array
+ 000006DA  FF 35 00000B3F R *	    push   numValues
+ 000006E0  68 000009AA R   *	    push   dword  ptr OFFSET FLAT:arrayB
+ 000006E5  E8 00000000 E   *	    call   selectionSort
+ 000006EA  83 C4 08	   *	    add    esp, 000000008h
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 000006ED  68 0000031B R   *	    push   OFFSET enterToCont
+ 000006F2  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 000006F7  6A 00	   *	    push   +000000000h
+ 000006F9  68 00000B3A R   *	    push   OFFSET strEnter
+ 000006FE  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000703  68 00000273 R   *	    push   OFFSET clearScr
+ 00000708  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  0000070D  E9 FFFFF8FD			JMP getUserChoice								;jump back up to display the menu			
  00000712			choiceI: ;multiply
  00000712  E9 000001A8			JMP notImplemented								;jump to the not implemented section
@@ -724,48 +1239,180 @@ proj4.asm						     Page 1 - 1
 	   01
  0000072D  0F 85 00000173		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
+			     1	
+ 00000733  68 00000354 R   *	    push   OFFSET enterValRow
+ 00000738  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValRow    				
+			     1	
 					PullString rowA, 10								;get the number input and put into variable
+			     1	
+ 0000073D  6A 0A	   *	    push   +00000000Ah
+ 0000073F  68 00000B43 R   *	    push   OFFSET rowA
+ 00000744  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR rowA, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum rowA									;convert the ascii value into dec
+			     1	
+ 00000749  68 00000B43 R   *	    push   OFFSET rowA
+ 0000074E  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR rowA					;Convert the ASCII value to its true decimal number
+			     1		
  00000753  A3 00000B43 R		MOV rowA, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
+			     1	
+ 00000758  68 00000339 R   *	    push   OFFSET enterValCol
+ 0000075D  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValCol    				
+			     1	
 					PullString colA, 10								;get the number input and put into variable
+			     1	
+ 00000762  6A 0A	   *	    push   +00000000Ah
+ 00000764  68 00000B47 R   *	    push   OFFSET colA
+ 00000769  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR colA, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum colA									;convert the ascii value into dec
+			     1	
+ 0000076E  68 00000B47 R   *	    push   OFFSET colA
+ 00000773  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR colA					;Convert the ASCII value to its true decimal number
+			     1		
  00000778  A3 00000B47 R		MOV colA, EAX									;store this in vairiable
 					
 					INVOKE smallestValue, OFFSET arrayA, rowA, colA	;call the sum up array method which returns the value in eax
+ 0000077D  FF 35 00000B47 R *	    push   colA
+ 00000783  FF 35 00000B43 R *	    push   rowA
+ 00000789  68 0000081A R   *	    push   dword  ptr OFFSET FLAT:arrayA
+ 0000078E  E8 00000000 E   *	    call   smallestValue
+ 00000793  83 C4 0C	   *	    add    esp, 00000000Ch
  00000796  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
+ 0000079B  FF 35 00000B3B R *	    push   tempNum
+ 000007A1  68 00000431 R   *	    push   OFFSET strDisplay
+ 000007A6  E8 00000000 E   *	    call   intasc32
 
 					DisplayString strSmallestNum					;display the sum message
+			     1	
+ 000007AB  68 0000039A R   *	    push   OFFSET strSmallestNum
+ 000007B0  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strSmallestNum    				
+			     1	
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
+			     1	
+ 000007B5  68 00000431 R   *	    push   OFFSET strDisplay
+ 000007BA  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strDisplay    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 000007BF  68 0000031B R   *	    push   OFFSET enterToCont
+ 000007C4  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 000007C9  6A 00	   *	    push   +000000000h
+ 000007CB  68 00000B3A R   *	    push   OFFSET strEnter
+ 000007D0  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000007D5  68 00000273 R   *	    push   OFFSET clearScr
+ 000007DA  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  000007DF  E9 FFFFF82B			JMP getUserChoice								;jump back up to display the menu	
  000007E4			choiceN: ;smallest b
  000007E4  80 3D 00000B54 R		CMP matrixBActive, 1							;checks to see if the matrix is active before executing the method
 	   01
  000007EB  0F 85 000000B5		JNE lockedMethod								;if it is not active, then jump to display it is locked
 					DisplayString enterValRow						;Displays the string asking for the number of rows
+			     1	
+ 000007F1  68 00000354 R   *	    push   OFFSET enterValRow
+ 000007F6  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValRow    				
+			     1	
 					PullString rowB, 10								;get the number input and put into variable
+			     1	
+ 000007FB  6A 0A	   *	    push   +00000000Ah
+ 000007FD  68 00000B4B R   *	    push   OFFSET rowB
+ 00000802  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR rowB, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum rowB									;convert the ascii value into dec
+			     1	
+ 00000807  68 00000B4B R   *	    push   OFFSET rowB
+ 0000080C  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR rowB					;Convert the ASCII value to its true decimal number
+			     1		
  00000811  A3 00000B4B R		MOV rowB, EAX									;store this in vairiable
 					DisplayString enterValCol						;Displays the string asking for the number of cols
+			     1	
+ 00000816  68 00000339 R   *	    push   OFFSET enterValCol
+ 0000081B  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterValCol    				
+			     1	
 					PullString colB, 10								;get the number input and put into variable
+			     1	
+ 00000820  6A 0A	   *	    push   +00000000Ah
+ 00000822  68 00000B4F R   *	    push   OFFSET colB
+ 00000827  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR colB, 10		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					CvtoNum colB									;convert the ascii value into dec
+			     1	
+ 0000082C  68 00000B4F R   *	    push   OFFSET colB
+ 00000831  E8 00000000 E   *	    call   ascint32
+			     1		INVOKE ascint32, ADDR colB					;Convert the ASCII value to its true decimal number
+			     1		
  00000836  A3 00000B4F R		MOV colB, EAX									;store this in vairiable
 					
 					INVOKE smallestValue, OFFSET arrayB, rowB, colB	;call the sum up array method which returns the value in eax
+ 0000083B  FF 35 00000B4F R *	    push   colB
+ 00000841  FF 35 00000B4B R *	    push   rowB
+ 00000847  68 000009AA R   *	    push   dword  ptr OFFSET FLAT:arrayB
+ 0000084C  E8 00000000 E   *	    call   smallestValue
+ 00000851  83 C4 0C	   *	    add    esp, 00000000Ch
  00000854  A3 00000B3B R		MOV tempNum, EAX								;store this into a variable so we dont pass eax as invoke
 						
 					INVOKE intasc32, addr strDisplay, tempNum		;convert the number into ascii and store into strdisplay
+ 00000859  FF 35 00000B3B R *	    push   tempNum
+ 0000085F  68 00000431 R   *	    push   OFFSET strDisplay
+ 00000864  E8 00000000 E   *	    call   intasc32
 
 					DisplayString strSmallestNum					;display the sum message
+			     1	
+ 00000869  68 0000039A R   *	    push   OFFSET strSmallestNum
+ 0000086E  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strSmallestNum    				
+			     1	
 					DisplayString strDisplay						;display the characters inside ofo the str display vairiable
+			     1	
+ 00000873  68 00000431 R   *	    push   OFFSET strDisplay
+ 00000878  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strDisplay    				
+			     1	
 					DisplayString enterToCont						;display the press enter to continue message
+			     1	
+ 0000087D  68 0000031B R   *	    push   OFFSET enterToCont
+ 00000882  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR enterToCont    				
+			     1	
 					PullString strEnter, 0							;wait for user to press enter
+			     1	
+ 00000887  6A 00	   *	    push   +000000000h
+ 00000889  68 00000B3A R   *	    push   OFFSET strEnter
+ 0000088E  E8 00000000 E   *	    call   getstring
+			     1			INVOKE getstring, ADDR strEnter, 0		;Take the string input and store it into a variable, max amount of chars typed is sNumChars
+			     1			
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 00000893  68 00000273 R   *	    push   OFFSET clearScr
+ 00000898  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
  0000089D  E9 FFFFF76D			JMP getUserChoice								;jump back up to display the menu
  000008A2			choiceO: ;smallest c
  000008A2  EB 1B			JMP notImplemented								;jump to the not implemented section
@@ -774,22 +1421,44 @@ proj4.asm						     Page 1 - 1
 					
  000008A6			lockedMethod:
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000008A6  68 00000273 R   *	    push   OFFSET clearScr
+ 000008AB  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
 					DisplayString strLocked							;show a message telling the user that this method is currently locked
+			     1	
+ 000008B0  68 00000402 R   *	    push   OFFSET strLocked
+ 000008B5  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strLocked    				
+			     1	
  000008BA  E9 FFFFF750			JMP getUserChoice								;jump back up to display the menu	
  000008BF			notImplemented:
 					DisplayString clearScr							;display the characters to clear the screen
+			     1	
+ 000008BF  68 00000273 R   *	    push   OFFSET clearScr
+ 000008C4  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR clearScr    				
+			     1	
 					DisplayString strMethodNotAdded					;show a message telling the user that this method has not been implemented
+			     1	
+ 000008C9  68 000002FA R   *	    push   OFFSET strMethodNotAdded
+ 000008CE  E8 00000000 E   *	    call   putstring
+			     1		INVOKE putstring, ADDR strMethodNotAdded    				
+			     1	
  000008D3  E9 FFFFF737			JMP getUserChoice								;jump back up to display the menu
 
 				;************************************* the instructions below calls for "normal termination"	
  000008D8			finished:
 					INVOKE ExitProcess,0						 
+ 000008D8  6A 00	   *	    push   +000000000h
+ 000008DA  E8 00000000 E   *	    call   ExitProcess
 					PUBLIC _start
 					
  000008DF			main ENDP
 
 					END												;Signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    11/01/19 16:09:53
+Microsoft (R) Macro Assembler Version 6.11		    11/06/19 21:07:10
 proj4.asm						     Symbols 2 - 1
 
 

@@ -12,6 +12,7 @@
 	.model flat					;This tells assembler that all addresses are real addresses
 
 	.stack 100h					;EVERY program needs to have a stack allocated
+	.listall
 
 ;******************************************************************************************
 

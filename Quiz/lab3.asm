@@ -9,7 +9,7 @@ Lab using logical directives
 ;  anywhere in the program. You may add any identifiers you need to the data segment.
 ;       
 ;************************************************************************************%  
-	.486				;tells assembler to generate 32-bit code
+	.486				;tells assembler to generate 32-bit code	
 	.model flat			;tells assembler that all addresses are real addresses
 	.stack 100h			;EVERY program needs to have a stack allocated
 ;************************************************************************************
@@ -35,8 +35,8 @@ strGreatest byte 10, "The greatest number in the array is: ", 0
 strSearch byte 10, "Enter the number you wish to search for: ", 0
 strFound byte 10, "The number you searched for is located at: ", 0 
 strNotFound byte 10, "The number you searched for was not found.", 0
-tempNum dword ?
-tempString byte 12 dup(0)
+tempNum dword ?									;memory to hold a temp dword
+tempString byte 12 dup(0)						;memory to hold a temp string
 
 	.code
 _start:

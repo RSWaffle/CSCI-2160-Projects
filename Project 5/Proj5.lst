@@ -1,0 +1,224 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/16/19 00:32:27
+Proj5.asm						     Page 1 - 1
+
+
+				;******************************************************************************************
+				;*  Program Name: ShupeStrings.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160-001
+				;*  Lab:		  Proj 5
+				;*  Date:         Created 10/19/2019
+				;*  Purpose:      create a Student
+				;******************************************************************************************
+					.486						;This tells assembler to generate 32-bit code
+					.model flat					;This tells assembler that all addresses are real addresses
+					.stack 100h					;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  					;Executes "normal" termination
+					intasc32 PROTO NEAR32 stdcall, lpStringToHold:dword, dval:dword			;Will convert any D-Word number into ACSII characters
+					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
+					getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
+					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
+					createHeapString PROTO stdcall, inAddr:dword
+					pausesc PROTO stdcall
+					myInfo PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword
+					getTime				PROTO Near32 stdcall   ;returns address of time string
+
+				;******************************************************************************************
+				COMMENT %
+				******************************************************************************
+				*Name: DisplayString                                                         *
+				*Purpose:                                                                    *
+				*	The purpose of this macro is to display a set of strings to the console  *
+				*                                                                            *
+				*Date Created: 10/02/2019                                                    *
+				*Date Modified: 10/02/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*****************************************************************************%
+				DisplayString MACRO String:REQ
+					INVOKE putstring, ADDR String    				;;display The string passed in 
+				ENDM
+
+				COMMENT %
+				******************************************************************************
+				*Name: PullString                                                            *
+				*Purpose:                                                                    *
+				*	The purpose is to get information from the user and store into a variable*
+				*                                                                            *
+				*Date Created: 10/09/2019                                                    *
+				*Date Modified: 10/09/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*@param limit:byte                                                           *
+				*****************************************************************************%
+				PullString MACRO String:REQ, limit:REQ
+					INVOKE getstring, ADDR String, limit			;;Take the string input and store it into a variable, max amount of chars typed is sNumChars	
+				ENDM
+				;******************************************************************************************
+ 00000000			.DATA
+ 00000000 52 79 61 6E 20	strName byte "Ryan Shupe",0
+	   53 68 75 70 65
+	   00
+ 0000000B 43 53 43 49 20	strSection byte "CSCI 2160-001",0
+	   32 31 36 30 2D
+	   30 30 31 00
+				;******************************************************************************************
+ 00000000			.CODE
+
+ 00000000			_start:
+ 00000000  B8 00000000			MOV EAX, 0										;Statement to help in debugging
+
+ 00000005 00000005		main PROC
+					INVOKE pausesc
+					INVOKE myInfo, addr strName, addr strSection, 5
+ 0000001B  B8 0000004D			MOV EAX, 77
+					INVOKE pausesc
+					
+					
+				;************************************* the instructions below calls for "normal termination"	
+ 00000025			finished:
+					INVOKE ExitProcess,0						 
+					PUBLIC _start
+					
+ 0000002C			main ENDP
+
+				COMMENT%
+				******************************************************************************
+				*Name: pausesc                                                               *
+				*Purpose:                                                                    *
+				*	  When invoked, displays a message press enter to continue. When the user* 
+				*		presses enter, the program returns 									 *
+				*Date Created: 11/15/2019                                                    *
+				*Date Modified: 11/15/2019                                                   *
+				*                                                                            *
+				*****************************************************************************%
+ 0000002C			pausesc PROC stdcall
+ 00000019			.data
+ 00000019 0A 50 72 65 73		strPressEnter byte 10, "Press ENTER to continue!",0 	
+	   73 20 45 4E 54
+	   45 52 20 74 6F
+	   20 63 6F 6E 74
+	   69 6E 75 65 21
+	   00
+ 00000033 00				strTemp byte 0											;a temp byte in memory for getstring
+ 0000002C			.code
+					
+					INVOKE putstring, addr strPressEnter					;display the press enter to continue message
+					INVOKE getstring, addr strTemp, 0						;wait for the user to press enter
+ 00000042  C3			RET 														;return to where i was called.
+ 00000043			pausesc ENDP
+
+				COMMENT%
+				******************************************************************************
+				*Name: myInfo                                                                *
+				*Purpose:                                                                    *
+				*	  Accepts a name and a section number and displays info to the screen    *
+				*		accordingly 														 *
+				*Date Created: 11/15/2019                                                    *
+				*Date Modified: 11/15/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param nameAddr:dword                                                       *
+				*@param sSectionAddr:dword	                                                 *
+				*****************************************************************************%
+ 00000043			myInfo PROC stdcall, sName:dword, sSection:dword, sProjNum:dword
+ 00000034			.data
+ 00000034 0A 09 20 20 20	  strInfo1 byte 10,09, "    Name: ",0				
+	   20 4E 61 6D 65
+	   3A 20 00
+ 00000041 0A 09 20 53 65	  strInfo2 byte 10,09, " Section: ",0
+	   63 74 69 6F 6E
+	   3A 20 00
+ 0000004E 0A 09 20 50 72	  strInfo3 byte 10,09, " Project: ",0
+	   6F 6A 65 63 74
+	   3A 20 00
+ 0000005B  00000004 [		 strProj byte 4 dup(0)
+	    00
+	   ]
+ 00000046			.code
+				INVOKE putstring, addr strInfo1						;display the first part of the info screen
+				INVOKE putstring, sName								;display the provided name
+				INVOKE putstring, addr strInfo2						;display the second part of the info screen
+				INVOKE putstring, sSection							;display the provided section
+				INVOKE putstring, addr strInfo3						;display the third part of the info screen
+				INVOKE intasc32, addr strProj, sProjNum				;convert the decimal number into ascii
+				INVOKE putstring, addr strProj							;display the project number
+				INVOKE getTime										;call the get time method to get the current system time and construct a string
+				INVOKE putstring, EAX								;display the current time thats address is in eax
+				RET													;return to where i was called from
+ 0000009A			myInfo ENDP
+
+					END												;Signals assembler that there are no instructions after this statement
+Microsoft (R) Macro Assembler Version 6.11		    11/16/19 00:32:27
+Proj5.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+DisplayString  . . . . . . . . .	Proc
+PullString . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000005F DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000009A DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000005 Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+createHeapString . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+getTime  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000027 Public
+  finished . . . . . . . . . . .	L Near	 00000025 _TEXT	
+myInfo . . . . . . . . . . . . .	P Near	 00000043 _TEXT	Length= 00000057 Public STDCALL
+  sName  . . . . . . . . . . . .	DWord	 bp + 00000008
+  sSection . . . . . . . . . . .	DWord	 bp + 0000000C
+  sProjNum . . . . . . . . . . .	DWord	 bp + 00000010
+pausesc  . . . . . . . . . . . .	P Near	 0000002C _TEXT	Length= 00000017 Public STDCALL
+putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+strInfo1 . . . . . . . . . . . .	Byte	 00000034 _DATA	
+strInfo2 . . . . . . . . . . . .	Byte	 00000041 _DATA	
+strInfo3 . . . . . . . . . . . .	Byte	 0000004E _DATA	
+strName  . . . . . . . . . . . .	Byte	 00000000 _DATA	
+strPressEnter  . . . . . . . . .	Byte	 00000019 _DATA	
+strProj  . . . . . . . . . . . .	Byte	 0000005B _DATA	
+strSection . . . . . . . . . . .	Byte	 0000000B _DATA	
+strTemp  . . . . . . . . . . . .	Byte	 00000033 _DATA	
+
+	   0 Warnings
+	   0 Errors

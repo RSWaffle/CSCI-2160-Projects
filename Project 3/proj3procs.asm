@@ -28,6 +28,20 @@ heapAllocHarrison PROTO Near32 stdcall, dSize:DWORD 							;Creates memory on th
 
 COMMENT %
 ******************************************************************************
+*Name: createHeapString                                                      *
+*Purpose:                                                                    *
+*	     Takes in a string address and creates a string with the correct     *
+		allocated space, returns the heap address							 *
+*Date Created: 11/15/2019                                                    *
+*Date Modified: 11/15/2019                                                   *
+*                                                                            *
+*                                                                            *
+*@param inAddress:dword                                                      *
+*@param outAddr:dword													 	 *
+*****************************************************************************%
+
+COMMENT %
+******************************************************************************
 *Name: createRectangle                                                       *
 *Purpose:                                                                    *
 *	     this procedure intakes a width and a height and generates a rectangle*

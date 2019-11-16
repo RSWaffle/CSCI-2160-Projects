@@ -300,42 +300,4 @@ getsTime proc  Near32 stdcall, lpSystemTime:dword, lpTimeString:dword
 getsTime	endp
 
 
-COMMENT%
-******************************************************************************
-*Name: appendString                                                          *
-*Purpose:                                                                    *
-*	  This method copies the null-terminated string starting at the address  *
-*  indicated by the source parameter into the string starting at the address *
-*  indicated by the destination. The destination string will be null-terminated*
-*  after appending.                                                          *
-*Date Created: 10/31/2019                                                    *
-*Date Modified: 11/02/2019                                                   *
-*                                                                            *
-*                                                                            *
-*@param lpDestination:dword                                                  *
-*@param lpDSource:dword	                                                     *
-*****************************************************************************%
-appendString PROC Near32 stdcall uses EDX ECX EDI EBX, lpDestination:dword, lpSource:dword
-	LOCAL numBytesToCopy:dword
-	
-	MOV EDX, lpSource				;moves the source address into EDX so we can get the number of current bytes
-	getBytes EDX					;call the getbytes macro so we get the current number of bytes. 
-	MOV numBytesToCopy, EAX			;stores this into a local variable
-	MOV EAX, lpDestination			;moves into EAX, the destination address
-	getBytes EAX					;gets the number of bytes of the destination address
-	MOV EDI, EAX					;stores the number of bytes in the output into EDI
-	DEC EDI							;decrements edi so we ignore the null character the getBytes counts for
-	MOV EBX, lpDestination			;moves the address of the output into ebx
-	MOV ECX, numBytesToCopy			;moves the number of bytes to copy into ecx so we can loop
-	ADD EBX, EDI 					;adds EDI to the initial address so we get the starting address were going to paste to
-	
-	lpCopyString:
-		MOV EAX, [EDX]				;moves the current value at address edx into eax
-		MOV [EBX], AL				;moves into the current address of ebx the value in AL
-		INC EBX						;increments to the next position in the destination
-		INC EDX						;increments to the next position in the source
-	loop lpCopyString				;decrement ecx, and jump back to the top
-	RET								;return back to where I was called from. 
-appendString endp 
-
 END

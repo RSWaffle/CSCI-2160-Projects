@@ -21,20 +21,26 @@ Student_getStreet PROTO stdcall, ths:dword
 getBytes PROTO stdcall, String1:dword
 Student_calcAvg PROTO stdcall, ths:dword
 Student_letterGrade PROTO stdcall, ths:dword
+Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word
+Student_getTest PROTO stdcall, ths:dword, numTest:word
+Student_setStreet PROTO stdcall, ths:dword, streetAddr:dword
+Student_setZip PROTO stdcall, ths:dword, inZip:dword
 ;******************************************************************************************	
 Student STRUCT 
-	last byte 100 dup(0)					;space to hold the last name of the student
-	first byte 100 dup(0)					;space to hold the first name of the student
-	street byte 200 dup(0)					;space to hold the street address
-	zip dword ?								;space to hold the zip
-	test1 word ?							;word to hold the test score 1
-	test2 word ?							;word to hold the test score 2
-	test3 word ? 							;word to hold the test score 3
+	last byte 100 dup(0)							;space to hold the last name of the student
+	first byte 100 dup(0)							;space to hold the first name of the student
+	street byte 200 dup(0)							;space to hold the street address
+	zip dword ?										;space to hold the zip
+	test1 word ?									;word to hold the test score 1
+	test2 word ?									;word to hold the test score 2
+	test3 word ? 									;word to hold the test score 3
 Student ENDS
 ;******************************************************************************************
 .DATA
 spaceChar byte 32,0									;memory to hold the space char
 nextLine byte 10,0									;memory to store the next line char
+tempAddr dword ?									;memory to hold an address
+tempVar dword ?										;memory to hold a dword
 
 strTest1 byte "Test 1: ", 0
 strTest2 byte "Test 2: ", 0
@@ -74,8 +80,7 @@ Student_2 PROC stdcall, firstN:dword, lastN:dword
 	PUSH EAX											;store the address it gives
 	INVOKE Student_setName, EAX, firstN, lastN			;set the name of the student
 	POP EAX												;restore our pushed address of the student
-	RET 8												;return back to where i was called cleaning
-	8 bytes, address in EAX
+	RET 8												;return back to where i was called cleaning 8 bytes, address in EAX
 Student_2 ENDP
 
 COMMENT%
@@ -89,8 +94,29 @@ COMMENT%
 *                                                                            *
 *@param sc:dword                                         		             *
 *****************************************************************************%
-Student_3 PROC stdcall, sc:dword
-
+Student_3 PROC stdcall uses EBX EDX EDI, sc:dword
+	INVOKE memoryallocBailey, sizeof Student			;allocate enough memory to hold a student
+	MOV tempAddr, EAX									;preserves address to the student
+	MOV EBX, EAX										;move the allocated address into ebx
+	ASSUME EBX:PTR Student								;assume ebx is a student
+	MOV EDX, sc											;move into edx the address of the copy student
+	ASSUME EDX:PTR Student								;let edx point to a student
+	INVOKE Student_setName, EBX, addr [EDX].first, 		;sets the name of the student to the name of the one we are making a copy of
+	addr [EDX].last
+	INVOKE Student_getZip, EDX							;gets the zip of the copy student
+	MOV tempVar, EAX									;moves the zip into the temp var
+	INVOKE Student_setZip, EBX, addr tempVar			;sets the zip of the new student
+	INVOKE Student_getStreet, EDX						;gets the street of the copy student
+	INVOKE Student_setStreet, EBX, EAX					;sets the street of the new student
+	INVOKE Student_getTest, EDX, 1						;get the first test of the copy student into ax
+	INVOKE Student_setTest, EBX, AX, 1					;place the first test score into the new students test
+	INVOKE Student_getTest, EDX, 2						;get the second test of the copy student into ax
+	INVOKE Student_setTest, EBX, AX, 2					;place the second test score into the new students test
+	INVOKE Student_getTest, EDX, 3						;get the third test of the copy student into ax
+	INVOKE Student_setTest, EBX, AX, 3					;place the third test score into the new students test
+	ASSUME EDX:PTR nothing								;edx doesnt point to a student anymore
+	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+	MOV EAX, tempAddr									;restores address to the student
 	RET 4												;returns back to where I was called with 4 bytes, address in eax.
 Student_3 ENDP
 
@@ -155,18 +181,36 @@ COMMENT%
 *@param score:word                                                           *
 *@param testNum:word                                                         *
 *****************************************************************************%
-Student_setTest PROC stdcall uses EBX, ths:dword, score:word, numTest:word
+Student_setTest PROC stdcall uses EBX EDX, ths:dword, score:word, numTest:word
 	MOV EBX, ths										;moves the address of the student into ebx.
 	ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
 	.IF numTest == 1									;if the in test num is equal to 1
 		MOV DX, score									;moves the first test into dx
-		MOV [EBX].test1, DX								;moves the word into the memory location where test 1 is 
+		TEST DX, DX										;test dx with itself to set flags
+		.IF SIGN?										;tests to see if the test score is negative
+		.ELSE											;if it is not
+			.IF DX <= 100								;checks to see if it is less than 100
+				MOV [EBX].test1, DX						;moves the word into the memory location where test 1 is 
+			.ENDIF										;end if
+		.ENDIF											;endif
 	.ELSEIF numTest == 2								;if the in test num is equal to 2
 		MOV DX, score									;moves the first test into dx
-		MOV [EBX].test2, DX								;moves the word into the memory location where test 1 is 	
+				TEST DX, DX								;test dx with itself to set flags
+		.IF SIGN?										;tests to see if the test score is negative
+		.ELSE											;if it is not
+			.IF DX <= 100								;checks to see if it is less than 100
+				MOV [EBX].test2, DX						;moves the word into the memory location where test 1 is 
+			.ENDIF										;end if
+		.ENDIF											;endif
 	.ELSEIF numTest == 3								;if the in test num is equal to 3
 		MOV DX, score									;moves the first test into dx
-		MOV [EBX].test3, DX								;moves the word into the memory location where test 1 is 
+		TEST DX, DX										;test dx with itself to set flags
+		.IF SIGN?										;tests to see if the test score is negative
+		.ELSE											;if it is not
+			.IF DX <= 100								;checks to see if it is less than 100
+				MOV [EBX].test3, DX						;moves the word into the memory location where test 1 is 
+			.ENDIF										;end if
+		.ENDIF											;endif 
 	.ELSE												;if the test number is not 1-3
 														;if this was java i would throw an exception here
 	.ENDIF												;end if
@@ -185,13 +229,18 @@ COMMENT%
 *@param ths:dword                                                            *
 *@param streetAddr:dword                                                     *
 *****************************************************************************%
-Student_Street PROC stdcall, ths:dword, streetAddr:dword
+Student_setStreet PROC stdcall uses EBX EDX, ths:dword, streetAddr:dword
 	MOV EBX, ths										;moves the address of the student into ebx.
 	ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
-	INVOKE appendString, addr [EBX].street, streetAddr	;appends the street in into the location it should go onto the heap
+	MOV EDX, streetAddr									;moves the address into EDX
+	MOV AL, byte ptr[EDX]								;moves the first byte into al
+	.IF AL == 0											;if it is null
+	.ELSE												;if it is not
+		INVOKE appendString, addr [EBX].street, streetAddr;appends the street in into the location it should go onto the heap
+	.ENDIF												;end if
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 8												;return to where i was called from and cleaning 8 bytes
-Student_Street ENDP
+Student_setStreet ENDP
 
 COMMENT%
 ******************************************************************************
@@ -209,7 +258,11 @@ Student_setZip PROC stdcall uses EBX EDX, ths:dword, inZip:dword
 	MOV EBX, ths										;moves the address of the student into ebx
 	ASSUME EBX:ptr Student								;assumes ebx is a student pointer so we dont have to type it 
 	MOV EDX, inZip										;moves the zip parameter into a register, cant do mem to mem
-	MOV [EBX].zip, EDX									;moves the zip sent into the method into the zip in student 
+	MOV AL, byte ptr[EDX]								;moves the first byte into al
+	.IF AL == 0											;if it is null
+	.ELSE												;if it is not
+		MOV [EBX].zip, EDX								;moves the zip sent into the method into the zip in student 
+	.ENDIF												;end if
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 8												;returns to where I was called cleaning 8 bytes. 
 Student_setZip ENDP
@@ -230,9 +283,8 @@ COMMENT%
 Student_setAddr PROC stdcall uses EBX EDX, ths:dword, inAddr:dword, inZip:dword
 	MOV EBX, ths										;moves the address of the student into ebx
 	ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-	INVOKE appendString, addr [EBX].street, inAddr		;appends the street in into the location it should go onto the heap
-	MOV EDX, inZip										;moves the zip param into edx, cant do mem to mem
-	MOV [EBX].zip, EDX									;moves the zip sent into the method into the zip in the student
+	INVOKE Student_setStreet, ths, inAddr				;sets the street to the student
+	INVOKE Student_setZip, ths, inZip					;sets the zip of the student
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 8												;returns to where I was called, cleaning 8 bytes.
 Student_setAddr ENDP
@@ -315,8 +367,14 @@ Student_getAddress PROC stdcall uses ECX EDX EDI, ths:dword
 	INVOKE appendString, EDI, EDX						;appends the street to the blank allocated memory
 	INVOKE appendString, EDI, addr spaceChar			;appends a space character onto the address
 	INVOKE Student_getZip, ths							;gets the current zip from the student and address is in eax
-	MOV EDX, EAX										;moves the address of the zip into eax
-	INVOKE appendString, EDI, EDX						;appends the zip at the end of the current string allocated (the street and the space to seperate)
+	.IF EAX == -1										;if the zip is null
+	.ELSE												;if it is not
+		MOV EDX, EAX									;moves the numbers of the zip into eax
+		INVOKE memoryallocBailey, 5						;allocates enough memory for a complete address
+		INVOKE intasc32, EAX, EDX						;converts the zip to ascii
+		MOV EDX, EAX									;moves the addr of the zip into eax
+		INVOKE appendString, EDI, EDX					;appends the zip at the end of the current string allocated (the street and the space to seperate)
+	.ENDIF												;endif
 	MOV EAX, EDI										;moves the address of the address into eax for returning
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 4												;returns to where I was called, cleaning 8 bytes.
@@ -358,15 +416,16 @@ COMMENT%
 *@param ths:dword                                                            *
 *@returns outAddr:dword                                                      *  
 *****************************************************************************%
-Student_getZip PROC stdcall uses ebx ecx edi, ths:dword
-	MOV ECX, 0											;clear out ecx
+Student_getZip PROC stdcall uses ebx edx, ths:dword
 	MOV EBX, ths										;moves the address of the student into ebx
 	ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-	INVOKE memoryallocBailey, 5							;allocate 5 bytes to convert the zip
-	MOV EDI, EAX										;move the address of the zip into edi
-	MOV ECX, [EBX].zip									;moves the address of the zip into ECX
-	INVOKE intasc32, EDI, dword ptr [ECX]				;converts the zipcode into ascii form 
-	MOV EAX, EDI										;moves the address of the address into eax for returning
+	MOV EAX, [EBX].zip									;moves the address of the zip into EAX
+	.IF EAX == 00										;if zip is null
+		MOV EAX, -1										;move -1 into eax
+	.ELSE												;if it is not
+		MOV EDX, [EAX]									;moves the value at eax into edx
+		MOV EAX, EDX									;moves back to eax for output
+	.ENDIF												;end if
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 4												;returns to where I was called, cleaning 8 bytes.
 Student_getZip ENDP

@@ -21,6 +21,7 @@
 	getTime	  PROTO Near32 stdcall   ;returns address of time string
 	Student_1 PROTO stdcall
 	Student_2 PROTO stdcall, firstN:dword, lastN:dword
+	Student_3 PROTO stdcall, sc:dword
 	Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
 	Student_setAddr PROTO stdcall, ths:dword, inAddr:dword, inZip:dword
 	Student_setTestScores PROTO stdcall, ths:dword, t1:word, t2:word, t3:word
@@ -83,6 +84,7 @@ zip dword 37601
 
 s1 dword ?
 s2 dword ?
+s3 dword ?
 ;******************************************************************************************
 .CODE
 
@@ -116,7 +118,12 @@ main PROC
 	INVOKE Student_studentRecord, s1
 	
 	INVOKE Student_equals, s1, s2
+	INVOKE Student_studentRecord, s2
 	
+	INVOKE Student_3, s1
+	MOV s3, EAX
+	
+	INVOKE Student_studentRecord, s3
 	
 	INVOKE pausesc
 	

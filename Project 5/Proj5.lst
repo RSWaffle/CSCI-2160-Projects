@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/19/19 19:26:33
+Microsoft (R) Macro Assembler Version 6.11		    11/20/19 00:29:27
 proj5.asm						     Page 1 - 1
 
 
@@ -28,6 +28,19 @@ proj5.asm						     Page 1 - 1
 					Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
 					Student_setAddr PROTO stdcall, ths:dword, inAddr:dword, inZip:dword
 					Student_setTestScores PROTO stdcall, ths:dword, t1:word, t2:word, t3:word
+					Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word
+					Student_getName PROTO stdcall, ths:dword
+					Student_getTest PROTO stdcall, ths:dword, numTest:word
+					Student_getAddress PROTO stdcall, ths:dword 
+					Student_getZip PROTO stdcall, ths:dword
+					Student_getStreet PROTO stdcall, ths:dword
+					Student_findMax PROTO stdcall, ths:dword
+					Student_findMin PROTO stdcall, ths:dword
+					Student_calcAvg PROTO stdcall, ths:dword
+					Student_studentRecord PROTO stdcall, ths:dword
+					Student_equals PROTO stdcall, ths:dword, sc:dword
+					
+				
 				
 				;******************************************************************************************
 				COMMENT %
@@ -96,20 +109,38 @@ proj5.asm						     Page 1 - 1
  0000001B  A3 00000044 R		MOV s1, EAX
 					INVOKE Student_setName, s1, addr first, addr last
 					INVOKE Student_setAddr, s1, addr address, addr zip
-					INVOKE Student_setTestScores, s1, 77, 50, 88
+					INVOKE Student_setTestScores, s1, 100, 70, 88
 					
 					INVOKE Student_2, addr first, addr last
  0000006A  A3 00000048 R		MOV s2, EAX
+					
+					INVOKE Student_getName, s2
+					INVOKE Student_setTestScores, s2, 100, 66, 88
+					INVOKE Student_getTest, s2, 2
+					
+					INVOKE Student_getStreet, s1
+					INVOKE Student_getZip, s1
+					
+					INVOKE Student_getAddress, s1
+					
+					INVOKE Student_findMax, s1
+					INVOKE Student_findMin, s1
+					
+					INVOKE Student_calcAvg, s1
+					INVOKE Student_studentRecord, s1
+					
+					INVOKE Student_equals, s1, s2
+					
 					
 					INVOKE pausesc
 					
 					
 				;************************************* the instructions below calls for "normal termination"	
- 00000074			finished:
+ 000000FB			finished:
 					INVOKE ExitProcess,0						 
 					PUBLIC _start
 					
- 0000007B			main ENDP
+ 00000102			main ENDP
 				
 				COMMENT%
 				******************************************************************************
@@ -121,7 +152,7 @@ proj5.asm						     Page 1 - 1
 				*Date Modified: 11/15/2019                                                   *
 				*                                                                            *
 				*****************************************************************************%
- 0000007B			pausesc PROC stdcall
+ 00000102			pausesc PROC stdcall
  0000004C			.data
  0000004C 0A 50 72 65 73		strPressEnter byte 10, "Press ENTER to continue!",0 	
 	   73 20 45 4E 54
@@ -130,12 +161,12 @@ proj5.asm						     Page 1 - 1
 	   69 6E 75 65 21
 	   00
  00000066 00				strTemp byte 0											;a temp byte in memory for getstring
- 0000007B			.code
+ 00000102			.code
 					
 					INVOKE putstring, addr strPressEnter					;display the press enter to continue message
 					INVOKE getstring, addr strTemp, 0						;wait for the user to press enter
- 00000091  C3			RET 														;return to where i was called.
- 00000092			pausesc ENDP
+ 00000118  C3			RET 														;return to where i was called.
+ 00000119			pausesc ENDP
 				
 				COMMENT%
 				******************************************************************************
@@ -150,7 +181,7 @@ proj5.asm						     Page 1 - 1
 				*@param nameAddr:dword                                                       *
 				*@param sSectionAddr:dword	                                                 *
 				*****************************************************************************%
- 00000092			myInfo PROC stdcall, sName:dword, sSection:dword, sProjNum:dword
+ 00000119			myInfo PROC stdcall, sName:dword, sSection:dword, sProjNum:dword
  00000067			.data
  00000067 0A 09 20 20 20	  strInfo1 byte 10,09, "    Name: ",0				
 	   20 4E 61 6D 65
@@ -164,7 +195,7 @@ proj5.asm						     Page 1 - 1
  0000008E  00000004 [		 strProj byte 4 dup(0)
 	    00
 	   ]
- 00000095			.code
+ 0000011C			.code
 				INVOKE putstring, addr strInfo1						;display the first part of the info screen
 				INVOKE putstring, sName								;display the provided name
 				INVOKE putstring, addr strInfo2						;display the second part of the info screen
@@ -175,10 +206,10 @@ proj5.asm						     Page 1 - 1
 				INVOKE getTime										;call the get time method to get the current system time and construct a string
 				INVOKE putstring, EAX								;display the current time thats address is in eax
 				RET													;return to where i was called from
- 000000E9			myInfo ENDP
+ 00000170			myInfo ENDP
 				
 					END												;Signals assembler that there are no instructions after this statement
-Microsoft (R) Macro Assembler Version 6.11		    11/19/19 19:26:33
+Microsoft (R) Macro Assembler Version 6.11		    11/20/19 00:29:27
 proj5.asm						     Symbols 2 - 1
 
 
@@ -199,7 +230,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000092 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000E9 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000170 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -210,20 +241,31 @@ $$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000005 Private
 ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Student_1  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Student_2  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_calcAvg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_equals . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_findMax  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_findMin  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_getAddress . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_getName  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_getStreet  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_getTest  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_getZip . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Student_setAddr  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Student_setName  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Student_setTestScores  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_setTest  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Student_studentRecord  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getTime  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000076 Public
-  finished . . . . . . . . . . .	L Near	 00000074 _TEXT	
-myInfo . . . . . . . . . . . . .	P Near	 00000092 _TEXT	Length= 00000057 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 000000FD Public
+  finished . . . . . . . . . . .	L Near	 000000FB _TEXT	
+myInfo . . . . . . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000057 Public STDCALL
   sName  . . . . . . . . . . . .	DWord	 bp + 00000008
   sSection . . . . . . . . . . .	DWord	 bp + 0000000C
   sProjNum . . . . . . . . . . .	DWord	 bp + 00000010
-pausesc  . . . . . . . . . . . .	P Near	 0000007B _TEXT	Length= 00000017 Public STDCALL
+pausesc  . . . . . . . . . . . .	P Near	 00000102 _TEXT	Length= 00000017 Public STDCALL
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 

@@ -24,6 +24,19 @@
 	Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
 	Student_setAddr PROTO stdcall, ths:dword, inAddr:dword, inZip:dword
 	Student_setTestScores PROTO stdcall, ths:dword, t1:word, t2:word, t3:word
+	Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word
+	Student_getName PROTO stdcall, ths:dword
+	Student_getTest PROTO stdcall, ths:dword, numTest:word
+	Student_getAddress PROTO stdcall, ths:dword 
+	Student_getZip PROTO stdcall, ths:dword
+	Student_getStreet PROTO stdcall, ths:dword
+	Student_findMax PROTO stdcall, ths:dword
+	Student_findMin PROTO stdcall, ths:dword
+	Student_calcAvg PROTO stdcall, ths:dword
+	Student_studentRecord PROTO stdcall, ths:dword
+	Student_equals PROTO stdcall, ths:dword, sc:dword
+	
+
 
 ;******************************************************************************************
 COMMENT %
@@ -82,10 +95,28 @@ main PROC
 	MOV s1, EAX
 	INVOKE Student_setName, s1, addr first, addr last
 	INVOKE Student_setAddr, s1, addr address, addr zip
-	INVOKE Student_setTestScores, s1, 77, 50, 88
+	INVOKE Student_setTestScores, s1, 100, 70, 88
 	
 	INVOKE Student_2, addr first, addr last
 	MOV s2, EAX
+	
+	INVOKE Student_getName, s2
+	INVOKE Student_setTestScores, s2, 100, 66, 88
+	INVOKE Student_getTest, s2, 2
+	
+	INVOKE Student_getStreet, s1
+	INVOKE Student_getZip, s1
+	
+	INVOKE Student_getAddress, s1
+	
+	INVOKE Student_findMax, s1
+	INVOKE Student_findMin, s1
+	
+	INVOKE Student_calcAvg, s1
+	INVOKE Student_studentRecord, s1
+	
+	INVOKE Student_equals, s1, s2
+	
 	
 	INVOKE pausesc
 	

@@ -15,7 +15,7 @@
 	putstring PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
 	getstring PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
 	ascint32  PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-	;createHeapString PROTO stdcall, inAddr:dword
+	heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
 	pausesc   PROTO stdcall
 	myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword
 	getTime	  PROTO Near32 stdcall   ;returns address of time string
@@ -130,6 +130,7 @@ main PROC
 	
 ;************************************* the instructions below calls for "normal termination"	
 finished:
+	INVOKE heapDestroyHarrison						;clears the memory used by heap allocharrion
 	INVOKE ExitProcess,0						 
 	PUBLIC _start
 	

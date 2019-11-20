@@ -111,7 +111,7 @@ COMMENT %
 *@param StringofChars:dword                                                    *
 *@param ArrayDwords:dword												 	   *
 *******************************************************************************%
-extractDwords PROC Near32 C uses EBX ECX EDX EDI , StringofChars:dword, ArrayDwords:dword
+extractDwords PROC Near32 stdcall uses EBX ECX EDX EDI , StringofChars:dword, ArrayDwords:dword
 	LOCAL addOut:dword, addASCII:dword			;sets up our stack frame and declares our local variables. 
 	
 	MOV EAX, ArrayDwords						;moves into EAX the address of the output array
@@ -175,7 +175,7 @@ extractDwords PROC Near32 C uses EBX ECX EDX EDI , StringofChars:dword, ArrayDwo
 			
 			
 	finished:
-		RET										;return back to where i was called 
+		RET	8									;return back to where i was called 
 extractDwords ENDP 
 
 COMMENT %

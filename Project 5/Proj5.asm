@@ -1,5 +1,5 @@
 ;******************************************************************************************
-;*  Program Name: ShupeStrings.asm
+;*  Program Name: Proj5.asm
 ;*  Programmer:   Ryan Shupe
 ;*  Class:        CSCI 2160-001
 ;*  Lab:		  Proj 5
@@ -11,14 +11,19 @@
 	.stack 100h					;EVERY program needs to have a stack allocated
 ;******************************************************************************************
 	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  					;Executes "normal" termination
-	intasc32 PROTO NEAR32 stdcall, lpStringToHold:dword, dval:dword			;Will convert any D-Word number into ACSII characters
-	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
-	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
-	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-	createHeapString PROTO stdcall, inAddr:dword
-	pausesc PROTO stdcall
-	myInfo PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword
-	getTime				PROTO Near32 stdcall   ;returns address of time string
+	intasc32  PROTO NEAR32 stdcall, lpStringToHold:dword, dval:dword			;Will convert any D-Word number into ACSII characters
+	putstring PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
+	getstring PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
+	ascint32  PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
+	;createHeapString PROTO stdcall, inAddr:dword
+	pausesc   PROTO stdcall
+	myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword
+	getTime	  PROTO Near32 stdcall   ;returns address of time string
+	Student_1 PROTO stdcall
+	Student_2 PROTO stdcall, firstN:dword, lastN:dword
+	Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
+	Student_setAddr PROTO stdcall, ths:dword, inAddr:dword, inZip:dword
+	Student_setTestScores PROTO stdcall, ths:dword, t1:word, t2:word, t3:word
 
 ;******************************************************************************************
 COMMENT %
@@ -57,6 +62,14 @@ ENDM
 .DATA
 strName byte "Ryan Shupe",0
 strSection byte "CSCI 2160-001",0
+
+first byte "Ryan",0
+last byte "Shupe",0
+address byte "3008 South Roan St., Apt. 6",0
+zip dword 37601
+
+s1 dword ?
+s2 dword ?
 ;******************************************************************************************
 .CODE
 
@@ -64,9 +77,16 @@ _start:
 	MOV EAX, 0										;Statement to help in debugging
 
 main PROC
-	INVOKE pausesc
 	INVOKE myInfo, addr strName, addr strSection, 5
-	MOV EAX, 77
+	INVOKE Student_1
+	MOV s1, EAX
+	INVOKE Student_setName, s1, addr first, addr last
+	INVOKE Student_setAddr, s1, addr address, addr zip
+	INVOKE Student_setTestScores, s1, 77, 50, 88
+	
+	INVOKE Student_2, addr first, addr last
+	MOV s2, EAX
+	
 	INVOKE pausesc
 	
 	

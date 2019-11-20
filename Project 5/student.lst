@@ -1,0 +1,348 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/19/19 19:26:14
+student.asm						     Page 1 - 1
+
+
+				;******************************************************************************************
+				;*  Program Name: Student.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160-001
+				;*  Lab:		  Proj 5
+				;*  Date:         Created 11/23/2019
+				;*  Purpose:      create a student class that can hold different attrubutes about a student
+				;*				   and create setters and getters
+				;******************************************************************************************
+					.486						;This tells assembler to generate 32-bit code
+					.model flat					;This tells assembler that all addresses are real addresses
+					.stack 100h					;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+				memoryallocBailey PROTO Near32 stdcall, dSize:DWORD
+				appendString	  PROTO Near32 stdcall, lpDestination:dword, lpSource:dword
+				Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
+					
+ 0000019A			Student STRUCT 
+ 00000000  00000064 [			last byte 100 dup(0)
+	    00
+	   ]
+ 00000064  00000064 [			first byte 100 dup(0)
+	    00
+	   ]
+ 000000C8  000000C8 [			street byte 200 dup(0)
+	    00
+	   ]
+ 00000190  00000000			zip dword ?
+ 00000194  0000				test1 word ?
+ 00000196  0000				test2 word ?
+ 00000198  0000				test3 word ? 
+				Student ENDS
+				;******************************************************************************************
+ 00000000			.DATA
+				;******************************************************************************************
+ 00000000			.CODE
+				
+ 00000000			Student_1 PROC stdcall
+					INVOKE memoryallocBailey, sizeof Student 	;allocates memory onto the heap the required amount for a student struct
+ 0000000A  C3				RET											;returns where I was called, address in EAX
+ 0000000B			Student_1 endp
+				
+ 0000000B			Student_2 PROC stdcall, firstN:dword, lastN:dword
+					INVOKE memoryallocBailey, sizeof Student
+					INVOKE Student_setName, EAX, firstN, lastN
+					RET 8
+ 00000025  C2 0008		Student_2 ENDP
+ 00000028			
+				Student_3 PROC stdcall
+ 00000028			RET
+ 00000028  C3			Student_3 ENDP
+ 00000029			
+				COMMENT%
+				******************************************************************************
+				*Name: setName                                                               *
+				*Purpose:                                                                    *
+				*	  Intakes a student first and last name and stores it onto the heap address*
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@param addrFirst:dword                                                      *
+				*@param addrLast:dword                                                       *
+				*****************************************************************************%
+				Student_setName PROC stdcall uses EBX, ths:dword, addrFirst:dword, addrLast:dword
+ 00000029				MOV EBX, ths										;moves the address of the student into ebx.
+ 0000002D  8B 5D 08			ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
+					INVOKE appendString, addr [EBX].first, addrFirst	;appends the first name string sent in onto the correct memory location	
+					INVOKE appendString, addr [EBX].last, addrLast		;appends the last name string sent in ontto the correct memory location	
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+					RET 12												;return to where I was called, returning 12 bytes.
+				Student_setName ENDP
+ 00000049  C2 000C		
+ 0000004C			COMMENT%
+				******************************************************************************
+				*Name: setTestScores                                                         *
+				*Purpose:                                                                    *
+				*	  Intakes a student and test scores and stores them in the appropriate   *
+				*			memory location 												 *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@param t1:word                                                              *
+				*@param t2:word                                                              *
+				*@param t3:word                                                              *
+				*****************************************************************************%
+				Student_setTestScores PROC stdcall uses ebx edx, ths:dword, t1:word, t2:word, t3:word
+					MOV EBX, ths										;moves the address of the student into ebx.
+ 0000004C				ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
+ 00000051  8B 5D 08			MOV DX, t1											;moves the first test into dx
+					MOV [EBX].test1, DX									;moves the word into the memory location where test 1 is 
+ 00000054  66| 8B 55 0C			MOV DX, t2											;moves the first test into dx
+ 00000058  66| 89 93			MOV [EBX].test2, DX									;moves the word into the memory location where test 1 is 
+	   00000194
+ 0000005F  66| 8B 55 10			MOV DX, t3											;moves the first test into dx
+ 00000063  66| 89 93			MOV [EBX].test3, DX									;moves the word into the memory location where test 1 is 
+	   00000196
+ 0000006A  66| 8B 55 14			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+ 0000006E  66| 89 93			RET 10												;return to where I was called, returning 12 bytes.
+	   00000198
+				Student_setTestScores ENDP
+				
+ 00000078  C2 000A		COMMENT%
+ 0000007B			******************************************************************************
+				*Name: setTest                                                               *
+				*Purpose:                                                                    *
+				*	  Intakes a student and test scores and stores them in the appropriate   *
+				*			memory location 												 *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@param score:word                                                           *
+				*@param testNum:word                                                         *
+				*****************************************************************************%
+				Student_setTest PROC stdcall uses EBX, ths:dword, score:word, numTest:word
+					MOV EBX, ths										;moves the address of the student into ebx.
+					ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
+ 0000007B				.IF numTest == 1									;if the in test num is equal to 1
+ 0000007F  8B 5D 08				MOV DX, score									;moves the first test into dx
+						MOV [EBX].test1, DX								;moves the word into the memory location where test 1 is 
+					.ELSEIF numTest == 2								;if the in test num is equal to 2
+ 00000089  66| 8B 55 0C				MOV DX, score									;moves the first test into dx
+ 0000008D  66| 89 93				MOV [EBX].test2, DX								;moves the word into the memory location where test 1 is 	
+	   00000194
+					.ELSEIF numTest == 3								;if the in test num is equal to 3
+ 0000009D  66| 8B 55 0C				MOV DX, score									;moves the first test into dx
+ 000000A1  66| 89 93				MOV [EBX].test3, DX								;moves the word into the memory location where test 1 is 
+	   00000196
+					.ELSE												;if the test number is not 1-3
+ 000000B1  66| 8B 55 0C																;if this was java i would throw an exception here
+ 000000B5  66| 89 93			.ENDIF												;end if
+	   00000198
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+					RET 8												;return to where i was called from and return 8 bytes
+				Student_setTest ENDP
+				
+				COMMENT%
+ 000000C0  C2 0008		******************************************************************************
+ 000000C3			*Name: setStreet                                                             *
+				*Purpose:                                                                    *
+				*	  Intakes a student and a street and copies the street onto the memory   *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@param streetAddr:dword                                                     *
+				*****************************************************************************%
+				Student_Street PROC stdcall, ths:dword, streetAddr:dword
+					MOV EBX, ths										;moves the address of the student into ebx.
+					ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
+					INVOKE appendString, addr [EBX].street, streetAddr	;appends the street in into the location it should go onto the heap
+ 000000C3				ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+ 000000C6  8B 5D 08			RET 8												;return to where i was called from and return 8 bytes
+				Student_Street ENDP
+				
+				COMMENT%
+				******************************************************************************
+ 000000D9  C2 0008		*Name: setZip                                                                *
+ 000000DC			*Purpose:                                                                    *
+				*	  Intakes a student and a dword zip code, then places the zip in, into   *
+				*     the student's zip                                                      *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@param inZip:dword                                                          *
+				*****************************************************************************%
+				Student_setZip PROC stdcall uses EBX EDX, ths:dword, inZip:dword
+					MOV EBX, ths									;moves the address of the student into ebx
+					ASSUME EBX:ptr Student							;assumes ebx is a student pointer so we dont have to type it 
+					MOV EDX, inZip									;moves the zip parameter into a register, cant do mem to mem
+					MOV [EBX].zip, EDX								;moves the zip sent into the method into the zip in student 
+ 000000DC				ASSUME EBX:ptr nothing							;ebx does not point to a student anymore
+ 000000E1  8B 5D 08			RET 8											;returns to where I was called returning 8 bytes. 
+				Student_setZip ENDP
+ 000000E4  8B 55 0C		
+ 000000E7  89 93 00000190	COMMENT%
+				******************************************************************************
+				*Name: setAddr                                                               *
+ 000000F0  C2 0008		*Purpose:                                                                    *
+ 000000F3			*	  Intakes a student and a dword address to an address, then places the   *
+				*		address in, into the student's address              				 *
+				*                                                                            *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@param inAddr:dword                                                         *
+				*****************************************************************************%
+				Student_setAddr PROC stdcall uses EBX EDX, ths:dword, inAddr:dword, inZip:dword
+					MOV EBX, ths									;moves the address of the student into ebx
+					ASSUME EBX:PTR Student							;assumes ebx is a student so we dont have to type it later
+					INVOKE appendString, addr [EBX].street, inAddr	;appends the street in into the location it should go onto the heap
+					MOV EDX, inZip									;moves the zip param into edx, cant do mem to mem
+					MOV [EBX].zip, EDX								;moves the zip sent into the method into the zip in the student
+ 000000F3				ASSUME EBX:ptr nothing							;ebx does not point to a student anymore
+ 000000F8  8B 5D 08			RET 8											;returns to where I was called, returning 8 bytes.
+				Student_setAddr ENDP
+				
+ 0000010A  8B 55 10		Student_getName PROC stdcall, ths:dword
+ 0000010D  89 93 00000190	Student_getName ENDP
+				
+				Student_getTest PROC stdcall, ths:dword
+ 00000116  C2 0008		Student_getTest ENDP
+ 00000119			
+				Student_getAddr PROC stdcall, ths:dword 
+ 00000119			Student_getAddr ENDP
+ 00000119			
+				Student_getStreet PROC stdcall, ths:dword
+ 00000119			Student_getStreet ENDP
+ 00000119			
+				Student_getZip PROC stdcall, ths:dword
+ 00000119			Student_getZip ENDP
+ 00000119			
+				Student_findMax PROC stdcall, ths:dword
+ 00000119			Student_findMax ENDP
+ 00000119			
+				Student_findMin PROC stdcall, ths:dword
+ 00000119			Student_findMin ENDP
+ 00000119			
+				Student_calcAvg PROC stdcall, ths:dword
+ 00000119			Student_calcAvg ENDP
+ 00000119			
+				Student_studentRecord PROC stdcall, ths:dword
+ 00000119			Student_studentRecord ENDP
+ 00000119			
+				Student_letterGrade PROC stdcall, ths:dword
+ 00000119			Student_letterGrade ENDP
+ 00000119			
+				Student_equals PROC stdcall, ths:dword, sc:dword
+ 00000119			Student_equals ENDP
+ 00000119			END
+ 00000119
+ 00000119
+ 00000119
+ 00000119
+Microsoft (R) Macro Assembler Version 6.11		    11/19/19 19:26:14
+student.asm						     Symbols 2 - 1
+
+
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+Student  . . . . . . . . . . . .	 0000019A
+  last . . . . . . . . . . . . .	 00000000	 Byte
+  first  . . . . . . . . . . . .	 00000064	 Byte
+  street . . . . . . . . . . . .	 000000C8	 Byte
+  zip  . . . . . . . . . . . . .	 00000190	 DWord
+  test1  . . . . . . . . . . . .	 00000194	 Word
+  test2  . . . . . . . . . . . .	 00000196	 Word
+  test3  . . . . . . . . . . . .	 00000198	 Word
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000119 DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+Student_1  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000B Public STDCALL
+Student_2  . . . . . . . . . . .	P Near	 0000000B _TEXT	Length= 0000001D Public STDCALL
+  firstN . . . . . . . . . . . .	DWord	 bp + 00000008
+  lastN  . . . . . . . . . . . .	DWord	 bp + 0000000C
+Student_3  . . . . . . . . . . .	P Near	 00000028 _TEXT	Length= 00000001 Public STDCALL
+Student_Street . . . . . . . . .	P Near	 000000C3 _TEXT	Length= 00000019 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  streetAddr . . . . . . . . . .	DWord	 bp + 0000000C
+Student_calcAvg  . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_equals . . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  sc . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+Student_findMax  . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_findMin  . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_getAddr  . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_getName  . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_getStreet  . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_getTest  . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_getZip . . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_letterGrade  . . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+Student_setAddr  . . . . . . . .	P Near	 000000F3 _TEXT	Length= 00000026 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  inAddr . . . . . . . . . . . .	DWord	 bp + 0000000C
+  inZip  . . . . . . . . . . . .	DWord	 bp + 00000010
+Student_setName  . . . . . . . .	P Near	 00000029 _TEXT	Length= 00000023 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  addrFirst  . . . . . . . . . .	DWord	 bp + 0000000C
+  addrLast . . . . . . . . . . .	DWord	 bp + 00000010
+Student_setTestScores  . . . . .	P Near	 0000004C _TEXT	Length= 0000002F Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  t1 . . . . . . . . . . . . . .	Word	 bp + 0000000C
+  t2 . . . . . . . . . . . . . .	Word	 bp + 00000010
+  t3 . . . . . . . . . . . . . .	Word	 bp + 00000014
+Student_setTest  . . . . . . . .	P Near	 0000007B _TEXT	Length= 00000048 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  score  . . . . . . . . . . . .	Word	 bp + 0000000C
+  numTest  . . . . . . . . . . .	Word	 bp + 00000010
+Student_setZip . . . . . . . . .	P Near	 000000DC _TEXT	Length= 00000017 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  inZip  . . . . . . . . . . . .	DWord	 bp + 0000000C
+Student_studentRecord  . . . . .	P Near	 00000119 _TEXT	Length= 00000000 Public STDCALL
+  ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+appendString . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+memoryallocBailey  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+
+	   0 Warnings
+	   0 Errors

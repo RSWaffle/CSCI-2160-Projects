@@ -9,12 +9,12 @@
 	.model flat					;This tells assembler that all addresses are real addresses
 	.stack 100h					;EVERY program needs to have a stack allocated
 ;******************************************************************************************
-heapAllocHarrison PROTO Near32 stdcall, dSize:DWORD 							;Creates memory on the heap (of dSize words) and returns the address of the
+memoryallocBailey PROTO Near32 stdcall, dSize:DWORD 							;Creates memory on the heap (of dSize words) and returns the address of the
 getBytes PROTO Near32 stdcall, string:dword
 
 COMMENT%
 ******************************************************************************
-*Name: getBytes M                                                             *
+*Name: getBytes                                                              *
 *Purpose:                                                                    *
 *	  Intakes an address and counts the number of bytes into a string including*
 *     the null char and returns the number.                                  *
@@ -127,7 +127,7 @@ appendString PROC Near32 stdcall uses EDX ECX EDI EBX, lpDestination:dword, lpSo
 		INC EDX						;increments to the next position in the source
 	loop lpCopyString				;decrement ecx, and jump back to the top
 	RET								;return back to where I was called from. 
-appendString endp 
+appendString endp
 
 COMMENT %
 ******************************************************************************
@@ -154,7 +154,7 @@ createStringCopy PROC stdcall uses EBX EDI EDX ESI, Addr1:dword
 	MOV numBytes, EBX					;move the number of bytes in the string into its own variable
 	MOV EBX, 0							;clear the ebx register so we can use it later. 
 
-	INVOKE 	heapAllocHarrison, numBytes ;allocate space on the heap with the number of bytes we need. 
+	INVOKE 	memoryallocBailey, numBytes ;allocate space on the heap with the number of bytes we need. 
 	MOV EDX, EAX						;move the address it gives us into its own variable 	
 	MOV EAX, 0							;clear out eax to avoid issues
 	MOV ESI, [originalAddr]				;move into EDI the derefrenced original address of the string

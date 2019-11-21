@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/20/19 01:50:34
+Microsoft (R) Macro Assembler Version 6.11		    11/20/19 23:40:01
 student.asm						     Page 1 - 1
 
 
@@ -14,6 +14,7 @@ student.asm						     Page 1 - 1
 					.486						;This tells assembler to generate 32-bit code
 					.model flat					;This tells assembler that all addresses are real addresses
 					.stack 100h					;EVERY program needs to have a stack allocated
+					.listall
 				;******************************************************************************************
 				memoryallocBailey PROTO Near32 stdcall, dSize:DWORD
 				appendString	  PROTO Near32 stdcall, lpDestination:dword, lpSource:dword
@@ -48,19 +49,20 @@ student.asm						     Page 1 - 1
 				;******************************************************************************************
  00000000			.DATA
  00000000 20 00			spaceChar byte 32,0									;memory to hold the space char
- 00000002 0A 00			nextLine byte 10,0									;memory to store the next line char
- 00000004 00000000		tempAddr dword ?									;memory to hold an address
- 00000008 00000000		tempVar dword ?										;memory to hold a dword
+ 00000002 0A 00			nullChar byte 10,0									;memory to hold the null char
+ 00000004 0A 00			nextLine byte 10,0									;memory to store the next line char
+ 00000006 00000000		tempAddr dword ?									;memory to hold an address
+ 0000000A 00000000		tempVar dword ?										;memory to hold a dword
 				
- 0000000C 54 65 73 74 20	strTest1 byte "Test 1: ", 0
+ 0000000E 54 65 73 74 20	strTest1 byte "Test 1: ", 0
 	   31 3A 20 00
- 00000015 54 65 73 74 20	strTest2 byte "Test 2: ", 0
+ 00000017 54 65 73 74 20	strTest2 byte "Test 2: ", 0
 	   32 3A 20 00
- 0000001E 54 65 73 74 20	strTest3 byte "Test 3: ", 0
+ 00000020 54 65 73 74 20	strTest3 byte "Test 3: ", 0
 	   33 3A 20 00
- 00000027 41 76 65 72 61	strAverage byte "Average: ", 0
+ 00000029 41 76 65 72 61	strAverage byte "Average: ", 0
 	   67 65 3A 20 00
- 00000031 47 72 61 64 65	strGrade byte "Grade: ", 0
+ 00000033 47 72 61 64 65	strGrade byte "Grade: ", 0
 	   3A 20 00
 				;******************************************************************************************
  00000000			.CODE
@@ -76,6 +78,8 @@ student.asm						     Page 1 - 1
 				*****************************************************************************%
  00000000			Student_1 PROC stdcall
 					INVOKE memoryallocBailey, sizeof Student 			;allocates memory onto the heap the required amount for a student struct
+ 00000000  68 0000019A	   *	    push   +00000019Ah
+ 00000005  E8 00000000 E   *	    call   memoryallocBailey
  0000000A  C3				RET													;returns where I was called, address in EAX
  0000000B			Student_1 endp
 				
@@ -91,11 +95,20 @@ student.asm						     Page 1 - 1
 				*@param addrLast:dword                                                       *
 				*****************************************************************************%
  0000000B			Student_2 PROC stdcall, firstN:dword, lastN:dword
+ 0000000B  55		   *	    push   ebp
+ 0000000C  8B EC	   *	    mov    ebp, esp
 					INVOKE memoryallocBailey, sizeof Student			;allocate enough memory to hold a student
+ 0000000E  68 0000019A	   *	    push   +00000019Ah
+ 00000013  E8 00000000 E   *	    call   memoryallocBailey
  00000018  50				PUSH EAX											;store the address it gives
 					INVOKE Student_setName, EAX, firstN, lastN			;set the name of the student
+ 00000019  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 0000001C  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000001F  50		   *	    push   eax
+ 00000020  E8 0000009A	   *	    call   Student_setName
  00000025  58				POP EAX												;restore our pushed address of the student
 					RET 8												;return back to where i was called cleaning 8 bytes, address in EAX
+ 00000026  C9		   *	    leave  
  00000027  C2 0008		Student_2 ENDP
  0000002A			
 				COMMENT%
@@ -111,29 +124,80 @@ student.asm						     Page 1 - 1
 				*****************************************************************************%
 				Student_3 PROC stdcall uses EBX EDX EDI, sc:dword
  0000002A				INVOKE memoryallocBailey, sizeof Student			;allocate enough memory to hold a student
+ 0000002A  55		   *	    push   ebp
+ 0000002B  8B EC	   *	    mov    ebp, esp
+ 0000002D  53		   *	    push   ebx
+ 0000002E  52		   *	    push   edx
+ 0000002F  57		   *	    push   edi
 					MOV tempAddr, EAX									;preserves address to the student
- 0000003A  A3 00000004 R		MOV EBX, EAX										;move the allocated address into ebx
+ 00000030  68 0000019A	   *	    push   +00000019Ah
+ 00000035  E8 00000000 E   *	    call   memoryallocBailey
+ 0000003A  A3 00000006 R		MOV EBX, EAX										;move the allocated address into ebx
  0000003F  8B D8			ASSUME EBX:PTR Student								;assume ebx is a student
 					MOV EDX, sc											;move into edx the address of the copy student
  00000041  8B 55 08			ASSUME EDX:PTR Student								;let edx point to a student
 					INVOKE Student_setName, EBX, addr [EDX].first, 		;sets the name of the student to the name of the one we are making a copy of
 					addr [EDX].last
 					INVOKE Student_getZip, EDX							;gets the zip of the copy student
+ 00000044  8D 02	   *	    lea    eax, byte  ptr [edx]
+ 00000046  50		   *	    push   eax
+ 00000047  8D 42 64	   *	    lea    eax, byte  ptr [edx]+064h
+ 0000004A  50		   *	    push   eax
+ 0000004B  53		   *	    push   ebx
+ 0000004C  E8 0000006E	   *	    call   Student_setName
 					MOV tempVar, EAX									;moves the zip into the temp var
- 00000057  A3 00000008 R		INVOKE Student_setZip, EBX, addr tempVar			;sets the zip of the new student
+ 00000051  52		   *	    push   edx
+ 00000052  E8 000002C7	   *	    call   Student_getZip
+ 00000057  A3 0000000A R		INVOKE Student_setZip, EBX, addr tempVar			;sets the zip of the new student
 					INVOKE Student_getStreet, EDX						;gets the street of the copy student
+ 0000005C  68 0000000A R   *	    push   OFFSET tempVar
+ 00000061  53		   *	    push   ebx
+ 00000062  E8 0000015A	   *	    call   Student_setZip
 					INVOKE Student_setStreet, EBX, EAX					;sets the street of the new student
+ 00000067  52		   *	    push   edx
+ 00000068  E8 00000280	   *	    call   Student_getStreet
 					INVOKE Student_getTest, EDX, 1						;get the first test of the copy student into ax
+ 0000006D  50		   *	    push   eax
+ 0000006E  53		   *	    push   ebx
+ 0000006F  E8 00000122	   *	    call   Student_setStreet
 					INVOKE Student_setTest, EBX, AX, 1					;place the first test score into the new students test
+ 00000074  6A 01	   *	    push   +000000001h
+ 00000076  52		   *	    push   edx
+ 00000077  E8 000001C8	   *	    call   Student_getTest
 					INVOKE Student_getTest, EDX, 2						;get the second test of the copy student into ax
+ 0000007C  6A 01	   *	    push   +000000001h
+ 0000007E  83 EC 02	   *	    sub    esp, 002h
+ 00000081  66| 50	   *	    push   ax
+ 00000083  53		   *	    push   ebx
+ 00000084  E8 00000099	   *	    call   Student_setTest
 					INVOKE Student_setTest, EBX, AX, 2					;place the second test score into the new students test
+ 00000089  6A 02	   *	    push   +000000002h
+ 0000008B  52		   *	    push   edx
+ 0000008C  E8 000001B3	   *	    call   Student_getTest
 					INVOKE Student_getTest, EDX, 3						;get the third test of the copy student into ax
+ 00000091  6A 02	   *	    push   +000000002h
+ 00000093  83 EC 02	   *	    sub    esp, 002h
+ 00000096  66| 50	   *	    push   ax
+ 00000098  53		   *	    push   ebx
+ 00000099  E8 00000084	   *	    call   Student_setTest
 					INVOKE Student_setTest, EBX, AX, 3					;place the third test score into the new students test
+ 0000009E  6A 03	   *	    push   +000000003h
+ 000000A0  52		   *	    push   edx
+ 000000A1  E8 0000019E	   *	    call   Student_getTest
 					ASSUME EDX:PTR nothing								;edx doesnt point to a student anymore
+ 000000A6  6A 03	   *	    push   +000000003h
+ 000000A8  83 EC 02	   *	    sub    esp, 002h
+ 000000AB  66| 50	   *	    push   ax
+ 000000AD  53		   *	    push   ebx
+ 000000AE  E8 0000006F	   *	    call   Student_setTest
 					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 					MOV EAX, tempAddr									;restores address to the student
- 000000B3  A1 00000004 R		RET 4												;returns back to where I was called with 4 bytes, address in eax.
+ 000000B3  A1 00000006 R		RET 4												;returns back to where I was called with 4 bytes, address in eax.
 				Student_3 ENDP
+ 000000B8  5F		   *	    pop    edi
+ 000000B9  5A		   *	    pop    edx
+ 000000BA  5B		   *	    pop    ebx
+ 000000BB  C9		   *	    leave  
  000000BC  C2 0004		
  000000BF			COMMENT%
 				******************************************************************************
@@ -148,16 +212,32 @@ student.asm						     Page 1 - 1
 				*@param addrLast:dword                                                       *
 				*****************************************************************************%
 				Student_setName PROC stdcall uses EBX, ths:dword, addrFirst:dword, addrLast:dword
-					MOV EBX, ths										;moves the address of the student into ebx.
- 000000BF				ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
- 000000C3  8B 5D 08			INVOKE appendString, addr [EBX].first, addrFirst	;appends the first name string sent in onto the correct memory location	
+					LOCAL bbyte:byte									;use local directive
+ 000000BF				MOV EBX, ths										;moves the address of the student into ebx.
+					ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
+ 000000BF  55		   *	    push   ebp
+ 000000C0  8B EC	   *	    mov    ebp, esp
+ 000000C2  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000000C5  53		   *	    push   ebx
+ 000000C6  8B 5D 08			INVOKE appendString, addr [EBX].first, addrFirst	;appends the first name string sent in onto the correct memory location	
 					INVOKE appendString, addr [EBX].last, addrLast		;appends the last name string sent in ontto the correct memory location	
 					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 12												;return to where I was called, cleaning 12 bytes.
+ 000000C9  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 000000CC  8D 43 64	   *	    lea    eax, byte  ptr [ebx]+064h
+ 000000CF  50		   *	    push   eax
+ 000000D0  E8 00000000 E   *	    call   appendString
+					RET 												;return to where I was called, cleaning 12 bytes.
+ 000000D5  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 000000D8  8D 03	   *	    lea    eax, byte  ptr [ebx]
+ 000000DA  50		   *	    push   eax
+ 000000DB  E8 00000000 E   *	    call   appendString
 				Student_setName ENDP
 				
- 000000DF  C2 000C		COMMENT%
- 000000E2			******************************************************************************
+ 000000E0  5B		   *	    pop    ebx
+ 000000E1  C9		   *	    leave  
+ 000000E2  C2 000C	   *	    ret    0000Ch
+ 000000E5			COMMENT%
+				******************************************************************************
 				*Name: setTestScores                                                         *
 				*Purpose:                                                                    *
 				*	  Intakes a student and test scores and stores them in the appropriate   *
@@ -170,25 +250,37 @@ student.asm						     Page 1 - 1
 				*@param t2:word                                                              *
 				*@param t3:word                                                              *
 				*****************************************************************************%
-				Student_setTestScores PROC stdcall uses ebx edx, ths:dword, t1:word, t2:word, t3:word
-					MOV EBX, ths										;moves the address of the student into ebx.
-					ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
- 000000E2				MOV DX, t1											;moves the first test into dx
- 000000E7  8B 5D 08			MOV [EBX].test1, DX									;moves the word into the memory location where test 1 is 
-					MOV DX, t2											;moves the first test into dx
- 000000EA  66| 8B 55 0C			MOV [EBX].test2, DX									;moves the word into the memory location where test 1 is 
- 000000EE  66| 89 93			MOV DX, t3											;moves the first test into dx
-	   00000194
- 000000F5  66| 8B 55 10			MOV [EBX].test3, DX									;moves the word into the memory location where test 1 is 
- 000000F9  66| 89 93			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-	   00000196
- 00000100  66| 8B 55 14			RET 10												;return to where I was called, cleaning 12 bytes.
- 00000104  66| 89 93		Student_setTestScores ENDP
-	   00000198
+				Student_setTestScores PROC stdcall, ths:dword, t1:word, t2:word, t3:word
+					LOCAL bbyte:byte									;use local directive
+ 000000E5				INVOKE Student_setTest, ths, t1, 1					;invokes the set test method to set the test for the first one		
+					INVOKE Student_setTest, ths, t2, 2					;invokes the set test method to set the 2nd test
+ 000000E5  55		   *	    push   ebp
+ 000000E6  8B EC	   *	    mov    ebp, esp
+ 000000E8  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+					INVOKE Student_setTest, ths, t3, 3					;invokes the set test method to set the 3rd test
+ 000000EB  6A 01	   *	    push   +000000001h
+ 000000ED  83 EC 02	   *	    sub    esp, 002h
+ 000000F0  66| FF 75 0C	   *	    push   word  ptr ss:[ebp]+0000Ch
+ 000000F4  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000000F7  E8 00000026	   *	    call   Student_setTest
+					RET 												;return to where I was called, cleaning 12 bytes.
+ 000000FC  6A 02	   *	    push   +000000002h
+ 000000FE  83 EC 02	   *	    sub    esp, 002h
+ 00000101  66| FF 75 10	   *	    push   word  ptr ss:[ebp]+00010h
+ 00000105  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000108  E8 00000015	   *	    call   Student_setTest
+				Student_setTestScores ENDP
+ 0000010D  6A 03	   *	    push   +000000003h
+ 0000010F  83 EC 02	   *	    sub    esp, 002h
+ 00000112  66| FF 75 14	   *	    push   word  ptr ss:[ebp]+00014h
+ 00000116  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000119  E8 00000004	   *	    call   Student_setTest
 				
-				COMMENT%
- 0000010E  C2 000A		******************************************************************************
- 00000111			*Name: setTest                                                               *
+ 0000011E  C9		   *	    leave  
+ 0000011F  C2 0010	   *	    ret    00010h
+ 00000122			COMMENT%
+				******************************************************************************
+				*Name: setTest                                                               *
 				*Purpose:                                                                    *
 				*	  Intakes a student and test scores and stores them in the appropriate   *
 				*			memory location 												 *
@@ -199,50 +291,100 @@ student.asm						     Page 1 - 1
 				*@param score:word                                                           *
 				*@param testNum:word                                                         *
 				*****************************************************************************%
-				Student_setTest PROC stdcall uses EBX EDX, ths:dword, score:word, numTest:word
-					MOV EBX, ths										;moves the address of the student into ebx.
+				Student_setTest PROC stdcall uses EBX EDX, ths:dword, score:word, numTest:word	
+					LOCAL bbyte:byte									;use local directive
+ 00000122				MOV EBX, ths										;moves the address of the student into ebx.
 					ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
+ 00000122  55		   *	    push   ebp
+ 00000123  8B EC	   *	    mov    ebp, esp
+ 00000125  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000128  53		   *	    push   ebx
+ 00000129  52		   *	    push   edx
+ 0000012A  8B 5D 08			
 					.IF numTest == 1									;if the in test num is equal to 1
- 00000111					MOV DX, score									;moves the first test into dx
- 00000116  8B 5D 08				TEST DX, DX										;test dx with itself to set flags
-						.IF SIGN?										;tests to see if the test score is negative
-						.ELSE											;if it is not
- 00000120  66| 8B 55 0C					.IF DX <= 100								;checks to see if it is less than 100
- 00000124  66| 85 D2						MOV [EBX].test1, DX						;moves the word into the memory location where test 1 is 
-							.ENDIF										;end if
-						.ENDIF											;endif
-					.ELSEIF numTest == 2								;if the in test num is equal to 2
- 00000131  66| 89 93				MOV DX, score									;moves the first test into dx
-	   00000194
-								TEST DX, DX								;test dx with itself to set flags
-						.IF SIGN?										;tests to see if the test score is negative
-						.ELSE											;if it is not
- 00000141  66| 8B 55 0C					.IF DX <= 100								;checks to see if it is less than 100
- 00000145  66| 85 D2						MOV [EBX].test2, DX						;moves the word into the memory location where test 1 is 
-							.ENDIF										;end if
-						.ENDIF											;endif
-					.ELSEIF numTest == 3								;if the in test num is equal to 3
- 00000152  66| 89 93				MOV DX, score									;moves the first test into dx
-	   00000196
+						MOV DX, score									;moves the first test into dx
 						TEST DX, DX										;test dx with itself to set flags
-						.IF SIGN?										;tests to see if the test score is negative
-						.ELSE											;if it is not
- 00000162  66| 8B 55 0C					.IF DX <= 100								;checks to see if it is less than 100
- 00000166  66| 85 D2						MOV [EBX].test3, DX						;moves the word into the memory location where test 1 is 
+ 0000012D  66| 83 7D 10
+	   01		   *	    cmp    numTest, 001h
+ 00000132  75 1A	   *	    jne    @C0001
+ 00000134  66| 8B 55 0C				.IF SIGN?										;tests to see if the test score is negative
+ 00000138  66| 85 D2				.ELSE											;if it is not
+							.IF DX <= 100								;checks to see if it is less than 100
+ 0000013B  79 02	   *	    jns    @C0003
+								MOV [EBX].test1, DX						;moves the word into the memory location where test 1 is 
+ 0000013D  EB 51	   *	    jmp    @C0005
+ 0000013F		   *@C0003:
 							.ENDIF										;end if
-						.ENDIF											;endif 
-					.ELSE												;if the test number is not 1-3
- 00000173  66| 89 93																;if this was java i would throw an exception here
+ 0000013F  66| 83 FA 64	   *	    cmp    dx, 064h
+ 00000143  77 07	   *	    ja     @C0006
+ 00000145  66| 89 93				.ENDIF											;endif
+	   00000194
+					.ELSEIF numTest == 2								;if the in test num is equal to 2
+						MOV DX, score									;moves the first test into dx
+ 0000014C		   *@C0006:
+								TEST DX, DX								;test dx with itself to set flags
+ 0000014C  EB 42	   *	    jmp    @C0008
+ 0000014E		   *@C0001:
+ 0000014E  66| 83 7D 10
+	   02		   *	    cmp    numTest, 002h
+ 00000153  75 1A	   *	    jne    @C0009
+ 00000155  66| 8B 55 0C				.IF SIGN?										;tests to see if the test score is negative
+ 00000159  66| 85 D2				.ELSE											;if it is not
+							.IF DX <= 100								;checks to see if it is less than 100
+ 0000015C  79 02	   *	    jns    @C000B
+								MOV [EBX].test2, DX						;moves the word into the memory location where test 1 is 
+ 0000015E  EB 30	   *	    jmp    @C000D
+ 00000160		   *@C000B:
+							.ENDIF										;end if
+ 00000160  66| 83 FA 64	   *	    cmp    dx, 064h
+ 00000164  77 07	   *	    ja     @C000E
+ 00000166  66| 89 93				.ENDIF											;endif
+	   00000196
+					.ELSEIF numTest == 3								;if the in test num is equal to 3
+						MOV DX, score									;moves the first test into dx
+ 0000016D		   *@C000E:
+						TEST DX, DX										;test dx with itself to set flags
+ 0000016D  EB 21	   *	    jmp    @C0010
+ 0000016F		   *@C0009:
+ 0000016F  66| 83 7D 10
+	   03		   *	    cmp    numTest, 003h
+ 00000174  75 1A	   *	    jne    @C0011
+ 00000176  66| 8B 55 0C				.IF SIGN?										;tests to see if the test score is negative
+ 0000017A  66| 85 D2				.ELSE											;if it is not
+							.IF DX <= 100								;checks to see if it is less than 100
+ 0000017D  79 02	   *	    jns    @C0013
+								MOV [EBX].test3, DX						;moves the word into the memory location where test 1 is 
+ 0000017F  EB 0F	   *	    jmp    @C0015
+ 00000181		   *@C0013:
+							.ENDIF										;end if
+ 00000181  66| 83 FA 64	   *	    cmp    dx, 064h
+ 00000185  77 07	   *	    ja     @C0016
+ 00000187  66| 89 93				.ENDIF											;endif 
 	   00000198
+					.ELSE												;if the test number is not 1-3
+																		;if this was java i would throw an exception here
+ 0000018E		   *@C0016:
 					.ENDIF												;end if
+ 0000018E  EB 00	   *	    jmp    @C0018
+ 00000190		   *@C0011:
 					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 8												;return to where i was called from and cleaning 8 bytes
+					RET 												;return to where i was called from and cleaning 8 bytes
+ 00000190		   *@C0018:
+ 00000190		   *@C0010:
+ 00000190		   *@C0008:
+ 00000190		   *@C0005:
+ 00000190		   *@C000D:
+ 00000190		   *@C0015:
 				Student_setTest ENDP
 				
-				COMMENT%
+ 00000190  5A		   *	    pop    edx
+ 00000191  5B		   *	    pop    ebx
+ 00000192  C9		   *	    leave  
+ 00000193  C2 000C	   *	    ret    0000Ch
+ 00000196			COMMENT%
 				******************************************************************************
- 0000017F  C2 0008		*Name: setStreet                                                             *
- 00000182			*Purpose:                                                                    *
+				*Name: setStreet                                                             *
+				*Purpose:                                                                    *
 				*	  Intakes a student and a street and copies the street onto the memory   *
 				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
@@ -251,23 +393,42 @@ student.asm						     Page 1 - 1
 				*@param streetAddr:dword                                                     *
 				*****************************************************************************%
 				Student_setStreet PROC stdcall uses EBX EDX, ths:dword, streetAddr:dword
-					MOV EBX, ths										;moves the address of the student into ebx.
+					LOCAL bbyte:byte									;use local directive
+ 00000196				MOV EBX, ths										;moves the address of the student into ebx.
 					ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
-					MOV EDX, streetAddr									;moves the address into EDX
+ 00000196  55		   *	    push   ebp
+ 00000197  8B EC	   *	    mov    ebp, esp
+ 00000199  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000019C  53		   *	    push   ebx
+ 0000019D  52		   *	    push   edx
+ 0000019E  8B 5D 08			MOV EDX, streetAddr									;moves the address into EDX
 					MOV AL, byte ptr[EDX]								;moves the first byte into al
- 00000182				.IF AL == 0											;if it is null
- 00000187  8B 5D 08			.ELSE												;if it is not
+ 000001A1  8B 55 0C			.IF AL == 0											;if it is null
+ 000001A4  8A 02			.ELSE												;if it is not
 						INVOKE appendString, addr [EBX].street, streetAddr;appends the street in into the location it should go onto the heap
- 0000018A  8B 55 0C			.ENDIF												;end if
- 0000018D  8A 02			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 8												;return to where i was called from and cleaning 8 bytes
+ 000001A6  0A C0	   *	    or	al, al
+ 000001A8  75 02	   *	    jne    @C0019
+					.ENDIF												;end if
+ 000001AA  EB 0F	   *	    jmp    @C001B
+ 000001AC		   *@C0019:
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+ 000001AC  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 000001AF  8D 83 000000C8  *	    lea    eax, byte  ptr [ebx]+0C8h
+ 000001B5  50		   *	    push   eax
+ 000001B6  E8 00000000 E   *	    call   appendString
+					RET 												;return to where i was called from and cleaning 8 bytes
+ 000001BB		   *@C001B:
 				Student_setStreet ENDP
 				
-				COMMENT%
+ 000001BB  5A		   *	    pop    edx
+ 000001BC  5B		   *	    pop    ebx
+ 000001BD  C9		   *	    leave  
+ 000001BE  C2 0008	   *	    ret    00008h
+ 000001C1			COMMENT%
 				******************************************************************************
 				*Name: setZip                                                                *
- 000001A7  C2 0008		*Purpose:                                                                    *
- 000001AA			*	  Intakes a student and a dword zip code, then places the zip in, into   *
+				*Purpose:                                                                    *
+				*	  Intakes a student and a dword zip code, then places the zip in, into   *
 				*     the student's zip                                                      *
 				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
@@ -276,24 +437,39 @@ student.asm						     Page 1 - 1
 				*@param inZip:dword                                                          *
 				*****************************************************************************%
 				Student_setZip PROC stdcall uses EBX EDX, ths:dword, inZip:dword
-					MOV EBX, ths										;moves the address of the student into ebx
+					LOCAL bbyte:byte									;use local directive
+ 000001C1				MOV EBX, ths										;moves the address of the student into ebx
 					ASSUME EBX:ptr Student								;assumes ebx is a student pointer so we dont have to type it 
-					MOV EDX, inZip										;moves the zip parameter into a register, cant do mem to mem
-					MOV AL, byte ptr[EDX]								;moves the first byte into al
-					.IF AL == 0											;if it is null
- 000001AA				.ELSE												;if it is not
- 000001AF  8B 5D 08				MOV [EBX].zip, EDX								;moves the zip sent into the method into the zip in student 
+ 000001C1  55		   *	    push   ebp
+ 000001C2  8B EC	   *	    mov    ebp, esp
+ 000001C4  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000001C7  53		   *	    push   ebx
+ 000001C8  52		   *	    push   edx
+ 000001C9  8B 5D 08			MOV EDX, inZip										;moves the zip parameter into a register, cant do mem to mem
+					MOV EAX, dword ptr[EDX]								;moves the first word into al
+ 000001CC  8B 55 0C			.IF EAX == 0										;if it is null
+ 000001CF  8B 02			.ELSE												;if it is not
+						MOV [EBX].zip, EDX								;moves the zip sent into the method into the zip in student 
+ 000001D1  0B C0	   *	    or	eax, eax
+ 000001D3  75 02	   *	    jne    @C001C
 					.ENDIF												;end if
- 000001B2  8B 55 0C			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
- 000001B5  8A 02			RET 8												;returns to where I was called cleaning 8 bytes. 
+ 000001D5  EB 06	   *	    jmp    @C001E
+ 000001D7		   *@C001C:
+ 000001D7  89 93 00000190		ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+					RET 												;returns to where I was called cleaning 8 bytes. 
+ 000001DD		   *@C001E:
 				Student_setZip ENDP
 				
- 000001BD  89 93 00000190	COMMENT%
+ 000001DD  5A		   *	    pop    edx
+ 000001DE  5B		   *	    pop    ebx
+ 000001DF  C9		   *	    leave  
+ 000001E0  C2 0008	   *	    ret    00008h
+ 000001E3			COMMENT%
 				******************************************************************************
 				*Name: setAddr                                                               *
 				*Purpose:                                                                    *
- 000001C6  C2 0008		*	  Intakes a student and a dword address to an address, then places the   *
- 000001C9			*		address in, into the student's address              				 *
+				*	  Intakes a student and a dword address to an address, then places the   *
+				*		address in, into the student's address              				 *
 				*                                                                            *
 				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
@@ -302,21 +478,34 @@ student.asm						     Page 1 - 1
 				*@param inAddr:dword                                                         *
 				*****************************************************************************%
 				Student_setAddr PROC stdcall uses EBX EDX, ths:dword, inAddr:dword, inZip:dword
-					MOV EBX, ths										;moves the address of the student into ebx
-					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					INVOKE Student_setStreet, ths, inAddr				;sets the street to the student
+					LOCAL bbyte:byte									;use local directive
+ 000001E3				INVOKE Student_setStreet, ths, inAddr				;sets the street to the student
 					INVOKE Student_setZip, ths, inZip					;sets the zip of the student
-					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 8												;returns to where I was called, cleaning 8 bytes.
- 000001C9			Student_setAddr ENDP
- 000001CE  8B 5D 08		
-				COMMENT%
+ 000001E3  55		   *	    push   ebp
+ 000001E4  8B EC	   *	    mov    ebp, esp
+ 000001E6  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000001E9  53		   *	    push   ebx
+ 000001EA  52		   *	    push   edx
+					RET 												;returns to where I was called, cleaning 8 bytes.
+ 000001EB  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 000001EE  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000001F1  E8 FFFFFFA0	   *	    call   Student_setStreet
+				Student_setAddr ENDP
+ 000001F6  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 000001F9  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000001FC  E8 FFFFFFC0	   *	    call   Student_setZip
+				
+ 00000201  5A		   *	    pop    edx
+ 00000202  5B		   *	    pop    ebx
+ 00000203  C9		   *	    leave  
+ 00000204  C2 000C	   *	    ret    0000Ch
+ 00000207			COMMENT%
 				******************************************************************************
 				*Name: getName                                                               *
 				*Purpose:                                                                    *
 				*	  Intakes a student and returns the address of where the name is 		 *
- 000001EA  C2 0008		*			( new generated string on the heap)                              *
- 000001ED			*                                                                            *
+				*			( new generated string on the heap)                              *
+				*                                                                            *
 				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
@@ -324,385 +513,758 @@ student.asm						     Page 1 - 1
 				*@returns outAddr:dword                                                      *  
 				*****************************************************************************%
 				Student_getName PROC stdcall uses EBX EDX, ths:dword
-					MOV EBX, ths										;moves the address of the student into ebx
+					LOCAL bbyte:byte									;use local directive
+ 00000207				MOV EBX, ths										;moves the address of the student into ebx
 					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					INVOKE memoryallocBailey, 200						;allocate 200 bytes of memory (enough for a big name)
+ 00000207  55		   *	    push   ebp
+ 00000208  8B EC	   *	    mov    ebp, esp
+ 0000020A  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000020D  53		   *	    push   ebx
+ 0000020E  52		   *	    push   edx
+ 0000020F  8B 5D 08			INVOKE memoryallocBailey, 200						;allocate 200 bytes of memory (enough for a big name)
 					MOV EDX, EAX										;moves the address of the heap onto edx so we can invoke it
 					INVOKE appendString, EDX, addr [EBX].first			;appends the first name at the address
-					INVOKE appendString, EDX, addr spaceChar			;appends a space character onto the address
+ 00000212  68 000000C8	   *	    push   +0000000C8h
+ 00000217  E8 00000000 E   *	    call   memoryallocBailey
+ 0000021C  8B D0			INVOKE appendString, EDX, addr spaceChar			;appends a space character onto the address
 					INVOKE appendString, EDX, addr [EBX].last			;appends the last name onto the address
- 000001ED				MOV EAX, EDX										;moves the address of the name into eax for returning
- 000001F2  8B 5D 08			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 4												;returns to where I was called, cleaning 8 bytes.
+ 0000021E  8D 43 64	   *	    lea    eax, byte  ptr [ebx]+064h
+ 00000221  50		   *	    push   eax
+ 00000222  52		   *	    push   edx
+ 00000223  E8 00000000 E   *	    call   appendString
+					MOV EAX, EDX										;moves the address of the name into eax for returning
+ 00000228  68 00000000 R   *	    push   OFFSET spaceChar
+ 0000022D  52		   *	    push   edx
+ 0000022E  E8 00000000 E   *	    call   appendString
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+ 00000233  8D 03	   *	    lea    eax, byte  ptr [ebx]
+ 00000235  50		   *	    push   eax
+ 00000236  52		   *	    push   edx
+ 00000237  E8 00000000 E   *	    call   appendString
+ 0000023C  8B C2			RET 												;returns to where I was called, cleaning 8 bytes.
 				Student_getName ENDP
- 000001FF  8B D0		
-				COMMENT%
+				
+ 0000023E  5A		   *	    pop    edx
+ 0000023F  5B		   *	    pop    ebx
+ 00000240  C9		   *	    leave  
+ 00000241  C2 0004	   *	    ret    00004h
+ 00000244			COMMENT%
 				******************************************************************************
 				*Name: getTest                                                               *
- 0000021F  8B C2		*Purpose:                                                                    *
+				*Purpose:                                                                    *
 				*	  Intakes a student and test number and retuns the test grade            *
 				*                                                                            *
- 00000224  C2 0004		*Date Created: 11/19/2019                                                    *
- 00000227			*Date Modified: 11/19/2019                                                   *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
 				*@param ths:dword                                                            *
 				*@param numTest:word                                                         *
 				*@returns testScore:word                                                     *  
 				*****************************************************************************%
 				Student_getTest PROC stdcall uses EBX, ths:dword, numTest:word
-					MOV EBX, ths										;moves the address of the student into ebx
+					LOCAL bbyte:byte									;use local directive
+ 00000244				MOV EBX, ths										;moves the address of the student into ebx
 					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					.IF numTest == 1									;if the in test num is equal to 1
+ 00000244  55		   *	    push   ebp
+ 00000245  8B EC	   *	    mov    ebp, esp
+ 00000247  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000024A  53		   *	    push   ebx
+ 0000024B  8B 5D 08			.IF numTest == 1									;if the in test num is equal to 1
 						MOV AX, [EBX].test1								;moves the score from the test into AX
 					.ELSEIF numTest == 2								;if the in test num is equal to 2
-						MOV AX, [EBX].test2								;moves the score from the test into AX	
-					.ELSEIF numTest == 3								;if the in test num is equal to 3
-						MOV AX, [EBX].test3								;moves the score from the test into AX
- 00000227				.ELSE												;if the test number is not 1-3
- 0000022B  8B 5D 08			.ENDIF												;if this was java i would throw an exception at the else
-					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 6												;returns to where I was called, cleaning 8 bytes.
- 00000235  66| 8B 83		Student_getTest ENDP
+ 0000024E  66| 83 7D 0C
+	   01		   *	    cmp    numTest, 001h
+ 00000253  75 09	   *	    jne    @C001F
+ 00000255  66| 8B 83				MOV AX, [EBX].test2								;moves the score from the test into AX	
 	   00000194
-				
- 00000245  66| 8B 83		
+					.ELSEIF numTest == 3								;if the in test num is equal to 3
+ 0000025C  EB 20	   *	    jmp    @C0021
+ 0000025E		   *@C001F:
+ 0000025E  66| 83 7D 0C
+	   02		   *	    cmp    numTest, 002h
+ 00000263  75 09	   *	    jne    @C0022
+ 00000265  66| 8B 83				MOV AX, [EBX].test3								;moves the score from the test into AX
 	   00000196
-				COMMENT%
- 00000255  66| 8B 83		******************************************************************************
+					.ELSE												;if the test number is not 1-3
+ 0000026C  EB 10	   *	    jmp    @C0024
+ 0000026E		   *@C0022:
+ 0000026E  66| 83 7D 0C
+	   03		   *	    cmp    numTest, 003h
+ 00000273  75 09	   *	    jne    @C0025
+ 00000275  66| 8B 83			.ENDIF												;if this was java i would throw an exception at the else
 	   00000198
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+ 0000027C  EB 00	   *	    jmp    @C0027
+ 0000027E		   *@C0025:
+					RET 												;returns to where I was called, cleaning 8 bytes.
+ 0000027E		   *@C0027:
+ 0000027E		   *@C0024:
+ 0000027E		   *@C0021:
+				Student_getTest ENDP
+				
+ 0000027E  5B		   *	    pop    ebx
+ 0000027F  C9		   *	    leave  
+ 00000280  C2 0008	   *	    ret    00008h
+ 00000283			
+				COMMENT%
+				******************************************************************************
 				*Name: getAddress                                                            *
 				*Purpose:                                                                    *
 				*	  Intakes a student and returns the street + zip 			             *
 				*                                                                            *
- 00000260  C2 0006		*Date Created: 11/19/2019                                                    *
- 00000263			*Date Modified: 11/19/2019                                                   *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
 				*@param ths:dword                                                            *
 				*@returns outAddr:dword                                                      *  
 				*****************************************************************************%
 				Student_getAddress PROC stdcall uses ECX EDX EDI, ths:dword 
-					MOV EDX, 0
+					LOCAL bbyte:byte									;use local directive
+ 00000283				MOV EDX, 0
 					MOV EBX, ths										;moves the address of the student into ebx
-					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					INVOKE memoryallocBailey, 205						;allocates enough memory for a complete address
+ 00000283  55		   *	    push   ebp
+ 00000284  8B EC	   *	    mov    ebp, esp
+ 00000286  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000289  51		   *	    push   ecx
+ 0000028A  52		   *	    push   edx
+ 0000028B  57		   *	    push   edi
+ 0000028C  BA 00000000			ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+ 00000291  8B 5D 08			INVOKE memoryallocBailey, 205						;allocates enough memory for a complete address
 					MOV EDI, EAX										;moves into edi the address given back from the allocation
 					INVOKE Student_getStreet, ths						;gets the street from the current student passed in
-					MOV EDX, EAX										;moves into EDX, the returning street address in EAX
+ 00000294  68 000000CD	   *	    push   +0000000CDh
+ 00000299  E8 00000000 E   *	    call   memoryallocBailey
+ 0000029E  8B F8			MOV EDX, EAX										;moves into EDX, the returning street address in EAX
 					INVOKE appendString, EDI, EDX						;appends the street to the blank allocated memory
-					INVOKE appendString, EDI, addr spaceChar			;appends a space character onto the address
- 00000263				INVOKE Student_getZip, ths							;gets the current zip from the student and address is in eax
- 00000269  BA 00000000			.IF EAX == -1										;if the zip is null
- 0000026E  8B 5D 08			.ELSE												;if it is not
+ 000002A0  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000002A3  E8 00000045	   *	    call   Student_getStreet
+ 000002A8  8B D0			INVOKE appendString, EDI, addr spaceChar			;appends a space character onto the address
+					INVOKE Student_getZip, ths							;gets the current zip from the student and address is in eax
+ 000002AA  52		   *	    push   edx
+ 000002AB  57		   *	    push   edi
+ 000002AC  E8 00000000 E   *	    call   appendString
+					.IF EAX == -1										;if the zip is null
+ 000002B1  68 00000000 R   *	    push   OFFSET spaceChar
+ 000002B6  57		   *	    push   edi
+ 000002B7  E8 00000000 E   *	    call   appendString
+					.ELSE												;if it is not
+ 000002BC  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000002BF  E8 0000005A	   *	    call   Student_getZip
 						MOV EDX, EAX									;moves the numbers of the zip into eax
+ 000002C4  83 F8 FF	   *	    cmp    eax, - 001h
+ 000002C7  75 02	   *	    jne    @C0028
 						INVOKE memoryallocBailey, 5						;allocates enough memory for a complete address
- 0000027B  8B F8				INVOKE intasc32, EAX, EDX						;converts the zip to ascii
+ 000002C9  EB 19	   *	    jmp    @C002A
+ 000002CB		   *@C0028:
+ 000002CB  8B D0				INVOKE intasc32, EAX, EDX						;converts the zip to ascii
 						MOV EDX, EAX									;moves the addr of the zip into eax
- 00000285  8B D0				INVOKE appendString, EDI, EDX					;appends the zip at the end of the current string allocated (the street and the space to seperate)
-					.ENDIF												;endif
+ 000002CD  6A 05	   *	    push   +000000005h
+ 000002CF  E8 00000000 E   *	    call   memoryallocBailey
+						INVOKE appendString, EDI, EDX					;appends the zip at the end of the current string allocated (the street and the space to seperate)
+ 000002D4  52		   *	    push   edx
+ 000002D5  50		   *	    push   eax
+ 000002D6  E8 00000000 E   *	    call   intasc32
+ 000002DB  8B D0			.ENDIF												;endif
 					MOV EAX, EDI										;moves the address of the address into eax for returning
+ 000002DD  52		   *	    push   edx
+ 000002DE  57		   *	    push   edi
+ 000002DF  E8 00000000 E   *	    call   appendString
 					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 4												;returns to where I was called, cleaning 8 bytes.
+ 000002E4		   *@C002A:
+ 000002E4  8B C7			RET 												;returns to where I was called, cleaning 8 bytes.
 				Student_getAddress ENDP
- 000002A8  8B D0		
-				COMMENT%
+				
+ 000002E6  5F		   *	    pop    edi
+ 000002E7  5A		   *	    pop    edx
+ 000002E8  59		   *	    pop    ecx
+ 000002E9  C9		   *	    leave  
+ 000002EA  C2 0004	   *	    ret    00004h
+ 000002ED			COMMENT%
 				******************************************************************************
- 000002B8  8B D0		*Name: getStreet                                                             *
-				*Purpose:                                                                    *
-				*	  Intakes a student and returns the street      			             *
- 000002C1  8B C7		*                                                                            *
-				*Date Created: 11/19/2019                                                    *
-				*Date Modified: 11/19/2019                                                   *
- 000002C7  C2 0004		*                                                                            *
- 000002CA			*@param ths:dword                                                            *
-				*@returns outAddr:dword                                                      *  
-				*****************************************************************************%
-				Student_getStreet PROC stdcall uses ebx edx, ths:dword
-					MOV EDX, 0											;clear our edx
-					MOV EBX, ths										;moves the address of the student into ebx
-					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					INVOKE memoryallocBailey, 200						;allocate 205 bytes of memory (enough for a street and 5 digit zip)
-					MOV EDX, EAX										;moves the address of the heap onto edx so we can invoke it
-					INVOKE appendString, EDX, addr [EBX].street			;appends the street at the address
-					MOV EAX, EDX										;moves the address of the address into eax for returning
-					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 4												;returns to where I was called, cleaning 8 bytes.
-				Student_getStreet ENDP
- 000002CA			
- 000002CF  BA 00000000		COMMENT%
- 000002D4  8B 5D 08		******************************************************************************
 				*Name: getStreet                                                             *
 				*Purpose:                                                                    *
- 000002E1  8B D0		*	  Intakes a student and returns the street      			             *
+				*	  Intakes a student and returns the street      			             *
 				*                                                                            *
- 000002F0  8B C2		*Date Created: 11/19/2019                                                    *
-				*Date Modified: 11/19/2019                                                   *
-				*                                                                            *
- 000002F5  C2 0004		*@param ths:dword                                                            *
- 000002F8			*@returns outAddr:dword                                                      *  
-				*****************************************************************************%
-				Student_getZip PROC stdcall uses ebx edx, ths:dword
-					MOV EBX, ths										;moves the address of the student into ebx
-					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					MOV EAX, [EBX].zip									;moves the address of the zip into EAX
-					.IF EAX == 00										;if zip is null
-						MOV EAX, -1										;move -1 into eax
-					.ELSE												;if it is not
-						MOV EDX, [EAX]									;moves the value at eax into edx
-						MOV EAX, EDX									;moves back to eax for output
-					.ENDIF												;end if
-					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 4												;returns to where I was called, cleaning 8 bytes.
- 000002F8			Student_getZip ENDP
- 000002FD  8B 5D 08		
-				COMMENT%
- 00000300  8B 83 00000190	******************************************************************************
-				*Name: findMax                                                               *
- 0000030A  B8 FFFFFFFF		*Purpose:                                                                    *
-				*	  finds the max test grade of the student        			             *
- 00000311  8B 10		*                                                                            *
- 00000313  8B C2		*Date Created: 11/19/2019                                                    *
+				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
 				*@param ths:dword                                                            *
- 00000318  C2 0004		*@returns outTest:word                                                       *  
- 0000031B			*****************************************************************************%
-				Student_findMax PROC stdcall uses EBX , ths:dword										
+				*@returns outAddr:dword                                                      *  
+				*****************************************************************************%
+				Student_getStreet PROC stdcall uses ebx edx, ths:dword
+					LOCAL bbyte:byte									;use local directive
+ 000002ED				MOV EDX, 0											;clear our edx
 					MOV EBX, ths										;moves the address of the student into ebx
-					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					MOV AX, [EBX].test1									;moves the value in t1 into register so we can compare without mem to mem error
-					.IF  AX > [EBX].test2 && AX > [EBX].test3			;if the value in t1 is greater than t2 and t3
-						MOV AX, [EBX].test1								;moves the first test into the largest spot
-					.ELSE												;considering the value in t1 is less than t2 and t3 we can use else
-						MOV AX, [EBX].test2								;moves the value of t2 into the register for comparison
-						.IF AX > [EBX].test3							;if the value t2 is greater than t3, it is therefore the greatest number	
-							MOV AX, [EBX].test2							;moves the test 2 into the largest spot
-						.ELSE											;test3 is the greatest if this gets hit
-							MOV AX, [EBX].test3							;move the test score 3 into the largest spot
-						.ENDIF											;end if
- 0000031B				.ENDIF												;ends if
- 0000031F  8B 5D 08			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 4												;returns to where I was called, cleaning 8 bytes.
- 00000322  66| 8B 83		Student_findMax ENDP
-	   00000194
+ 000002ED  55		   *	    push   ebp
+ 000002EE  8B EC	   *	    mov    ebp, esp
+ 000002F0  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000002F3  53		   *	    push   ebx
+ 000002F4  52		   *	    push   edx
+ 000002F5  BA 00000000			ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+ 000002FA  8B 5D 08			INVOKE memoryallocBailey, 200						;allocate 205 bytes of memory (enough for a street and 5 digit zip)
+					MOV EDX, EAX										;moves the address of the heap onto edx so we can invoke it
+					INVOKE appendString, EDX, addr [EBX].street			;appends the street at the address
+ 000002FD  68 000000C8	   *	    push   +0000000C8h
+ 00000302  E8 00000000 E   *	    call   memoryallocBailey
+ 00000307  8B D0			MOV EAX, EDX										;moves the address of the address into eax for returning
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+ 00000309  8D 83 000000C8  *	    lea    eax, byte  ptr [ebx]+0C8h
+ 0000030F  50		   *	    push   eax
+ 00000310  52		   *	    push   edx
+ 00000311  E8 00000000 E   *	    call   appendString
+ 00000316  8B C2			RET 												;returns to where I was called, cleaning 8 bytes.
+				Student_getStreet ENDP
 				
- 0000033B  66| 8B 83		COMMENT%
-	   00000194
+ 00000318  5A		   *	    pop    edx
+ 00000319  5B		   *	    pop    ebx
+ 0000031A  C9		   *	    leave  
+ 0000031B  C2 0004	   *	    ret    00004h
+ 0000031E			COMMENT%
 				******************************************************************************
- 00000344  66| 8B 83		*Name: findMin                                                               *
-	   00000196
+				*Name: getStreet                                                             *
 				*Purpose:                                                                    *
- 00000354  66| 8B 83		*	  finds the min test grade of the student        			             *
-	   00000196
+				*	  Intakes a student and returns the street      			             *
 				*                                                                            *
- 0000035D  66| 8B 83		*Date Created: 11/19/2019                                                    *
-	   00000198
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@returns outAddr:dword                                                      *  
+				*****************************************************************************%
+				Student_getZip PROC stdcall uses ebx edx, ths:dword
+					LOCAL bbyte:byte									;use local directive
+ 0000031E				MOV EBX, ths										;moves the address of the student into ebx
+					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+ 0000031E  55		   *	    push   ebp
+ 0000031F  8B EC	   *	    mov    ebp, esp
+ 00000321  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000324  53		   *	    push   ebx
+ 00000325  52		   *	    push   edx
+ 00000326  8B 5D 08			MOV EAX, [EBX].zip									;moves the address of the zip into EAX
+					.IF EAX == 00										;if zip is null
+ 00000329  8B 83 00000190			MOV EAX, -1										;move -1 into eax
+					.ELSE												;if it is not
+ 0000032F  0B C0	   *	    or	eax, eax
+ 00000331  75 07	   *	    jne    @C002B
+ 00000333  B8 FFFFFFFF				MOV EDX, [EAX]									;moves the value at eax into edx
+						MOV EAX, EDX									;moves back to eax for output
+ 00000338  EB 04	   *	    jmp    @C002D
+ 0000033A		   *@C002B:
+ 0000033A  8B 10			.ENDIF												;end if
+ 0000033C  8B C2			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+					RET 												;returns to where I was called, cleaning 8 bytes.
+ 0000033E		   *@C002D:
+				Student_getZip ENDP
+				
+ 0000033E  5A		   *	    pop    edx
+ 0000033F  5B		   *	    pop    ebx
+ 00000340  C9		   *	    leave  
+ 00000341  C2 0004	   *	    ret    00004h
+ 00000344			COMMENT%
+				******************************************************************************
+				*Name: findMax                                                               *
+				*Purpose:                                                                    *
+				*	  finds the max test grade of the student        			             *
+				*                                                                            *
+				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
 				*@param ths:dword                                                            *
 				*@returns outTest:word                                                       *  
- 00000366  C2 0004		*****************************************************************************%
- 00000369			Student_findMin PROC stdcall, ths:dword
-					MOV EBX, ths										;moves the address of the student into ebx
+				*****************************************************************************%
+				Student_findMax PROC stdcall uses EBX , ths:dword		
+					LOCAL bbyte:byte									;use local directive								
+ 00000344				MOV EBX, ths										;moves the address of the student into ebx
 					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					MOV AX, [EBX].test1									;moves the value in t1 into register so we can compare without mem to mem error
-					.IF  AX < [EBX].test2 && AX < [EBX].test3			;if the value in t1 is greater than t2 and t3
-						MOV AX, [EBX].test1								;moves the first test into the smallest spot
+ 00000344  55		   *	    push   ebp
+ 00000345  8B EC	   *	    mov    ebp, esp
+ 00000347  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000034A  53		   *	    push   ebx
+ 0000034B  8B 5D 08			MOV AX, [EBX].test1									;moves the value in t1 into register so we can compare without mem to mem error
+					.IF  AX > [EBX].test2 && AX > [EBX].test3			;if the value in t1 is greater than t2 and t3
+ 0000034E  66| 8B 83				MOV AX, [EBX].test1								;moves the first test into the largest spot
+	   00000194
 					.ELSE												;considering the value in t1 is less than t2 and t3 we can use else
-						MOV AX, [EBX].test2								;moves the value of t2 into the register for comparison
-						.IF AX < [EBX].test3							;if the value t2 is greater than t3, it is therefore the greatest number	
-							MOV AX, [EBX].test2							;moves the test 2 into the smallest spot
+ 00000355  66| 3B 83
+	   00000196	   *	    cmp    ax, [ebx] . test2
+ 0000035C  76 12	   *	    jbe    @C002E
+ 0000035E  66| 3B 83
+	   00000198	   *	    cmp    ax, [ebx] . test3
+ 00000365  76 09	   *	    jbe    @C002E
+ 00000367  66| 8B 83				MOV AX, [EBX].test2								;moves the value of t2 into the register for comparison
+	   00000194
+						.IF AX > [EBX].test3							;if the value t2 is greater than t3, it is therefore the greatest number	
+ 0000036E  EB 20	   *	    jmp    @C0031
+ 00000370		   *@C002E:
+ 00000370  66| 8B 83					MOV AX, [EBX].test2							;moves the test 2 into the largest spot
+	   00000196
 						.ELSE											;test3 is the greatest if this gets hit
-							MOV AX, [EBX].test3							;move the test score 3 into the smallest spot
+ 00000377  66| 3B 83
+	   00000198	   *	    cmp    ax, [ebx] . test3
+ 0000037E  76 09	   *	    jbe    @C0032
+ 00000380  66| 8B 83					MOV AX, [EBX].test3							;move the test score 3 into the largest spot
+	   00000196
 						.ENDIF											;end if
-					.ENDIF												;ends if
- 00000369				ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
- 0000036C  8B 5D 08			RET 4												;returns to where I was called, cleaning 8 bytes.
-				Student_findMin ENDP
- 0000036F  66| 8B 83		
-	   00000194
-				COMMENT%
- 00000388  66| 8B 83		******************************************************************************
-	   00000194
-				*Name: calcAvg                                                               *
- 00000391  66| 8B 83		*Purpose:                                                                    *
-	   00000196
-				*	  finds the average of the 3 test grades        			             *
- 000003A1  66| 8B 83		*                                                                            *
-	   00000196
-				*Date Created: 11/19/2019                                                    *
- 000003AA  66| 8B 83		*Date Modified: 11/19/2019                                                   *
+ 00000387  EB 07	   *	    jmp    @C0034
+ 00000389		   *@C0032:
+ 00000389  66| 8B 83			.ENDIF												;ends if
 	   00000198
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+					RET 												;returns to where I was called, cleaning 8 bytes.
+ 00000390		   *@C0034:
+ 00000390		   *@C0031:
+				Student_findMax ENDP
+				
+ 00000390  5B		   *	    pop    ebx
+ 00000391  C9		   *	    leave  
+ 00000392  C2 0004	   *	    ret    00004h
+ 00000395			COMMENT%
+				******************************************************************************
+				*Name: findMin                                                               *
+				*Purpose:                                                                    *
+				*	  finds the min test grade of the student        			             *
+				*                                                                            *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@returns outTest:word                                                       *  
+				*****************************************************************************%
+				Student_findMin PROC stdcall, ths:dword
+					LOCAL bbyte:byte									;use local directive
+ 00000395				MOV EBX, ths										;moves the address of the student into ebx
+					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+ 00000395  55		   *	    push   ebp
+ 00000396  8B EC	   *	    mov    ebp, esp
+ 00000398  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000039B  8B 5D 08			MOV AX, [EBX].test1									;moves the value in t1 into register so we can compare without mem to mem error
+					.IF  AX < [EBX].test2 && AX < [EBX].test3			;if the value in t1 is greater than t2 and t3
+ 0000039E  66| 8B 83				MOV AX, [EBX].test1								;moves the first test into the smallest spot
+	   00000194
+					.ELSE												;considering the value in t1 is less than t2 and t3 we can use else
+ 000003A5  66| 3B 83
+	   00000196	   *	    cmp    ax, [ebx] . test2
+ 000003AC  73 12	   *	    jae    @C0035
+ 000003AE  66| 3B 83
+	   00000198	   *	    cmp    ax, [ebx] . test3
+ 000003B5  73 09	   *	    jae    @C0035
+ 000003B7  66| 8B 83				MOV AX, [EBX].test2								;moves the value of t2 into the register for comparison
+	   00000194
+						.IF AX < [EBX].test3							;if the value t2 is greater than t3, it is therefore the greatest number	
+ 000003BE  EB 20	   *	    jmp    @C0038
+ 000003C0		   *@C0035:
+ 000003C0  66| 8B 83					MOV AX, [EBX].test2							;moves the test 2 into the smallest spot
+	   00000196
+						.ELSE											;test3 is the greatest if this gets hit
+ 000003C7  66| 3B 83
+	   00000198	   *	    cmp    ax, [ebx] . test3
+ 000003CE  73 09	   *	    jae    @C0039
+ 000003D0  66| 8B 83					MOV AX, [EBX].test3							;move the test score 3 into the smallest spot
+	   00000196
+						.ENDIF											;end if
+ 000003D7  EB 07	   *	    jmp    @C003B
+ 000003D9		   *@C0039:
+ 000003D9  66| 8B 83			.ENDIF												;ends if
+	   00000198
+					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+					RET 												;returns to where I was called, cleaning 8 bytes.
+ 000003E0		   *@C003B:
+ 000003E0		   *@C0038:
+				Student_findMin ENDP
+				
+ 000003E0  C9		   *	    leave  
+ 000003E1  C2 0004	   *	    ret    00004h
+ 000003E4			COMMENT%
+				******************************************************************************
+				*Name: calcAvg                                                               *
+				*Purpose:                                                                    *
+				*	  finds the average of the 3 test grades        			             *
+				*                                                                            *
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
 				*@param ths:dword                                                            *
 				*@returns outAvg:word                                                        *  
 				*****************************************************************************%
- 000003B2  C2 0004		Student_calcAvg PROC stdcall uses EBX, ths:dword
- 000003B5				MOV EBX, ths										;moves the address of the student into ebx
+				Student_calcAvg PROC stdcall uses EBX, ths:dword
+					LOCAL bbyte:byte									;use local directive
+ 000003E4				MOV EBX, ths										;moves the address of the student into ebx
 					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					MOV AX, [EBX].test1									;moves the first test into AX
+ 000003E4  55		   *	    push   ebp
+ 000003E5  8B EC	   *	    mov    ebp, esp
+ 000003E7  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000003EA  53		   *	    push   ebx
+ 000003EB  8B 5D 08			MOV AX, [EBX].test1									;moves the first test into AX
 					MOV DX, [EBX].test2									;moves the second test into DX
-					ADD AX, DX											;add the first two tests together
-					MOV DX, [EBX].test3									;move the third test into DX
-					ADD AX, DX											;all 3 are added together now
-					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					MOV BL, 3											;we are dividing by 3
-					iDIV BL												;divide by 3
-					CBW													;converts the byte to word
-					RET 4												;returns to where I was called, cleaning 8 bytes.
-				Student_calcAvg ENDP
-				
- 000003B5			COMMENT%
- 000003B9  8B 5D 08		******************************************************************************
-				*Name: calcAvg                                                               *
- 000003BC  66| 8B 83		*Purpose:                                                                    *
+ 000003EE  66| 8B 83			ADD AX, DX											;add the first two tests together
 	   00000194
- 000003C3  66| 8B 93		*	  sends back a string address containing the students record             *
+ 000003F5  66| 8B 93			MOV DX, [EBX].test3									;move the third test into DX
 	   00000196
- 000003CA  66| 03 C2		*                                                                            *
- 000003CD  66| 8B 93		*Date Created: 11/19/2019                                                    *
+ 000003FC  66| 03 C2			ADD AX, DX											;all 3 are added together now
+ 000003FF  66| 8B 93			ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	   00000198
- 000003D4  66| 03 C2		*Date Modified: 11/19/2019                                                   *
+ 00000406  66| 03 C2			MOV BL, 3											;we are dividing by 3
+					iDIV BL												;divide by 3
+ 00000409  B3 03			CBW													;converts the byte to word
+ 0000040B  F6 FB			RET 												;returns to where I was called, cleaning 8 bytes.
+ 0000040D  66| 98		Student_calcAvg ENDP
+				
+ 0000040F  5B		   *	    pop    ebx
+ 00000410  C9		   *	    leave  
+ 00000411  C2 0004	   *	    ret    00004h
+ 00000414			COMMENT%
+				******************************************************************************
+				*Name: calcAvg                                                               *
+				*Purpose:                                                                    *
+				*	  sends back a string address containing the students record             *
 				*                                                                            *
- 000003D7  B3 03		*@param ths:dword                                                            *
- 000003D9  F6 FB		*@returns outAddr:word                                                       *  
- 000003DB  66| 98		*****************************************************************************%
+				*Date Created: 11/19/2019                                                    *
+				*Date Modified: 11/19/2019                                                   *
+				*                                                                            *
+				*@param ths:dword                                                            *
+				*@returns outAddr:word                                                       *  
+				*****************************************************************************%
 				Student_studentRecord PROC stdcall uses EBX EDX EDI ESI, ths:dword
- 000003DF  C2 0004			MOV EBX, ths										;moves the address of the student into ebx
- 000003E2				ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
-					INVOKE memoryallocBailey, 400						;holds enough space to have the record...
+					LOCAL bbyte:byte									;use local directive
+ 00000414				MOV EBX, ths										;moves the address of the student into ebx
+					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+ 00000414  55		   *	    push   ebp
+ 00000415  8B EC	   *	    mov    ebp, esp
+ 00000417  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000041A  53		   *	    push   ebx
+ 0000041B  52		   *	    push   edx
+ 0000041C  57		   *	    push   edi
+ 0000041D  56		   *	    push   esi
+ 0000041E  8B 5D 08			INVOKE memoryallocBailey, 400						;holds enough space to have the record...
 					MOV EDI, EAX										;moves the address given back into edi
 					INVOKE Student_getName, ths							;gets the name of the student, address is in eax
-					MOV EDX, EAX										;stores this address into edx
+ 00000421  68 00000190	   *	    push   +000000190h
+ 00000426  E8 00000000 E   *	    call   memoryallocBailey
+ 0000042B  8B F8			MOV EDX, EAX										;stores this address into edx
+					INVOKE appendString, EDI, addr nextLine				;appends the new line character
+ 0000042D  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000430  E8 FFFFFDD2	   *	    call   Student_getName
+ 00000435  8B D0			INVOKE appendString, EDI, addr nextLine				;appends the new line character
 					INVOKE appendString, EDI, EDX						;appends the name onto the main string
+ 00000437  68 00000004 R   *	    push   OFFSET nextLine
+ 0000043C  57		   *	    push   edi
+ 0000043D  E8 00000000 E   *	    call   appendString
 					INVOKE appendString, EDI, addr nextLine				;appends the new line character
+ 00000442  68 00000004 R   *	    push   OFFSET nextLine
+ 00000447  57		   *	    push   edi
+ 00000448  E8 00000000 E   *	    call   appendString
 					INVOKE Student_getAddress, ths						;gets the address of the student, address is in eax
+ 0000044D  52		   *	    push   edx
+ 0000044E  57		   *	    push   edi
+ 0000044F  E8 00000000 E   *	    call   appendString
 					MOV EDX, EAX										;moves the address into edx
+ 00000454  68 00000004 R   *	    push   OFFSET nextLine
+ 00000459  57		   *	    push   edi
+ 0000045A  E8 00000000 E   *	    call   appendString
 					INVOKE appendString, EDI, EDX						;appends the address of the student at the end of the main string
+ 0000045F  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000462  E8 FFFFFE1C	   *	    call   Student_getAddress
+ 00000467  8B D0			INVOKE appendString, EDI, addr nextLine				;appends the new line character
 					INVOKE appendString, EDI, addr nextLine				;appends the new line character
-					INVOKE appendString, EDI, addr nextLine				;appends the new line character
+ 00000469  52		   *	    push   edx
+ 0000046A  57		   *	    push   edi
+ 0000046B  E8 00000000 E   *	    call   appendString
 					INVOKE appendString, EDI, addr strTest1				;append the test 1 string
+ 00000470  68 00000004 R   *	    push   OFFSET nextLine
+ 00000475  57		   *	    push   edi
+ 00000476  E8 00000000 E   *	    call   appendString
 					INVOKE Student_getTest, ths, 1						;get the score for the test
- 000003E2				MOV DX, AX											;move the score into dx
- 000003E9  8B 5D 08			INVOKE memoryallocBailey, 4							;allocate 4 bytes, to hold the asc conversion
-					MOV ESI, EAX										;move into esi the address of the 4 byte allocation
-					INVOKE intasc32, ESI, DX							;converts the test into ascii
- 000003F6  8B F8			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
-					INVOKE appendString, EDI, addr spaceChar			;appends the space char
- 00000400  8B D0			INVOKE appendString, EDI, addr spaceChar			;append the space character
-					INVOKE appendString, EDI, addr strTest2				;append the test 1 string
-					INVOKE Student_getTest, ths, 2						;get the score for the test
+ 0000047B  68 00000004 R   *	    push   OFFSET nextLine
+ 00000480  57		   *	    push   edi
+ 00000481  E8 00000000 E   *	    call   appendString
 					MOV DX, AX											;move the score into dx
- 0000041C  8B D0			INVOKE intasc32, ESI, DX							;converts the test into ascii
-					INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
+ 00000486  68 0000000E R   *	    push   OFFSET strTest1
+ 0000048B  57		   *	    push   edi
+ 0000048C  E8 00000000 E   *	    call   appendString
+					INVOKE memoryallocBailey, 4							;allocate 4 bytes, to hold the asc conversion
+ 00000491  6A 01	   *	    push   +000000001h
+ 00000493  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000496  E8 FFFFFDA9	   *	    call   Student_getTest
+ 0000049B  66| 8B D0			MOV ESI, EAX										;move into esi the address of the 4 byte allocation
+					INVOKE intasc32, ESI, DX							;converts the test into ascii
+ 0000049E  6A 04	   *	    push   +000000004h
+ 000004A0  E8 00000000 E   *	    call   memoryallocBailey
+ 000004A5  8B F0			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
 					INVOKE appendString, EDI, addr spaceChar			;appends the space char
+ 000004A7  6A 00	   *	    push   000h
+ 000004A9  66| 52	   *	    push   dx
+ 000004AB  56		   *	    push   esi
+ 000004AC  E8 00000000 E   *	    call   intasc32
 					INVOKE appendString, EDI, addr spaceChar			;append the space character
+ 000004B1  56		   *	    push   esi
+ 000004B2  57		   *	    push   edi
+ 000004B3  E8 00000000 E   *	    call   appendString
+					INVOKE appendString, EDI, addr strTest2				;append the test 1 string
+ 000004B8  68 00000000 R   *	    push   OFFSET spaceChar
+ 000004BD  57		   *	    push   edi
+ 000004BE  E8 00000000 E   *	    call   appendString
+					INVOKE Student_getTest, ths, 2						;get the score for the test
+ 000004C3  68 00000000 R   *	    push   OFFSET spaceChar
+ 000004C8  57		   *	    push   edi
+ 000004C9  E8 00000000 E   *	    call   appendString
+					MOV DX, AX											;move the score into dx
+ 000004CE  68 00000017 R   *	    push   OFFSET strTest2
+ 000004D3  57		   *	    push   edi
+ 000004D4  E8 00000000 E   *	    call   appendString
+					INVOKE intasc32, ESI, DX							;converts the test into ascii
+ 000004D9  6A 02	   *	    push   +000000002h
+ 000004DB  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000004DE  E8 FFFFFD61	   *	    call   Student_getTest
+ 000004E3  66| 8B D0			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
+					INVOKE appendString, EDI, addr spaceChar			;appends the space char
+ 000004E6  6A 00	   *	    push   000h
+ 000004E8  66| 52	   *	    push   dx
+ 000004EA  56		   *	    push   esi
+ 000004EB  E8 00000000 E   *	    call   intasc32
+					INVOKE appendString, EDI, addr spaceChar			;append the space character
+ 000004F0  56		   *	    push   esi
+ 000004F1  57		   *	    push   edi
+ 000004F2  E8 00000000 E   *	    call   appendString
 					INVOKE appendString, EDI, addr strTest3				;append the test 1 string
+ 000004F7  68 00000000 R   *	    push   OFFSET spaceChar
+ 000004FC  57		   *	    push   edi
+ 000004FD  E8 00000000 E   *	    call   appendString
 					INVOKE Student_getTest, ths, 3						;get the score for the test
- 00000450  66| 8B D0			MOV DX, AX											;move the score into dx
+ 00000502  68 00000000 R   *	    push   OFFSET spaceChar
+ 00000507  57		   *	    push   edi
+ 00000508  E8 00000000 E   *	    call   appendString
+					MOV DX, AX											;move the score into dx
+ 0000050D  68 00000020 R   *	    push   OFFSET strTest3
+ 00000512  57		   *	    push   edi
+ 00000513  E8 00000000 E   *	    call   appendString
 					INVOKE intasc32, ESI, DX							;converts the test into ascii
- 0000045A  8B F0			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
+ 00000518  6A 03	   *	    push   +000000003h
+ 0000051A  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000051D  E8 FFFFFD22	   *	    call   Student_getTest
+ 00000522  66| 8B D0			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
 					INVOKE appendString, EDI, addr spaceChar			;appends the space char
+ 00000525  6A 00	   *	    push   000h
+ 00000527  66| 52	   *	    push   dx
+ 00000529  56		   *	    push   esi
+ 0000052A  E8 00000000 E   *	    call   intasc32
 					INVOKE appendString, EDI, addr spaceChar			;append the space character
+ 0000052F  56		   *	    push   esi
+ 00000530  57		   *	    push   edi
+ 00000531  E8 00000000 E   *	    call   appendString
 					INVOKE appendString, EDI, addr strAverage			;append the average string		
+ 00000536  68 00000000 R   *	    push   OFFSET spaceChar
+ 0000053B  57		   *	    push   edi
+ 0000053C  E8 00000000 E   *	    call   appendString
 					INVOKE Student_calcAvg, ths							;get the average
+ 00000541  68 00000000 R   *	    push   OFFSET spaceChar
+ 00000546  57		   *	    push   edi
+ 00000547  E8 00000000 E   *	    call   appendString
 					MOV DX, AX											;move the avg into dx
+ 0000054C  68 00000029 R   *	    push   OFFSET strAverage
+ 00000551  57		   *	    push   edi
+ 00000552  E8 00000000 E   *	    call   appendString
 					INVOKE intasc32, ESI, DX							;converts the test into ascii
- 00000498  66| 8B D0			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
+ 00000557  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000055A  E8 FFFFFE85	   *	    call   Student_calcAvg
+ 0000055F  66| 8B D0			INVOKE appendString, EDI, ESI						;appends the test at the end of the main string
 					INVOKE appendString, EDI, addr spaceChar			;append the space character
+ 00000562  6A 00	   *	    push   000h
+ 00000564  66| 52	   *	    push   dx
+ 00000566  56		   *	    push   esi
+ 00000567  E8 00000000 E   *	    call   intasc32
 					INVOKE appendString, EDI, addr spaceChar			;append the space character
+ 0000056C  56		   *	    push   esi
+ 0000056D  57		   *	    push   edi
+ 0000056E  E8 00000000 E   *	    call   appendString
 					INVOKE appendString, EDI, addr strGrade				;append the grade string to the main string
-					INVOKE memoryallocBailey, 1							;allocated 1 byte of storage onto the heap
+ 00000573  68 00000000 R   *	    push   OFFSET spaceChar
+ 00000578  57		   *	    push   edi
+ 00000579  E8 00000000 E   *	    call   appendString
+					INVOKE memoryallocBailey, 2							;allocated 2 byte of storage onto the heap
+ 0000057E  68 00000000 R   *	    push   OFFSET spaceChar
+ 00000583  57		   *	    push   edi
+ 00000584  E8 00000000 E   *	    call   appendString
 					MOV ESI, EAX										;moves the address of the 1 byte into esi
+ 00000589  68 00000033 R   *	    push   OFFSET strGrade
+ 0000058E  57		   *	    push   edi
+ 0000058F  E8 00000000 E   *	    call   appendString
 					INVOKE Student_letterGrade, ths						;gets the letter grade of the student
- 000004D7  66| 8B D0			MOV [ESI], AL										;moves into tehe 1 byte storage the letter grade
+ 00000594  6A 02	   *	    push   +000000002h
+ 00000596  E8 00000000 E   *	    call   memoryallocBailey
+ 0000059B  8B F0			MOV [ESI], AL										;moves into tehe 1 byte storage the letter grade
 					INVOKE appendString, EDI, ESI						;appends the letter grade onto the main string
+ 0000059D  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000005A0  E8 0000001E	   *	    call   Student_letterGrade
+ 000005A5  88 06			INVOKE appendString, EDI, addr nullChar				;append the null character
 					MOV EAX, EDI										;moves the address of the main string into eax
+ 000005A7  56		   *	    push   esi
+ 000005A8  57		   *	    push   edi
+ 000005A9  E8 00000000 E   *	    call   appendString
 					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
-					RET 4												;returns to where I was called, cleaning 8 bytes.
+ 000005AE  68 00000002 R   *	    push   OFFSET nullChar
+ 000005B3  57		   *	    push   edi
+ 000005B4  E8 00000000 E   *	    call   appendString
+ 000005B9  8B C7			RET 												;returns to where I was called, cleaning 8 bytes.
 				Student_studentRecord ENDP
 				
- 00000514  66| 8B D0		COMMENT%
+ 000005BB  5E		   *	    pop    esi
+ 000005BC  5F		   *	    pop    edi
+ 000005BD  5A		   *	    pop    edx
+ 000005BE  5B		   *	    pop    ebx
+ 000005BF  C9		   *	    leave  
+ 000005C0  C2 0004	   *	    ret    00004h
+ 000005C3			COMMENT%
 				******************************************************************************
 				*Name: letterGrade                                                           *
 				*Purpose:                                                                    *
 				*	  sends back a letter grade corresponding to the average                 *
 				*                                                                            *
 				*Date Created: 11/19/2019                                                    *
- 00000550  8B F0		*Date Modified: 11/19/2019                                                   *
+				*Date Modified: 11/19/2019                                                   *
 				*                                                                            *
- 0000055A  88 06		*@param ths:dword                                                            *
+				*@param ths:dword                                                            *
 				*@returns outASCII:byte                                                      *  
- 00000563  8B C7		*****************************************************************************%
+				*****************************************************************************%
 				Student_letterGrade PROC stdcall uses EBX EDX, ths:dword
-					MOV EBX, ths										;moves the address of the student into ebx
- 0000056A  C2 0004			ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
- 0000056D				INVOKE Student_calcAvg, ths							;get the average of the tests
+					LOCAL bbyte:byte									;use local directive
+ 000005C3				MOV EBX, ths										;moves the address of the student into ebx
+					ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+ 000005C3  55		   *	    push   ebp
+ 000005C4  8B EC	   *	    mov    ebp, esp
+ 000005C6  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000005C9  53		   *	    push   ebx
+ 000005CA  52		   *	    push   edx
+ 000005CB  8B 5D 08			INVOKE Student_calcAvg, ths							;get the average of the tests
 					.IF AX >= 90										;if the average is greater than or equal to 90
 						MOV DL, 41h										;move the ASCII A (in hex) into DL
+ 000005CE  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000005D1  E8 FFFFFE0E	   *	    call   Student_calcAvg
 					.ELSEIF AX >= 80									;if it is greater or equal to 80
-						MOV DL, 42h										;move the B character in DL
+ 000005D6  66| 83 F8 5A	   *	    cmp    ax, 05Ah
+ 000005DA  72 04	   *	    jb     @C003C
+ 000005DC  B2 41				MOV DL, 42h										;move the B character in DL
 					.ELSEIF AX >= 70									;if it is greater or equal to 70
-						MOV DL, 43h										;move the C character in DL
+ 000005DE  EB 20	   *	    jmp    @C003E
+ 000005E0		   *@C003C:
+ 000005E0  66| 83 F8 50	   *	    cmp    ax, 050h
+ 000005E4  72 04	   *	    jb     @C003F
+ 000005E6  B2 42				MOV DL, 43h										;move the C character in DL
 					.ELSEIF AX >= 60									;if it is greater or equal to 60
-						MOV DL, 44h										;move the D character in DL
+ 000005E8  EB 16	   *	    jmp    @C0041
+ 000005EA		   *@C003F:
+ 000005EA  66| 83 F8 46	   *	    cmp    ax, 046h
+ 000005EE  72 04	   *	    jb     @C0042
+ 000005F0  B2 43				MOV DL, 44h										;move the D character in DL
 					.ELSE												;if it is not any of the above
-						MOV DL, 45h										;move the F character into DL
+ 000005F2  EB 0C	   *	    jmp    @C0044
+ 000005F4		   *@C0042:
+ 000005F4  66| 83 F8 3C	   *	    cmp    ax, 03Ch
+ 000005F8  72 04	   *	    jb     @C0045
+ 000005FA  B2 44				MOV DL, 46h										;move the F character into DL
 					.ENDIF												;end if
-					MOV AL, DL											;move DL into AL for output
+ 000005FC  EB 02	   *	    jmp    @C0047
+ 000005FE		   *@C0045:
+ 000005FE  B2 46			MOV AL, DL											;move DL into AL for output
 					ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
- 0000056D				RET 4												;returns to where I was called, cleaning 8 bytes.
- 00000572  8B 5D 08		Student_letterGrade ENDP
+ 00000600		   *@C0047:
+ 00000600		   *@C0044:
+ 00000600		   *@C0041:
+ 00000600		   *@C003E:
+ 00000600  8A C2			RET 												;returns to where I was called, cleaning 8 bytes.
+				Student_letterGrade ENDP
 				
-				COMMENT%
+ 00000602  5A		   *	    pop    edx
+ 00000603  5B		   *	    pop    ebx
+ 00000604  C9		   *	    leave  
+ 00000605  C2 0004	   *	    ret    00004h
+ 00000608			COMMENT%
 				******************************************************************************
- 00000583  B2 41		*Name: equals                                                                *
+				*Name: equals                                                                *
 				*Purpose:                                                                    *
- 0000058D  B2 42		*	  tests if the students tests are equal, if they are it returns 1        *
+				*	  tests if the students tests are equal, if they are it returns 1        *
 				*                                                                            *
- 00000597  B2 43		*Date Created: 11/19/2019                                                    *
+				*Date Created: 11/19/2019                                                    *
 				*Date Modified: 11/19/2019                                                   *
- 000005A1  B2 44		*                                                                            *
+				*                                                                            *
 				*@param ths:dword                                                            *
- 000005A5  B2 45		*@param sc:dword                                                             *
+				*@param sc:dword                                                             *
 				*@returns outResult:byte                                                     *  
- 000005A7  8A C2		*****************************************************************************%
+				*****************************************************************************%
 				Student_equals PROC stdcall uses EBX ECX EDX, ths:dword, sc:dword
-				MOV ECX, 0												;moves 0 into ecx, to initialize
- 000005AC  C2 0004		INVOKE Student_getTest, ths, 1							;get the first students test score
- 000005AF			MOV DX, AX												;move the test score into edx
+					LOCAL bbyte:byte									;use local directive
+ 00000608			MOV ECX, 0												;moves 0 into ecx, to initialize
+				INVOKE Student_getTest, ths, 1							;get the first students test score
+ 00000608  55		   *	    push   ebp
+ 00000609  8B EC	   *	    mov    ebp, esp
+ 0000060B  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000060E  53		   *	    push   ebx
+ 0000060F  51		   *	    push   ecx
+ 00000610  52		   *	    push   edx
+ 00000611  B9 00000000		MOV DX, AX												;move the test score into edx
 				INVOKE Student_getTest, sc, 1							;get the second students test score
-				.IF AX == DX											;compare the two to see if they are equal
+ 00000616  6A 01	   *	    push   +000000001h
+ 00000618  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000061B  E8 FFFFFC24	   *	    call   Student_getTest
+ 00000620  66| 8B D0		.IF AX == DX											;compare the two to see if they are equal
 					INVOKE Student_getTest, ths, 2						;get the first students test score
+ 00000623  6A 01	   *	    push   +000000001h
+ 00000625  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000628  E8 FFFFFC17	   *	    call   Student_getTest
 					MOV DX, AX											;move the test score into edx
+ 0000062D  66| 3B C2	   *	    cmp    ax, dx
+ 00000630  75 44	   *	    jne    @C0048
 					INVOKE Student_getTest, sc, 2						;get the second students test score
-					.IF AX == DX										;compare the two to see if they are equal
+ 00000632  6A 02	   *	    push   +000000002h
+ 00000634  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000637  E8 FFFFFC08	   *	    call   Student_getTest
+ 0000063C  66| 8B D0			.IF AX == DX										;compare the two to see if they are equal
 					INVOKE Student_getTest, ths, 3						;get the first students test score
+ 0000063F  6A 02	   *	    push   +000000002h
+ 00000641  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000644  E8 FFFFFBFB	   *	    call   Student_getTest
 					MOV DX, AX											;move the test score into edx
+ 00000649  66| 3B C2	   *	    cmp    ax, dx
+ 0000064C  75 24	   *	    jne    @C004A
 					INVOKE Student_getTest, sc, 3						;get the second students test score
-						.IF AX == DX									;compare the two to see if they are equal
+ 0000064E  6A 03	   *	    push   +000000003h
+ 00000650  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000653  E8 FFFFFBEC	   *	    call   Student_getTest
+ 00000658  66| 8B D0				.IF AX == DX									;compare the two to see if they are equal
 							MOV CL, 1									;if they are then the students test scores are equal
+ 0000065B  6A 03	   *	    push   +000000003h
+ 0000065D  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000660  E8 FFFFFBDF	   *	    call   Student_getTest
 						.ELSE											;if not
-							MOV CL, 0									;move 0 into cl if they are not equal
+ 00000665  66| 3B C2	   *	    cmp    ax, dx
+ 00000668  75 04	   *	    jne    @C004C
+ 0000066A  B1 01					MOV CL, 0									;move 0 into cl if they are not equal
 						.ENDIF											;end if
- 000005AF				.ELSE												;if not
- 000005B5  B9 00000000				MOV CL, 0										;move 0 into cl they are not equal
+ 0000066C  EB 0A	   *	    jmp    @C004E
+ 0000066E		   *@C004C:
+ 0000066E  B1 00			.ELSE												;if not
+						MOV CL, 0										;move 0 into cl they are not equal
 					.ENDIF												;end if
- 000005C4  66| 8B D0		.ELSE													;if not
+ 00000670  EB 06	   *	    jmp    @C004F
+ 00000672		   *@C004A:
+ 00000672  B1 00		.ELSE													;if not
 					MOV CL, 0											;move 0 into cl they are not equal
 				.ENDIF													;end if
-				MOV AL, CL												;move the cl into al for standard output
- 000005E0  66| 8B D0		RET 8													;return to where i was called cleaning 8 bytes
-				Student_equals ENDP
+ 00000674  EB 02	   *	    jmp    @C0050
+ 00000676		   *@C0048:
+ 00000676  B1 00		MOV AL, CL												;move the cl into al for standard output
+				RET 													;return to where i was called cleaning 8 bytes
+ 00000678		   *@C0050:
+ 00000678		   *@C004F:
+ 00000678		   *@C004E:
+ 00000678  8A C1		Student_equals ENDP
 				END
- 000005FC  66| 8B D0
- 0000060E  B1 01
- 00000612  B1 00
- 00000616  B1 00
- 0000061A  B1 00
- 0000061C  8A C1
- 00000622  C2 0008
- 00000625
-Microsoft (R) Macro Assembler Version 6.11		    11/20/19 01:50:34
+ 0000067A  5A		   *	    pop    edx
+ 0000067B  59		   *	    pop    ecx
+ 0000067C  5B		   *	    pop    ebx
+ 0000067D  C9		   *	    leave  
+ 0000067E  C2 0008	   *	    ret    00008h
+ 00000681
+Microsoft (R) Macro Assembler Version 6.11		    11/20/19 23:40:01
 student.asm						     Symbols 2 - 1
 
 
@@ -729,8 +1291,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000039 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000625 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000003B DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000681 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -743,53 +1305,70 @@ Student_2  . . . . . . . . . . .	P Near	 0000000B _TEXT	Length= 0000001F Public 
   lastN  . . . . . . . . . . . .	DWord	 bp + 0000000C
 Student_3  . . . . . . . . . . .	P Near	 0000002A _TEXT	Length= 00000095 Public STDCALL
   sc . . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_calcAvg  . . . . . . . .	P Near	 000003B5 _TEXT	Length= 0000002D Public STDCALL
+Student_calcAvg  . . . . . . . .	P Near	 000003E4 _TEXT	Length= 00000030 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_equals . . . . . . . . .	P Near	 000005AF _TEXT	Length= 00000076 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_equals . . . . . . . . .	P Near	 00000608 _TEXT	Length= 00000079 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   sc . . . . . . . . . . . . . .	DWord	 bp + 0000000C
-Student_findMax  . . . . . . . .	P Near	 0000031B _TEXT	Length= 0000004E Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_findMax  . . . . . . . .	P Near	 00000344 _TEXT	Length= 00000051 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_findMin  . . . . . . . .	P Near	 00000369 _TEXT	Length= 0000004C Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_findMin  . . . . . . . .	P Near	 00000395 _TEXT	Length= 0000004F Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_getAddress . . . . . . .	P Near	 00000263 _TEXT	Length= 00000067 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_getAddress . . . . . . .	P Near	 00000283 _TEXT	Length= 0000006A Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_getName  . . . . . . . .	P Near	 000001ED _TEXT	Length= 0000003A Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_getName  . . . . . . . .	P Near	 00000207 _TEXT	Length= 0000003D Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_getStreet  . . . . . . .	P Near	 000002CA _TEXT	Length= 0000002E Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_getStreet  . . . . . . .	P Near	 000002ED _TEXT	Length= 00000031 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_getTest  . . . . . . . .	P Near	 00000227 _TEXT	Length= 0000003C Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_getTest  . . . . . . . .	P Near	 00000244 _TEXT	Length= 0000003F Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   numTest  . . . . . . . . . . .	Word	 bp + 0000000C
-Student_getZip . . . . . . . . .	P Near	 000002F8 _TEXT	Length= 00000023 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_getZip . . . . . . . . .	P Near	 0000031E _TEXT	Length= 00000026 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_letterGrade  . . . . . .	P Near	 0000056D _TEXT	Length= 00000042 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_letterGrade  . . . . . .	P Near	 000005C3 _TEXT	Length= 00000045 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
-Student_setAddr  . . . . . . . .	P Near	 000001C9 _TEXT	Length= 00000024 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_setAddr  . . . . . . . .	P Near	 000001E3 _TEXT	Length= 00000024 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   inAddr . . . . . . . . . . . .	DWord	 bp + 0000000C
   inZip  . . . . . . . . . . . .	DWord	 bp + 00000010
-Student_setName  . . . . . . . .	P Near	 000000BF _TEXT	Length= 00000023 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_setName  . . . . . . . .	P Near	 000000BF _TEXT	Length= 00000026 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   addrFirst  . . . . . . . . . .	DWord	 bp + 0000000C
   addrLast . . . . . . . . . . .	DWord	 bp + 00000010
-Student_setStreet  . . . . . . .	P Near	 00000182 _TEXT	Length= 00000028 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_setStreet  . . . . . . .	P Near	 00000196 _TEXT	Length= 0000002B Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   streetAddr . . . . . . . . . .	DWord	 bp + 0000000C
-Student_setTestScores  . . . . .	P Near	 000000E2 _TEXT	Length= 0000002F Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_setTestScores  . . . . .	P Near	 000000E5 _TEXT	Length= 0000003D Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   t1 . . . . . . . . . . . . . .	Word	 bp + 0000000C
   t2 . . . . . . . . . . . . . .	Word	 bp + 00000010
   t3 . . . . . . . . . . . . . .	Word	 bp + 00000014
-Student_setTest  . . . . . . . .	P Near	 00000111 _TEXT	Length= 000000C6 Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_setTest  . . . . . . . .	P Near	 00000122 _TEXT	Length= 000000D8 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   score  . . . . . . . . . . . .	Word	 bp + 0000000C
   numTest  . . . . . . . . . . .	Word	 bp + 00000010
-Student_setZip . . . . . . . . .	P Near	 000001AA _TEXT	Length= 0000001F Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_setZip . . . . . . . . .	P Near	 000001C1 _TEXT	Length= 00000022 Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
   inZip  . . . . . . . . . . . .	DWord	 bp + 0000000C
-Student_studentRecord  . . . . .	P Near	 000003E2 _TEXT	Length= 0000018B Public STDCALL
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+Student_studentRecord  . . . . .	P Near	 00000414 _TEXT	Length= 000001AF Public STDCALL
   ths  . . . . . . . . . . . . .	DWord	 bp + 00000008
+  bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
 appendString . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getBytes . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -809,15 +1388,16 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
-nextLine . . . . . . . . . . . .	Byte	 00000002 _DATA	
+nextLine . . . . . . . . . . . .	Byte	 00000004 _DATA	
+nullChar . . . . . . . . . . . .	Byte	 00000002 _DATA	
 spaceChar  . . . . . . . . . . .	Byte	 00000000 _DATA	
-strAverage . . . . . . . . . . .	Byte	 00000027 _DATA	
-strGrade . . . . . . . . . . . .	Byte	 00000031 _DATA	
-strTest1 . . . . . . . . . . . .	Byte	 0000000C _DATA	
-strTest2 . . . . . . . . . . . .	Byte	 00000015 _DATA	
-strTest3 . . . . . . . . . . . .	Byte	 0000001E _DATA	
-tempAddr . . . . . . . . . . . .	DWord	 00000004 _DATA	
-tempVar  . . . . . . . . . . . .	DWord	 00000008 _DATA	
+strAverage . . . . . . . . . . .	Byte	 00000029 _DATA	
+strGrade . . . . . . . . . . . .	Byte	 00000033 _DATA	
+strTest1 . . . . . . . . . . . .	Byte	 0000000E _DATA	
+strTest2 . . . . . . . . . . . .	Byte	 00000017 _DATA	
+strTest3 . . . . . . . . . . . .	Byte	 00000020 _DATA	
+tempAddr . . . . . . . . . . . .	DWord	 00000006 _DATA	
+tempVar  . . . . . . . . . . . .	DWord	 0000000A _DATA	
 
 	   0 Warnings
 	   0 Errors

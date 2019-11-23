@@ -31,7 +31,7 @@ getBytesM MACRO String:REQ
 	PUSH EBP							;;preserves base register
 	MOV EBP, ESP						;;sets a new stack frame
 	PUSH EBX							;;pushes EBX to the stack to store this
-	PUSH ESI							;;pushes ESI to the stack to preseve
+	PUSH ESI							;;pushes ESI to the stack to preserve
 	MOV EBX, String						;;moves into ebx the first val in the stack that we are going to use
 	MOV ESI, 0							;;sets the initial point to 0
 		
@@ -46,7 +46,7 @@ getBytesM MACRO String:REQ
 	
 	POP ESI								;;restore original esi
 	POP EBX								;;restore original ebx
-	POP EBP								;;restore originla ebp
+	POP EBP								;;restore original ebp
 ENDM
 ;******************************************************************************************
 .data
@@ -54,7 +54,7 @@ ENDM
 	bChar byte ?				;memory to hold a char to put into memory 
 	originalAddr dword ?		;original address of a string
 	cpAddr dword ?				;new address of a string after copying
-	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 + -
+	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 43		;set of white-listed characters, 0 1 2 3 4 5 6 7 8 9 + -
 	bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
 
 ;******************************************************************************************

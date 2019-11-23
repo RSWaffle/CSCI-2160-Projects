@@ -90,7 +90,27 @@ COMMENT %
 *@param Studentnum:byte                                                      *
 *****************************************************************************%
 setStudentInfo MACRO testArray, studentNum
-LOCAL lpClearB										;make this a unique label
+	MOV EAX, 0
+	DisplayString strStudentFName							;display string showing students first name
+	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number to ascii
+	DisplayString strAsciiChar								;display the string showing the student number
+	DisplayString strCol									;display the string :
+	PullString strTempF, 100								;get what the user typed and store into strTempF
+	DisplayString strStudentLName							;ask for the students last name
+	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number into ascii
+	DisplayString strAsciiChar								;display the string showing the student number
+	DisplayString strCol									;display the string :
+	PullString strTempL, 100								;get what the user typed and store into strTempL	
+	DisplayString strStudentStreet							;ask for the students last name
+	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number into ascii
+	DisplayString strAsciiChar								;display the string showing the student number
+	DisplayString strCol									;display the string :
+	PullString strTempStreet, 200							;get what the user typed and store into strTempL
+	DisplayString strStudentZip								;ask for the students last name
+	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number into ascii
+	DisplayString strAsciiChar								;display the string showing the student number
+	DisplayString strCol									;display the string :
+	
 	
 ENDM
 ;******************************************************************************************
@@ -102,7 +122,7 @@ strInfo2 byte 10,09, " Section: ",0
 strInfo3 byte 10,09, " Project: ",0
 strPressEnter byte 10, "Press ENTER to continue!",0 	
 strAskValues  byte 10, "Enter the scores for 3 tests: ",0
-strStudentFName byte 10,"Enter the first name for Student ",0
+strStudentFName byte 10,10,"Enter the first name for Student ",0
 strStudentLName byte 10,"Enter the last name for Student ",0
 strStudentStreet byte 10,"Enter the street for Student ",0
 strStudentZip byte 10,"Enter the 5 digit zip for Student ",0
@@ -119,8 +139,8 @@ zipDecimal2 dword 0,0								;memory to hold a decimal zip
 zipDecimal3 dword 0,0								;memory to hold a decimal zip	
 zipDecimal4 dword 0,0								;memory to hold a decimal zip	
 strAsciiChar byte 0									;memory to hold 1 ascii char
-ALIGN
-crlf byte  10," ",0									;Null-terminated string to skip to new line
+;ALIGN
+crlf byte  10,13,0									;Null-terminated string to skip to new line
 strEmpty byte 0
 tempNum dword 0
 strTemp byte 0										;a temp byte in memory for getstring
@@ -144,33 +164,18 @@ _start:
 
 main PROC
 	INVOKE myInfo, addr strName, addr strSection, 5 		;display the student information, section, time, and project number. 
-	DisplayString crlf								 		;skip to a new line.
-	DisplayString strStudentFName							;display string showing students first name
-	INVOKE intasc32, addr strAsciiChar, 1  					;convert the student number to ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempF, 100								;get what the user typed and store into strTempF
-	DisplayString strStudentLName							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 1  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempL, 100								;get what the user typed and store into strTempL	
-	DisplayString strStudentStreet							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 1  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempStreet, 200							;get what the user typed and store into strTempL
-	DisplayString strStudentZip								;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 1  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
+	
+	setStudentInfo testArray, 1
+	MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 	PullString strTempZip, 5   								;get what the user typed and store into strTempL
 	INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
 	MOV zipDecimal1, EAX									;moves the decimal zip into dword 
-	MOV ECX, lengthof testArray 							;moves the length of array a into ECX so we can clear that amount to clear the array
-	lpClearB1:
-		MOV testArray [ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
-	loop lpClearB1											;decrement ECX and go to the top of the loop
+	
+	MOV EAX, offset testArray								;moves the address of the test array into eax
+	MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
+	MOV word ptr [EAX + 2], 0								;set the second test score to 0 to clear out the value from the previous student
+	MOV word ptr [EAX + 4], 0								;set the third test score to 0 to clear out the value from the previous student
+	
 	DisplayString strAskValues								;display the string asking which values to store
 	PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
 	INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
@@ -178,41 +183,24 @@ main PROC
 	
 	INVOKE Student_1										;create the student 1 object
 	MOV s1, EAX												;move the address of the student into s1
-	INVOKE Student_setName, s1, addr strTempF, addr strTempL;sets the student name cooresponding to the names passed in
+	INVOKE Student_setName, s1, addr strTempF, addr strTempL;sets the student name corresponding to the names passed in
 	INVOKE Student_setAddr, s1, addr strTempStreet, 		;sets the address for the student corresponding to what the user typed in
 	addr zipDecimal1
-	MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can refernce the positions
+	MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can reference the positions
 	INVOKE Student_setTestScores, s1, word ptr [EDX], 		;sets the test scores for the student.
 	word ptr [EDX + 2], word ptr [EDX + 4]
 	
-	DisplayString crlf										;skip to a new line.
- 
-	DisplayString strStudentFName							;display string showing students first name
-	INVOKE intasc32, addr strAsciiChar, 2  					;convert the student number to ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempF, 100								;get what the user typed and store into strTempF
-	DisplayString strStudentLName							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 2  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempL, 100								;get what the user typed and store into strTempL	
-	DisplayString strStudentStreet							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 2  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempStreet, 200							;get what the user typed and store into strTempL
-	DisplayString strStudentZip								;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 2  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
+	setStudentInfo testArray, 2
+	MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 	PullString strTempZip, 5   								;get what the user typed and store into strTempL
 	INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
-	MOV zipDecimal2, EAX									;moves the decimal zip into dword 
-	MOV ECX, lengthof testArray 							;moves the length of array a into ECX so we can clear that amount to clear the array
-	lpClearB2:
-		MOV testArray [ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
-	loop lpClearB2											;decrement ECX and go to the top of the loop
+	MOV zipDecimal1, EAX									;moves the decimal zip into dword 
+	
+	MOV EAX, offset testArray								;moves the address of the test array into eax
+	MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
+	MOV word ptr [EAX + 2], 0								;set the second test score to 0 to clear out the value from the previous student
+	MOV word ptr [EAX + 4], 0								;set the third test score to 0 to clear out the value from the previous student
+	
 	DisplayString strAskValues								;display the string asking which values to store
 	PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
 	INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
@@ -222,43 +210,26 @@ main PROC
 	MOV s2, EAX												;move the address of the student into s1
 	INVOKE Student_setAddr, s2, addr strTempStreet, 		;sets the address for the student corresponding to what the user typed in
 	addr zipDecimal2
-	MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can refernce the positions
+	MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can reference the positions
 	INVOKE Student_setTest, s2, word ptr [EDX], 1			;sets the first test score
 	INVOKE Student_setTest, s2, word ptr [EDX + 2], 2		;sets the second test score
 	INVOKE Student_setTest, s2, word ptr [EDX + 4], 3		;sets the third test score
-	
-	DisplayString crlf										;skip to a new line.
-	DisplayString strStudentFName							;display string showing students first name
-	INVOKE intasc32, addr strAsciiChar, 3  					;convert the student number to ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempF, 100								;get what the user typed and store into strTempF
-	DisplayString strStudentLName							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 3  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempL, 100								;get what the user typed and store into strTempL
-	DisplayString strStudentStreet							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 3  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
-	PullString strTempStreet, 200							;get what the user typed and store into strTempL
-	DisplayString strStudentZip								;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, 3  					;convert the student number into ascii
-	DisplayString strAsciiChar								;display the string showing the student number
-	DisplayString strCol									;display the string :
+		
+	setStudentInfo testArray, 3
+	MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 	PullString strTempZip, 5   								;get what the user typed and store into strTempL
 	INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
-	MOV zipDecimal3, EAX									;moves the decimal zip into dword 
-	MOV ECX, lengthof testArray 							;moves the length of array a into ECX so we can clear that amount to clear the array
-	lpClearB3:
-		MOV testArray [ECX], 0								;sets the byte at position ecx to 0 (this will exclude the first byte but thats ok because its going to be overwritten)
-	loop lpClearB3											;decrement ECX and go to the top of the loop
+	MOV zipDecimal1, EAX									;moves the decimal zip into dword 
+	
+	MOV EAX, offset testArray								;moves the address of the test array into eax
+	MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
+	MOV word ptr [EAX + 2], 0								;set the second test score to 0 to clear out the value from the previous student
+	MOV word ptr [EAX + 4], 0								;set the third test score to 0 to clear out the value from the previous student
+	
 	DisplayString strAskValues								;display the string asking which values to store
 	PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
 	INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
 	OFFSET testArray 
-	DisplayString crlf										;skip to a new line.
 	
 	INVOKE Student_2, addr strTempF, addr strTempL			;create the student 2 object passing in the name provided
 	MOV s3, EAX												;move the address of the student into s3
@@ -392,7 +363,7 @@ main PROC
 	
 ;************************************* the instructions below calls for "normal termination"	
 finished:
-	INVOKE heapDestroyHarrison						;clears the memory used by heap allocharrion
+	;INVOKE heapDestroyHarrison						;clears the memory used by heap allocharrion
 	INVOKE ExitProcess,0						 
 	PUBLIC _start
 	

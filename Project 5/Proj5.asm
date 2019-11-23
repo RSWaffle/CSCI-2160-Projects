@@ -10,37 +10,38 @@
 	.model flat					;This tells assembler that all addresses are real addresses
 	.stack 100h					;EVERY program needs to have a stack allocated
 ;******************************************************************************************
-	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  					;Executes "normal" termination
-	intasc32 PROTO NEAR32 stdcall, lpStringToHold:dword, dval:dword			;Will convert any D-Word number into ACSII characters
-	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  				;Will display ;characters until the NULL character is found
-	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
-	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
-	heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
-	extractWords PROTO Near32 stdcall, StringofChars:dword, ArrayDwords:dword
-	putch PROTO Near32 stdcall, bVal:byte
-	pausesc   PROTO stdcall													;displays the pause screen message and waits for user to press enter
-	myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword	;display the info for the project
-	getTime	  PROTO Near32 stdcall   										;returns address of time string
-	Student_1 PROTO stdcall													;reference to the first constuctor
-	Student_2 PROTO stdcall, firstN:dword, lastN:dword						;2nd student constructor
-	Student_3 PROTO stdcall, sc:dword										;copy constructor
-	Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
-	Student_setAddr PROTO stdcall, ths:dword, inAddr:dword, inZip:dword
-	Student_setTestScores PROTO stdcall, ths:dword, t1:word, t2:word, t3:word
-	Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word
-	Student_getName PROTO stdcall, ths:dword
-	Student_getTest PROTO stdcall, ths:dword, numTest:word
-	Student_getAddress PROTO stdcall, ths:dword 
-	Student_getZip PROTO stdcall, ths:dword
-	Student_getStreet PROTO stdcall, ths:dword
-	Student_findMax PROTO stdcall, ths:dword
-	Student_findMin PROTO stdcall, ths:dword
-	Student_calcAvg PROTO stdcall, ths:dword
-	Student_studentRecord PROTO stdcall, ths:dword
-	Student_equals PROTO stdcall, ths:dword, sc:dword
-	Student_setStreet PROTO stdcall, ths:dword, streetAddr:dword
-	Student_setZip PROTO stdcall, ths:dword, inZip:dword
-	Student_letterGrade PROTO stdcall, ths:dword
+	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
+	intasc32 PROTO NEAR32 stdcall, lpStringToHold:dword, dval:dword				;Will convert any D-Word number into ACSII characters
+	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword  					;Will display ;characters until the NULL character is found
+	getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword 	;Get input from user and convert. 
+	ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  					;This converts ASCII characters to the dword value
+	heapDestroyHarrison PROTO Near32 stdcall									;Destroys the memory allocated by the allocate proc 
+	extractWords PROTO Near32 stdcall, StringofChars:dword, ArrayDwords:dword	;extracts words from a string and stores into an array
+	putch PROTO Near32 stdcall, bVal:byte										;puts a char onto the screen
+	pausesc   PROTO stdcall														;displays the pause screen message and waits for user to press enter
+	myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword		;display the info for the project
+	getTime	  PROTO Near32 stdcall   											;returns address of time string
+	Student_1 PROTO stdcall														;reference to the first constuctor
+	Student_2 PROTO stdcall, firstN:dword, lastN:dword							;2nd student constructor
+	Student_3 PROTO stdcall, sc:dword											;copy constructor
+	Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword	;sets the name of a student
+	Student_setAddr PROTO stdcall, ths:dword, inAddr:dword, inZip:dword			;sets the address of a student
+	Student_setTestScores PROTO stdcall, ths:dword, t1:word, t2:word, t3:word	;sets all of the test scoroes of the student
+	Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word			;sets a specific test score
+	Student_getName PROTO stdcall, ths:dword									;gets the name of the student with address in eax
+	Student_getTest PROTO stdcall, ths:dword, numTest:word						;gets the test of a student returns in ax
+	Student_getAddress PROTO stdcall, ths:dword 								;returns the address of the student address in eax
+	Student_getZip PROTO stdcall, ths:dword										;gets the zip code of the student returns in eax
+	Student_getStreet PROTO stdcall, ths:dword									;gets the street of the student, returning address in eax
+	Student_findMax PROTO stdcall, ths:dword									;returns the max test grade
+	Student_findMin PROTO stdcall, ths:dword									;returns the lowest test grade
+	Student_calcAvg PROTO stdcall, ths:dword									;calculates the average test grade of a student passed in
+	Student_studentRecord PROTO stdcall, ths:dword								;returns a address pointing to a ascii string of the student
+	Student_equals PROTO stdcall, ths:dword, sc:dword							;returns 1 if equal, 0 if not. 
+	Student_setStreet PROTO stdcall, ths:dword, streetAddr:dword				;sets the street of a student
+	Student_setZip PROTO stdcall, ths:dword, inZip:dword						;sets the zip code foro a student
+	Student_letterGrade PROTO stdcall, ths:dword								;returns the ascii letter grade in AL
+	Student_BasicInfo PROTO stdcall, ths:dword									;returns the name and address, address in eax
 	
 ;******************************************************************************************
 COMMENT %
@@ -90,24 +91,24 @@ COMMENT %
 *@param Studentnum:byte                                                      *
 *****************************************************************************%
 setStudentInfo MACRO testArray, studentNum
-	MOV EAX, 0
+	MOV EAX, 0												;clear out eax
 	DisplayString strStudentFName							;display string showing students first name
-	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number to ascii
+	INVOKE intasc32, addr strAsciiChar, studentNum  		;convert the student number to ascii
 	DisplayString strAsciiChar								;display the string showing the student number
 	DisplayString strCol									;display the string :
 	PullString strTempF, 100								;get what the user typed and store into strTempF
 	DisplayString strStudentLName							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number into ascii
+	INVOKE intasc32, addr strAsciiChar, studentNum  		;convert the student number into ascii
 	DisplayString strAsciiChar								;display the string showing the student number
 	DisplayString strCol									;display the string :
 	PullString strTempL, 100								;get what the user typed and store into strTempL	
 	DisplayString strStudentStreet							;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number into ascii
+	INVOKE intasc32, addr strAsciiChar, studentNum  		;convert the student number into ascii
 	DisplayString strAsciiChar								;display the string showing the student number
 	DisplayString strCol									;display the string :
 	PullString strTempStreet, 200							;get what the user typed and store into strTempL
 	DisplayString strStudentZip								;ask for the students last name
-	INVOKE intasc32, addr strAsciiChar, studentNum  					;convert the student number into ascii
+	INVOKE intasc32, addr strAsciiChar, studentNum  		;convert the student number into ascii
 	DisplayString strAsciiChar								;display the string showing the student number
 	DisplayString strCol									;display the string :
 	
@@ -132,6 +133,8 @@ strMinTest byte 10, "The min grade for the student 2 is: ", 0
 strStreet byte 10, "The street for the student 2 is: ", 0
 strZip byte 10, "The zip for student 2 is: ", 0
 strLetterGrade byte 10, "The letter grade for the student 1 is: ", 0
+strEqual byte 10, "The students are equal.", 0
+strNotEqual byte 10, "The students are NOT equal", 0
 
 strCol byte ": ", 0		
 zipDecimal1 dword 0,0								;memory to hold a decimal zip	
@@ -139,10 +142,9 @@ zipDecimal2 dword 0,0								;memory to hold a decimal zip
 zipDecimal3 dword 0,0								;memory to hold a decimal zip	
 zipDecimal4 dword 0,0								;memory to hold a decimal zip	
 strAsciiChar byte 0									;memory to hold 1 ascii char
-;ALIGN
-crlf byte  10,13,0									;Null-terminated string to skip to new line
-strEmpty byte 0
-tempNum dword 0
+
+strEmpty byte 00									;null terminated string 
+tempNum dword 0										;temp dword that can be manipulated for calculation
 strTemp byte 0										;a temp byte in memory for getstring
 strProj byte 4 dup(0), 10 							;memory to hold the project number
 testArray word 50 dup (?),00						;memory to hold dwords in an array
@@ -165,7 +167,8 @@ _start:
 main PROC
 	INVOKE myInfo, addr strName, addr strSection, 5 		;display the student information, section, time, and project number. 
 	
-	setStudentInfo testArray, 1
+	;student1
+	setStudentInfo testArray, 1								;gets basic information for a student
 	MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 	PullString strTempZip, 5   								;get what the user typed and store into strTempL
 	INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
@@ -180,7 +183,7 @@ main PROC
 	PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
 	INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
 	OFFSET testArray 
-	
+		
 	INVOKE Student_1										;create the student 1 object
 	MOV s1, EAX												;move the address of the student into s1
 	INVOKE Student_setName, s1, addr strTempF, addr strTempL;sets the student name corresponding to the names passed in
@@ -190,11 +193,12 @@ main PROC
 	INVOKE Student_setTestScores, s1, word ptr [EDX], 		;sets the test scores for the student.
 	word ptr [EDX + 2], word ptr [EDX + 4]
 	
-	setStudentInfo testArray, 2
+	;student2
+	setStudentInfo testArray, 2								;gets the basic student info for the second student
 	MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 	PullString strTempZip, 5   								;get what the user typed and store into strTempL
 	INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
-	MOV zipDecimal1, EAX									;moves the decimal zip into dword 
+	MOV zipDecimal2, EAX									;moves the decimal zip into dword 
 	
 	MOV EAX, offset testArray								;moves the address of the test array into eax
 	MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
@@ -215,11 +219,12 @@ main PROC
 	INVOKE Student_setTest, s2, word ptr [EDX + 2], 2		;sets the second test score
 	INVOKE Student_setTest, s2, word ptr [EDX + 4], 3		;sets the third test score
 		
-	setStudentInfo testArray, 3
+	;student3	
+	setStudentInfo testArray, 3								;gets the basic student info for the second student
 	MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 	PullString strTempZip, 5   								;get what the user typed and store into strTempL
 	INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
-	MOV zipDecimal1, EAX									;moves the decimal zip into dword 
+	MOV zipDecimal3, EAX									;moves the decimal zip into dword 
 	
 	MOV EAX, offset testArray								;moves the address of the test array into eax
 	MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
@@ -239,9 +244,11 @@ main PROC
 	INVOKE Student_setTestScores, s3, word ptr [EDX], 		;sets the test scores for the student
 	word ptr [EDX + 2], word ptr [EDX + 4]
 	
+	;create copy
 	INVOKE Student_3, s1									;creates a copy of student 1
 	MOV s4, EAX												;moves the address into s4
 	
+	;display records
 	INVOKE Student_studentRecord, s1						;gather the student record for the student
 	DisplayString [EAX]										;display the students information
 	
@@ -253,34 +260,57 @@ main PROC
 	
 	INVOKE Student_studentRecord, s4						;gather the student record for the student
 	DisplayString [EAX]										;display the students information
+	
+	INVOKE Student_equals, s1, s2							;check to see if the two sotudents are equal
+	.IF AL == 1												;if the two students are equal
+		DisplayString strEqual								;display the equals message
+	.ELSE													;if they are not
+		DisplayString strNotEqual							;if they are not equal then, display the not equal message
+	.ENDIF													;endif
+	
+	INVOKE Student_equals, s1, s4							;check to see if the two sotudents are equal
+	.IF AL == 1												;if the two students are equal
+		DisplayString strEqual								;display the equals message
+	.ELSE													;if they are not
+		DisplayString strNotEqual							;if they are not equal then, display the not equal message
+	.ENDIF													;endif
 		
 	INVOKE pausesc											;press enter to continue
 	
 ; //1. Display s2’s test average with an appropriate message.
-	DisplayString crlf										;skip to new line
+	MOV tempNum, 10											;moves the new line character in tempnum
+	DisplayString tempNum									;skip to a new line
 	DisplayString strAverage								;display average is string
-	INVOKE Student_calcAvg, s1								;gets the students average in AX
+	INVOKE Student_calcAvg, s2								;gets the students average in AX
 	CWDE													;convert to eax
 	INVOKE intasc32, addr tempNum, EAX						;convert the average into ascii
 	DisplayString tempNum									;displays the test score
 	
 ; //2. Display s1’s 2nd test score, then display his first score, then display his 3rd score.
-	DisplayString crlf								 		;skip to a new line.
-	INVOKE Student_getTest, s1, 2							;gets the 2nd test score into AX
-	CWDE													;convert to eax	
-	DisplayString crlf										;skip to new line	
-	INVOKE intasc32, addr numbersASCII, EAX					;converts it to ascii
-	DisplayString numbersASCII								;displays the test score
-	INVOKE Student_getTest, s1, 1							;gets the first test score into AX
-	CWDE													;convert to eax				
-	DisplayString crlf										;skip to new line	
-	INVOKE intasc32, addr numbersASCII, EAX					;converts it to ascii
-	DisplayString numbersASCII								;displays the average
+	MOV tempNum, 10											;moves the new line character in tempnum
+	DisplayString tempNum									;skip to a new line
+	
+	INVOKE Student_getTest, s1, 2							;gets the test score into AX
+	CWDE													;convert the word test into dword
+	MOV EDX, EAX											;shoudnt invoke eax
+	INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+	DisplayString numbersASCII								;display the converted test onto the screen
+	
+	DisplayString tempNum									;skip to a new line
+	
+	INVOKE Student_getTest, s1, 1							;gets the test score into AX
+	CWDE													;convert the word test into dword	
+	MOV EDX, EAX											;shoudnt invoke eax
+	INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+	DisplayString numbersASCII								;display the converted test onto the screen
+	
+	DisplayString tempNum									;skip to a new line
+	
 	INVOKE Student_getTest, s1, 3							;gets the test score into AX
-	CWDE													;convert to eax
-	DisplayString crlf										;skip to new line	;
-	INVOKE intasc32, addr numbersASCII, EAX					;converts it to ascii
-	DisplayString numbersASCII								;displays the test score
+	CWDE													;convert the word test into dword	
+	MOV EDX, EAX											;shoudnt invoke eax
+	INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+	DisplayString numbersASCII								;display the converted test onto the screen
 	
 ; //3. pause
 	INVOKE pausesc											;press enter to continue
@@ -292,19 +322,23 @@ main PROC
 	INVOKE Student_setTest, s1, -65, 2						;attemps to set the 2ns test to -65
 	
 ; //6. Display s1’s 2nd test score. If your setter worked correctly, it should not have changed
+	DisplayString tempNum									;skip to a new line
+	
 	INVOKE Student_getTest, s1, 2							;get the 2nd test from the student in ax
 	CWDE													;convert AX into EAX
-	INVOKE intasc32, addr numbersASCII, EAX					;convert the test number into ascii
-	DisplayString crlf										;skip to new line
+	MOV EDX, EAX											;shoudnt invoke eax
+	INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
 	DisplayString numbersASCII								;display the test
+	DisplayString tempNum									;skip to a new line
 	
 ; //7. Change s1’s name to NOTHING, that is the empty string.
-	;INVOKE Student_setName, s1, strEmpty, strEmpty 
+	INVOKE Student_setName, s1, addr strEmpty, addr strEmpty;sets the student name to null
 	
 ; //8. Display s1’s name. It should still be the same
-	;INVOKE Student_getName, s1
-	;MOV dword ptr numbersASCII, EAX
-	;DisplayString numbersASCII
+	DisplayString tempNum									;skip to a new line
+	INVOKE Student_getName, s1								;get the  name of the student
+	MOV EDX, EAX											;moves into edx, eax because cant invoke eax
+	INVOKE putstring, EDX									;invokes putstring and passes in edx
 	
 ; //9. pause
 	INVOKE pausesc											;press enter to continue
@@ -313,49 +347,65 @@ main PROC
 	DisplayString strMaxTest								;display max test message
 	INVOKE Student_findMax, s1								;get the students max test size into ax
 	CWDE													;convert AX into EAX
-	INVOKE intasc32, addr numbersASCII, EAX					;convert the test number into ascii
+	MOV EDX, EAX											;shoudnt invoke eax
+	INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
 	DisplayString numbersASCII								;display the test
-	DisplayString crlf										;skip to new line	
+	DisplayString tempNum
 	
 ; //11. Display s2’s lowest test score with an appropriate message.
 	DisplayString strMinTest								;display min test message
 	INVOKE Student_findMin, s2								;get the students min test size into ax
 	CWDE													;convert AX into EAX
-	INVOKE intasc32, addr numbersASCII, EAX					;convert the test number into ascii
+	MOV EDX, EAX											;shoudnt invoke eax
+	INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
 	DisplayString numbersASCII								;display the test
-	DisplayString crlf										;skip to new line
+	DisplayString tempNum
 	
 ; //12. Display s1’s lettergrade with an appropriate message.
 	DisplayString strLetterGrade							;display letter grade message
 	INVOKE Student_letterGrade, s1							;call the letter grade method to get the letter grade
 	INVOKE putch, AL										;puts the letter grade onto the screen
-	DisplayString crlf										;skip to new line
+	DisplayString tempNum									;skip to new line
 	
 ; //13. Display the name in the Student object ref by s1
+	DisplayString tempNum									;skip to a new line
+	INVOKE Student_getName, s1								;get the name of the student
+	MOV EDX, EAX											;moves into edx, eax because cant invoke eax
+	INVOKE putstring, EDX									;invokes putstring and passes in edx
+	
 ; //14. pause
 	INVOKE pausesc											;press enter to continue
 	
 ; //15. Display s1’s name and address using ONE method
-
+	INVOKE Student_BasicInfo, s1							;get name and addr of the student (TECHNICALLY no restriction on me writing seperate method to do this)
+	MOV EDX, EAX											;moves into edx, eax because cant invoke eax
+	INVOKE putstring, EDX									;invokes putstring and passes in edx
+	DisplayString tempNum									;skip to a new line
+	
 ; //16. Display the street that s2 lives on with an appropriate message.
 	DisplayString strStreet									;display street message
 	INVOKE Student_getStreet, s2							;get the street address
 	MOV tempNum, EAX										;moves the address into a temp variable
 	INVOKE putstring, tempNum								;display the street of the student
-	
-	
+	MOV tempNum, 10
+	DisplayString tempNum
+		
 ; //17. Display the City that s2 lives in with an appropriate message.
 	;???????	DOES NOT EXIST									
 	
 ; //18. Display the State that s2 lives in with an appropriate message.
 	;???????	DOES NOT EXIST							
 	
-; //19. Display the Zip Code for s2 with an appropriate message.	
+; //19. Display the Zip Code for s2 with an appropriate message.
+	MOV numbersASCII, 0										;set first byte of the ascii string array to 0
 	DisplayString strZip									;display street message
-	INVOKE Student_getZip, s2	
-	MOV tempNum, EAX										;moves the zip into eax
-	INVOKE intasc32, addr strAsciiChar, addr tempNum
-	DisplayString tempNum									;display the street from the stored address
+	INVOKE Student_getZip, s2								;get the students zip codoe into 
+	.IF EAX == -1											;if the zip is null, do nothing
+	.ELSE													;if there is a zip 
+		MOV EDX, EAX										;shouldnt invoke eax
+		INVOKE intasc32, addr numbersASCII, EDX				;moves the zip into eax
+		DisplayString numbersASCII							;display the zip from the stored address
+	.ENDIF													;end if
 	
 ; //20. pause
 	INVOKE pausesc											;press enter to continue
@@ -363,7 +413,7 @@ main PROC
 	
 ;************************************* the instructions below calls for "normal termination"	
 finished:
-	;INVOKE heapDestroyHarrison						;clears the memory used by heap allocharrion
+	INVOKE heapDestroyHarrison								;clears the memory used by heap allocharrion
 	INVOKE ExitProcess,0						 
 	PUBLIC _start
 	

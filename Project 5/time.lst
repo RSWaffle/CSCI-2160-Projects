@@ -1,0 +1,452 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/22/19 20:12:50
+time.asm						     Page 1 - 1
+
+
+				;******************************************************************************************
+				;Name: 		Dr. Bailey / Ryan Shupe
+				;Program: 	time.asm
+				;Class: 	CSCI 2160-001
+				;Lab: 		proj5a
+				;Date: 		November 2, 2019
+				;Purpose:
+				;		 call the GetLocalTime method and return a string made up of the time in some sort of readable format.e.g. 
+				; Time:  November 2, 2019  at 3:37:22 PM.  The getTime method is contained in an external file
+				;  time.asm  in which it will have its own data segment. It calls the getsTime method which
+				;  actually creates the string
+				;******************************************************************************************
+					.486
+					.model flat
+				;******************************************************************************************
+					intasc32 			PROTO Near32 stdcall, lpStringToHold:dword, dval:dword
+					intasc32Comma 		PROTO Near32 stdcall, lpStringToHold:dword, dval:dword
+					GetLocalTime		PROTO Near32 stdcall, lpSystemTime:PTR SYSTEMTIME
+					getsTime			PROTO Near32 stdcall, lpStringOfSysTime:dword,lpStringTime:dword
+					getTime				PROTO Near32 stdcall   ;returns address of time string
+					appendString		PROTO Near32 stdcall, lpDestination:dword, lpSource:dword
+				;******************************************************************************************	
+ 00000010			SYSTEMTIME STRUCT
+ 00000000  0000				wYear		word	?			;holds system year
+ 00000002  0000				wMonth		word	?			;holds system month
+ 00000004  0000				wDayOfWeek	word	?			;holds system DayOfWeek
+ 00000006  0000				wDay		word	?			;holds system Day
+ 00000008  0000				wHour		word	?			;holds system Hour
+ 0000000A  0000				wMinute		word	?			;holds system minute
+ 0000000C  0000				wSecond		word	?			;holds system second
+ 0000000E  0000				wMillisecs	word	?			;holds system millisecond									
+				SYSTEMTIME ENDS	
+				;******************************************************************************************
+				COMMENT%
+				******************************************************************************
+				*Name: getBytes                                                              *
+				*Purpose:                                                                    *
+				*	  Intakes an address and counts the number of bytes into a string including*
+				*     the null char and returns the number.                                  *
+				*Date Created: 10/24/2019                                                    *
+				*Date Modified: 10/25/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*****************************************************************************%
+				getBytes MACRO String:REQ
+					LOCAL stLoop						;add a local label so the assembler doesnt yell when this is called more than once
+					LOCAL done							;add a local label so the assembler doesnt yell when this is called more than once
+					PUSH EBP							;preserves base register
+					MOV EBP, ESP						;sets a new stack frame
+					PUSH EBX							;pushes EBX to the stack to store this
+					PUSH ESI							;pushes ESI to the stack to preseve
+					MOV EBX, String						;;moves into ebx the first val in the stack that we are going to use
+					MOV ESI, 0							;sets the initial point to 0
+							stLoop:
+						CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+						JE done							;;if it is jump to finished
+						INC ESI							;if not increment esi
+						JMP stLoop						;;jump to the top of the loop and look at the next char
+					done:		
+						INC ESI							;increment esi to include the null character in the string
+						MOV EAX, ESI					;move the value of esi into eax for proper output and return
+						POP ESI								;restore original esi
+					POP EBX								;restore original ebx
+					POP EBP								;restore originla ebp
+				ENDM
+				;******************************************************************************************
+					.DATA
+				sysTime 	SYSTEMTIME			<>  				  ;SYSTEM TIME variable with attributes of the time 
+ 00000000			strTimeString  byte 200 dup(?)      				  ;contains the address of the dynamic time string
+ 00000000 0000 0000 0000	strTempString byte 50 dup(?)	    				  ;temp string that will be manipulated for output to time string
+	   0000 0000 0000
+	   0000 0000
+ 00000010  000000C8 [		strJanuary byte 10,13,9," January ", 0
+	    00
+	   ]
+ 000000D8  00000032 [		strFebruary byte 10,13,9," February ", 0
+	    00
+	   ]
+ 0000010A 0A 0D 09 20 4A	strMarch byte 10,13,9," March ", 0
+	   61 6E 75 61 72
+	   79 20 00
+ 00000117 0A 0D 09 20 46	strApril byte 10,13,9," April ", 0
+	   65 62 72 75 61
+	   72 79 20 00
+ 00000125 0A 0D 09 20 4D	strMay byte 10,13,9," May ", 0
+	   61 72 63 68 20
+	   00
+ 00000130 0A 0D 09 20 41	strJune byte 10,13,9," June ", 0
+	   70 72 69 6C 20
+	   00
+ 0000013B 0A 0D 09 20 4D	strJuly byte 10,13,9," July ", 0
+	   61 79 20 00
+ 00000144 0A 0D 09 20 4A	strAugust byte 10,13,9," August ", 0 
+	   75 6E 65 20 00
+ 0000014E 0A 0D 09 20 4A	strSeptember byte 10,13,9," September ", 0
+	   75 6C 79 20 00
+ 00000158 0A 0D 09 20 41	strOctober byte 10,13,9," October ", 0
+	   75 67 75 73 74
+	   20 00
+ 00000164 0A 0D 09 20 53	strNovember byte 10,13,9," November ", 0
+	   65 70 74 65 6D
+	   62 65 72 20 00
+ 00000173 0A 0D 09 20 4F	strDecember byte 10,13,9," December ", 0
+	   63 74 6F 62 65
+	   72 20 00
+ 00000180 0A 0D 09 20 4E	
+	   6F 76 65 6D 62
+	   65 72 20 00
+ 0000018E 0A 0D 09 20 44	strAM byte " A.M.", 0
+	   65 63 65 6D 62
+	   65 72 20 00
+				strPM byte " P.M.", 0
+ 0000019C 20 41 2E 4D 2E	strCol byte ":", 0
+	   00
+ 000001A2 20 50 2E 4D 2E	strAt byte " at ", 0
+	   00
+ 000001A8 3A 00			strComma byte ", ", 0
+ 000001AA 20 61 74 20 00	bAM byte 0											   ;byte to signify whether it is AM orPM
+ 000001AF 2C 20 00		;******************************************************************************************
+ 000001B2 00				.code
+				COMMENT%
+ 00000000			******************************************************************************
+				*Name: getTime                                                               *
+				*Purpose:                                                                    *
+				*	  gets the system time and calls the method to format it into a string   *
+				*Date Created: 10/31/2019                                                    *
+				*Date Modified: 11/02/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*****************************************************************************%
+				getTime	proc Near32 stdcall
+					INVOKE GetLocalTime, ADDR sysTime				   ;calls the get local time method and it returns the local time from the PC 
+ 00000000				INVOKE getsTime, addr sysTime, addr strTimeString  ;returns a displayable string with the date and time
+					RET
+				getTime	endp	
+ 00000019  C3			
+ 0000001A			COMMENT%
+				******************************************************************************
+				*Name: getsTime                                                              *
+				*Purpose:                                                                    *
+				*	  Gets the time and returns the address with the formatted string in it  *
+				*Date Created: 10/31/2019                                                    *
+				*Date Modified: 11/02/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param lpSystemTime:dword                                                   *
+				*@param lpTimeString:dword	                                                 *
+				*****************************************************************************%
+				
+				getsTime proc  Near32 stdcall, lpSystemTime:dword, lpTimeString:dword
+						LOCAL outputAddress:dword					   ;initializes the method with a output address local variable initialized
+ 0000001A					MOV EBX, lpSystemTime						   ;move the input values into the local values so i dont get confused
+				
+ 00000020  8B 5D 08				MOV EAX, lpTimeString						   ;moves the address of the string where the time will be displayed into eax
+						MOV outputAddress, EAX						   ;moves the address in eax into the output address
+ 00000023  8B 45 0C				MOV EDX, outputAddress						   ;moves the output address into edx
+ 00000026  89 45 FC		
+ 00000029  8B 55 FC				ASSUME EBX:ptr SYSTEMTIME					   ;assume that ebx is a systemtime so we can reference it easier
+						MOVSX EAX, word ptr [EBX].wMonth			   ;moves the month number into eax so we can compare it to the correct month
+						
+ 0000002C  0F BF 43 02				CMP EAX, 1									   ;compares the month number to 1
+						JE January									   ;if it is 1 then jump to the january section
+ 00000030  83 F8 01				CMP EAX, 2									   ;compares the month number to 2
+ 00000033  74 57				JE February									   ;if it is the month number then jump to the appropriate section
+ 00000035  83 F8 02				CMP EAX, 3									   ;compares the month number to 3
+ 00000038  74 64				JE March									   ;if it is the month number then jump to the appropriate section
+ 0000003A  83 F8 03				CMP EAX, 4									   ;compares the month number to 4
+ 0000003D  74 71				JE April									   ;if it is the month number then jump to the appropriate section
+ 0000003F  83 F8 04				CMP EAX, 5									   ;compares the month number to 5
+ 00000042  74 7E				JE May										   ;if it is the month number then jump to the appropriate section
+ 00000044  83 F8 05				CMP EAX, 6									   ;compares the month number to 6
+ 00000047  0F 84 00000084			JE June										   ;if it is the month number then jump to the appropriate section
+ 0000004D  83 F8 06				CMP EAX, 7									   ;compares the month number to 7
+ 00000050  0F 84 0000008A			JE July										   ;if it is the month number then jump to the appropriate section
+ 00000056  83 F8 07				CMP EAX, 8									   ;compares the month number to 8
+ 00000059  0F 84 00000090			JE August									   ;if it is the month number then jump to the appropriate section
+ 0000005F  83 F8 08				CMP EAX, 9									   ;compares the month number to 9
+ 00000062  0F 84 00000096			JE September								   ;if it is the month number then jump to the appropriate section
+ 00000068  83 F8 09				CMP EAX, 10									   ;compares the month number to 10
+ 0000006B  0F 84 0000009C			JE October									   ;if it is the month number then jump to the appropriate section
+ 00000071  83 F8 0A				CMP EAX, 11									   ;compares the month number to 11
+ 00000074  0F 84 000000A2			JE November									   ;if it is the month number then jump to the appropriate section
+ 0000007A  83 F8 0B				CMP EAX, 12									   ;compares the month number to 12
+ 0000007D  0F 84 000000A8			JE December									   ;if it is the month number then jump to the appropriate section
+ 00000083  83 F8 0C			
+ 00000086  0F 84 000000AE		January:	
+						INVOKE appendString, lpTimeString, addr strJanuary			;appends the january string at the beginning of the address using appendString
+ 0000008C					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					February:
+ 00000099  E9 000000AB				INVOKE appendString, lpTimeString, addr strFebruary			;appends the february string at the beginning of the address using appendString
+ 0000009E					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					March:
+ 000000AB  E9 00000099				INVOKE appendString, lpTimeString, addr strMarch			;appends the march string at the beginning of the address using appendString
+ 000000B0					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					April:
+ 000000BD  E9 00000087				INVOKE appendString, lpTimeString, addr strApril			;appends the april string at the beginning of the address using appendString
+ 000000C2					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					May:	
+ 000000CF  EB 78				INVOKE appendString, lpTimeString, addr strMay				;appends the may string at the beginning of the address using appendString
+ 000000D1					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					June:
+ 000000DE  EB 69				INVOKE appendString, lpTimeString, addr strJune				;appends the june string at the beginning of the address using appendString
+ 000000E0					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					July:
+ 000000ED  EB 5A				INVOKE appendString, lpTimeString, addr strJuly				;appends the july string at the beginning of the address using appendString
+ 000000EF					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					August:
+ 000000FC  EB 4B				INVOKE appendString, lpTimeString, addr strAugust			;appends the august string at the beginning of the address using appendString
+ 000000FE					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					September:
+ 0000010B  EB 3C				INVOKE appendString, lpTimeString, addr strSeptember		;appends the september string at the beginning of the address using appendString
+ 0000010D					JMP InsertRest												;jump to the section to insert the rest of the time into the string		
+					October:
+ 0000011A  EB 2D				INVOKE appendString, lpTimeString, addr strOctober			;appends the octiber string at the beginning of the address using appendString
+ 0000011C					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					November:
+ 00000129  EB 1E				INVOKE appendString, lpTimeString, addr strNovember			;appends the november string at the beginning of the address using appendString
+ 0000012B					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+					December:
+ 00000138  EB 0F				INVOKE appendString, lpTimeString, addr strDecember			;appends the december string at the beginning of the address using appendString
+ 0000013A					JMP InsertRest												;jump to the section to insert the rest of the time into the string
+						
+ 00000147  EB 00			InsertRest:
+						MOVSX EDX, word ptr [EBX].wDay 								;moves the day number into EDX with its sign extended to clear out the rest of the numbers
+ 00000149					INVOKE intasc32, ADDR strTempString, EDX 					;turns the day into a temp string of ascii characters
+ 00000149  0F BF 53 06				INVOKE appendString, lpTimeString, addr strTempString		;appends the day at the end of the current time string which is just the month right now
+						INVOKE appendString, lpTimeString, addr strComma			;inserts the comma string at the end of the current time string
+						
+						MOVSX EDX, word ptr [EBX].wYear								;moves the year into EDX with its sign extended to clear out the rest of the numbers
+						INVOKE intasc32, ADDR strTempString, EDX					;turns the year into a temp string of ascii characters
+ 00000172  0F BF 13				INVOKE appendString, lpTimeString, addr strTempString		;appends the day at the end of the current time string which is the month and day
+						INVOKE appendString, lpTimeString, addr strAt				;inserts the word at at the end of the current time string
+					
+						MOVSX EDX, word ptr [EBX].wHour								;moves the current hour into edx with its sign extended to clear out the rest of the numbers
+						CMP EDX, 0													;compares the hour number to 0 to check to osee if it is midnight
+ 0000019A  0F BF 53 08				JE Midnight													;if it is then jump to the midnight section
+ 0000019E  83 FA 00				CMP EDX, 24													;compares the current hour to 24 to see if it is midnight
+ 000001A1  74 38				JE Midnight													;if it is then jump to the midnight section
+ 000001A3  83 FA 18				CMP EDX, 13													;compares the hour number to 13
+ 000001A6  74 33				JGE PMConvert												;if it is greater than or equal to 13 then jump to the section that will enable the PM string
+ 000001A8  83 FA 0D				INVOKE intasc32, ADDR strTempString, EDX					;converts the hour into the ascii characters
+ 000001AB  7D 5F				INVOKE appendString, lpTimeString, addr strTempString		;appends to the end of the current time string what is in temp string 
+						INVOKE appendString, lpTimeString, addr strCol				;appends a : at the end of the current time string
+						MOV bAM, 1												;set the bAM variable to 1, so later we can display the AM message
+						JMP Minute													;jump to the minute section
+ 000001D2  C6 05 000001B2 R			
+	   01
+ 000001D9  EB 62				Midnight:
+							ADD EDX, 12												;adds 12 the the current hour to symbolize 12 AM
+ 000001DB						INVOKE intasc32, ADDR strTempString, EDX				;comverts the hour into the ascii characters
+ 000001DB  83 C2 0C					INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE appendString, lpTimeString, addr strCol			;appends a : at the end of the current time string
+							MOV bAM, 1												;set the bAM variable to 1, so later we can display the AM message
+							JMP Minute												;jump to the minute section
+ 00000203  C6 05 000001B2 R				
+	   01
+ 0000020A  EB 31				PMConvert:
+							SUB EDX, 12												;subtracts 12 from the current hour to convert it for displaying
+ 0000020C						INVOKE intasc32, ADDR strTempString, EDX				;converts the hour to the current ascii characters
+ 0000020C  83 EA 0C					INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE appendString, lpTimeString, addr strCol			;appends a : at the end of the current time string
+							MOV bAM, 0												;set the BAM byte to 1, to signify that its PM 
+							JMP Minute												;jump to the minute section 
+ 00000234  C6 05 000001B2 R				
+	   00
+ 0000023B  EB 00				Minute:
+							MOVSX EDX, word ptr [EBX].wMinute						;moves the current minute into edx
+ 0000023D						CMP EDX, 10												;compares the current minute to see if it is less than 10
+ 0000023D  0F BF 53 0A					JL formatMin											;if it is less than 10 then we need to format it to 2 digits so jump to the section
+ 00000241  83 FA 0A					INVOKE intasc32, ADDR strTempString, EDX				;if it is not, convert the current minute into ascii characters 
+ 00000244  7C 27					INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE appendString, lpTimeString, addr strCol			;appends a : at the end of the current time string
+							JMP Second												;jump to the seconds section
+						
+ 0000026B  EB 40				formatMin:
+							INVOKE intasc32, ADDR strTempString, 0					;append a 0 at the end of the current string for formattiong
+ 0000026D						INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE intasc32, ADDR strTempString, EDX				;convert the minute into the ascii characters
+							INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE appendString, lpTimeString, addr strCol			;appends a : at the end of the current time string
+							JMP Second												;jump to the seconds section
+						
+ 000002AB  EB 00				Second:
+							MOVSX EDX, word ptr [EBX].wSecond						;moves the current second into EDX
+ 000002AD						CMP EDX, 10												;compares the seconds to see if it is less than 10
+ 000002AD  0F BF 53 0C					JL formatSec											;if it is less than then we need to format it
+ 000002B1  83 FA 0A					INVOKE intasc32, ADDR strTempString, EDX				;if it is not, convert the seconds into the ascii characters
+ 000002B4  7C 27					INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE appendString, lpTimeString, addr strCol			;appends a : at the end of the current time string
+							JMP Millisecs											;jump to the milliseconds section
+						
+ 000002DB  EB 40				formatSec:
+							INVOKE intasc32, ADDR strTempString, 0					;append a 0 at the end of the current string for formattiong
+ 000002DD						INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE intasc32, ADDR strTempString, EDX				;convert the minute into the ascii characters
+							INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE appendString, lpTimeString, addr strCol			;appends a : at the end of the current time string
+							JMP Millisecs											;jump to the milliseconds section
+						
+ 0000031B  EB 00				Millisecs:
+							MOVSX EDX, word ptr [EBX].wMillisecs					;moves the current millisecond into EDX
+ 0000031D						CMP EDX, 100											;compares it to see if it is less than 100
+ 0000031D  0F BF 53 0E					JL formatMill											;if it is, then we need to format it
+ 00000321  83 FA 64					INVOKE intasc32, ADDR strTempString, EDX				;if not, then convert the current millisecond into ascii characters. 
+ 00000324  7C 1A					INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							JMP endofTime											;jump to the end of time section
+							
+ 0000033E  EB 33				formatMill:	
+							INVOKE intasc32, ADDR strTempString, 0					;append a 0 at the end of the current string for formattiong
+ 00000340						INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							INVOKE intasc32, ADDR strTempString, EDX				;convert the minute into the ascii characters
+							INVOKE appendString, lpTimeString, addr strTempString	;appends to the end of the current time string what is in temp string 
+							JMP endofTime											;jump to the end of time section
+							
+ 00000371  EB 00				endofTime:
+							CMP bAM, 1												;compares to see if the bAM byte is 1
+ 00000373						JE itsAM												;if it is 1, then it is AM
+ 00000373  80 3D 000001B2 R				INVOKE appendString, lpTimeString, addr strPM			;if not, then it is PM call appendstring and add PM at the end of the current string 
+	   01
+ 0000037A  74 0F					JMP done												;jump to done. 
+							
+ 00000389  EB 0F					itsAM:
+								INVOKE appendString, lpTimeString, addr strAM		;call appendstring and add AM at the end of the current string 
+ 0000038B							JMP done											;jump to done
+								
+ 00000398  EB 00					done:
+							ASSUME EBX: ptr nothing									;now that we are done we dont have to assume ebx is a time anymore
+ 0000039A						MOV EAX, lpTimeString									;moves into eax the address of the time string for returning	
+							RET														;return to where i was called. 
+ 0000039A  8B 45 0C		getsTime	endp
+				
+ 000003A1			
+				END
+Microsoft (R) Macro Assembler Version 6.11		    11/22/19 20:12:50
+time.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+getBytes . . . . . . . . . . . .	Proc
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+SYSTEMTIME . . . . . . . . . . .	 00000010
+  wYear  . . . . . . . . . . . .	 00000000	 Word
+  wMonth . . . . . . . . . . . .	 00000002	 Word
+  wDayOfWeek . . . . . . . . . .	 00000004	 Word
+  wDay . . . . . . . . . . . . .	 00000006	 Word
+  wHour  . . . . . . . . . . . .	 00000008	 Word
+  wMinute  . . . . . . . . . . .	 0000000A	 Word
+  wSecond  . . . . . . . . . . .	 0000000C	 Word
+  wMillisecs . . . . . . . . . .	 0000000E	 Word
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001B3 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000003A1 DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+GetLocalTime . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+appendString . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+getTime  . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001A Public STDCALL
+getsTime . . . . . . . . . . . .	P Near	 0000001A _TEXT	Length= 0000039B Public STDCALL
+  lpSystemTime . . . . . . . . .	DWord	 bp + 00000008
+  lpTimeString . . . . . . . . .	DWord	 bp + 0000000C
+  outputAddress  . . . . . . . .	DWord	 bp - 00000004
+  January  . . . . . . . . . . .	L Near	 0000008C _TEXT	
+  February . . . . . . . . . . .	L Near	 0000009E _TEXT	
+  March  . . . . . . . . . . . .	L Near	 000000B0 _TEXT	
+  April  . . . . . . . . . . . .	L Near	 000000C2 _TEXT	
+  May  . . . . . . . . . . . . .	L Near	 000000D1 _TEXT	
+  June . . . . . . . . . . . . .	L Near	 000000E0 _TEXT	
+  July . . . . . . . . . . . . .	L Near	 000000EF _TEXT	
+  August . . . . . . . . . . . .	L Near	 000000FE _TEXT	
+  September  . . . . . . . . . .	L Near	 0000010D _TEXT	
+  October  . . . . . . . . . . .	L Near	 0000011C _TEXT	
+  November . . . . . . . . . . .	L Near	 0000012B _TEXT	
+  December . . . . . . . . . . .	L Near	 0000013A _TEXT	
+  InsertRest . . . . . . . . . .	L Near	 00000149 _TEXT	
+  Midnight . . . . . . . . . . .	L Near	 000001DB _TEXT	
+  PMConvert  . . . . . . . . . .	L Near	 0000020C _TEXT	
+  Minute . . . . . . . . . . . .	L Near	 0000023D _TEXT	
+  formatMin  . . . . . . . . . .	L Near	 0000026D _TEXT	
+  Second . . . . . . . . . . . .	L Near	 000002AD _TEXT	
+  formatSec  . . . . . . . . . .	L Near	 000002DD _TEXT	
+  Millisecs  . . . . . . . . . .	L Near	 0000031D _TEXT	
+  formatMill . . . . . . . . . .	L Near	 00000340 _TEXT	
+  endofTime  . . . . . . . . . .	L Near	 00000373 _TEXT	
+  itsAM  . . . . . . . . . . . .	L Near	 0000038B _TEXT	
+  done . . . . . . . . . . . . .	L Near	 0000039A _TEXT	
+intasc32Comma  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+bAM  . . . . . . . . . . . . . .	Byte	 000001B2 _DATA	
+strAM  . . . . . . . . . . . . .	Byte	 0000019C _DATA	
+strApril . . . . . . . . . . . .	Byte	 00000130 _DATA	
+strAt  . . . . . . . . . . . . .	Byte	 000001AA _DATA	
+strAugust  . . . . . . . . . . .	Byte	 00000158 _DATA	
+strCol . . . . . . . . . . . . .	Byte	 000001A8 _DATA	
+strComma . . . . . . . . . . . .	Byte	 000001AF _DATA	
+strDecember  . . . . . . . . . .	Byte	 0000018E _DATA	
+strFebruary  . . . . . . . . . .	Byte	 00000117 _DATA	
+strJanuary . . . . . . . . . . .	Byte	 0000010A _DATA	
+strJuly  . . . . . . . . . . . .	Byte	 0000014E _DATA	
+strJune  . . . . . . . . . . . .	Byte	 00000144 _DATA	
+strMarch . . . . . . . . . . . .	Byte	 00000125 _DATA	
+strMay . . . . . . . . . . . . .	Byte	 0000013B _DATA	
+strNovember  . . . . . . . . . .	Byte	 00000180 _DATA	
+strOctober . . . . . . . . . . .	Byte	 00000173 _DATA	
+strPM  . . . . . . . . . . . . .	Byte	 000001A2 _DATA	
+strSeptember . . . . . . . . . .	Byte	 00000164 _DATA	
+strTempString  . . . . . . . . .	Byte	 000000D8 _DATA	
+strTimeString  . . . . . . . . .	Byte	 00000010 _DATA	
+sysTime  . . . . . . . . . . . .	SYSTEMTIME  00000000 _DATA	
+
+	   0 Warnings
+	   0 Errors

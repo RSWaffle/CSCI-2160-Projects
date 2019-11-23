@@ -12,20 +12,21 @@
 	.stack 100h					;EVERY program needs to have a stack allocated
 	.listall
 ;******************************************************************************************
-memoryallocBailey PROTO Near32 stdcall, dSize:DWORD
-appendString	  PROTO Near32 stdcall, lpDestination:dword, lpSource:dword
-intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword
-Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword
-Student_getZip PROTO stdcall, ths:dword
-Student_getName PROTO stdcall, ths:dword
-Student_getStreet PROTO stdcall, ths:dword
-getBytes PROTO stdcall, String1:dword
-Student_calcAvg PROTO stdcall, ths:dword
-Student_letterGrade PROTO stdcall, ths:dword
-Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word
-Student_getTest PROTO stdcall, ths:dword, numTest:word
-Student_setStreet PROTO stdcall, ths:dword, streetAddr:dword
-Student_setZip PROTO stdcall, ths:dword, inZip:dword
+memoryallocBailey PROTO Near32 stdcall, dSize:DWORD							;dynamically allocate bytes in memory
+appendString	  PROTO Near32 stdcall, lpDestination:dword, lpSource:dword	;appends a strring to the end of an existing one
+intasc32 proto Near32 stdcall, lpStringToHold:dword, dval:dword				;converts ints to ascii format
+Student_setName PROTO stdcall, ths:dword, addrFirst:dword, addrLast:dword	;sets the name ofo a student
+Student_getZip PROTO stdcall, ths:dword										;returns the zip of a student
+Student_getName PROTO stdcall, ths:dword									;returns the name of a student
+Student_getStreet PROTO stdcall, ths:dword									;returns the street 
+getBytes PROTO stdcall, String1:dword										;returns the number of bytes in a string
+Student_calcAvg PROTO stdcall, ths:dword									;calculates the average of the test scores and returns it
+Student_letterGrade PROTO stdcall, ths:dword								;returns a letter grade corresponding to the test average
+Student_setTest PROTO stdcall, ths:dword, score:word, numTest:word			;sets a test for a student
+Student_getTest PROTO stdcall, ths:dword, numTest:word						;returns a test for a student
+Student_setStreet PROTO stdcall, ths:dword, streetAddr:dword				;sets the street for a student
+Student_setZip PROTO stdcall, ths:dword, inZip:dword						;sets the zip code for a student
+Student_BasicInfo PROTO stdcall, ths:dword									;returns the name and address of a student 
 ;******************************************************************************************	
 Student STRUCT 
 	last byte 100 dup(0)							;space to hold the last name of the student
@@ -138,8 +139,16 @@ Student_setName PROC stdcall uses EBX, ths:dword, addrFirst:dword, addrLast:dwor
 	LOCAL bbyte:byte									;use local directive
 	MOV EBX, ths										;moves the address of the student into ebx.
 	ASSUME EBX:PTR Student								;assumes that ebx is a student pointer so we dont have to type that every line
-	INVOKE appendString, addr [EBX].first, addrFirst	;appends the first name string sent in onto the correct memory location	
-	INVOKE appendString, addr [EBX].last, addrLast		;appends the last name string sent in ontto the correct memory location	
+	MOV EAX, addrFirst									;moves the address of the first name into eax 
+	.IF byte ptr [EAX] == 0								;if the first name is null
+	.ELSE												;if it is not null
+		INVOKE appendString, addr [EBX].first, addrFirst;appends the first name string sent in onto the correct memory location	
+		MOV EAX, addrLast								;moves the address of the last name into eax so we can check it
+		.IF byte ptr [EAX] == 0							;if the last name is null
+		.ELSE											;if the last name is not null
+			INVOKE appendString, addr [EBX].last, addrLast;appends the last name string sent in ontto the correct memory location	
+		.ENDIF											;endif
+	.ENDIF												;endif
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 												;return to where I was called, cleaning 12 bytes.
 Student_setName ENDP
@@ -426,7 +435,7 @@ Student_getZip PROC stdcall uses ebx edx, ths:dword
 	ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
 	MOV EAX, [EBX].zip									;moves the address of the zip into EAX
 	.IF EAX == 00										;if zip is null
-		MOV EAX, -1										;move -1 into eax
+		MOV EAX, -1										;if it is null than put -1 in eax
 	.ELSE												;if it is not
 		MOV EDX, [EAX]									;moves the value at eax into edx
 		MOV EAX, EDX									;moves back to eax for output
@@ -543,13 +552,7 @@ Student_studentRecord PROC stdcall uses EBX EDX EDI ESI, ths:dword
 	ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
 	INVOKE memoryallocBailey, 400						;holds enough space to have the record...
 	MOV EDI, EAX										;moves the address given back into edi
-	INVOKE Student_getName, ths							;gets the name of the student, address is in eax
-	MOV EDX, EAX										;stores this address into edx
-	INVOKE appendString, EDI, addr nextLine				;appends the new line character
-	INVOKE appendString, EDI, addr nextLine				;appends the new line character
-	INVOKE appendString, EDI, EDX						;appends the name onto the main string
-	INVOKE appendString, EDI, addr nextLine				;appends the new line character
-	INVOKE Student_getAddress, ths						;gets the address of the student, address is in eax
+	INVOKE Student_BasicInfo, ths						;gets the name of the student, address is in eax
 	MOV EDX, EAX										;moves the address into edx
 	INVOKE appendString, EDI, EDX						;appends the address of the student at the end of the main string
 	INVOKE appendString, EDI, addr nextLine				;appends the new line character
@@ -595,6 +598,38 @@ Student_studentRecord PROC stdcall uses EBX EDX EDI ESI, ths:dword
 	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
 	RET 												;returns to where I was called, cleaning 8 bytes.
 Student_studentRecord ENDP
+
+COMMENT%
+******************************************************************************
+*Name: BasicInfo                                                        	 *
+*Purpose:                                                                    *
+*	  sends back the students name and address            					 *
+*                                                                            *
+*Date Created: 11/21/2019                                                    *
+*Date Modified: 11/21/2019                                                   *
+*                                                                            *
+*@param ths:dword                                                            *
+*@returns outAddr:word                                                       *  
+*****************************************************************************%
+Student_BasicInfo PROC stdcall uses EBX EDX EDI, ths:dword
+	LOCAL bbyte:byte									;use local directive
+	MOV EBX, ths										;moves the address of the student into ebx
+	ASSUME EBX:PTR Student								;assumes ebx is a student so we dont have to type it later
+	INVOKE memoryallocBailey, 200						;holds enough space to have the record...
+	MOV EDI, EAX										;moves the address given back into edi
+	INVOKE Student_getName, ths							;gets the name of the student, address is in eax
+	MOV EDX, EAX										;stores this address into edx
+	INVOKE appendString, EDI, addr nextLine				;appends the new line character
+	INVOKE appendString, EDI, addr nextLine				;appends the new line character
+	INVOKE appendString, EDI, EDX						;appends the name onto the main string
+	INVOKE appendString, EDI, addr nextLine				;appends the new line character
+	INVOKE Student_getAddress, ths						;gets the address of the student, address is in eax
+	MOV EDX, EAX										;moves the address into edx
+	INVOKE appendString, EDI, EDX						;appends the address of the student at the end of the main string
+	MOV EAX, EDI										;moves the address of the main string into eax
+	ASSUME EBX:ptr nothing								;ebx does not point to a student anymore
+	RET 												;returns to where I was called, cleaning 8 bytes.
+Student_BasicInfo ENDP
 
 COMMENT%
 ******************************************************************************

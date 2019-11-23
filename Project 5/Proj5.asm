@@ -391,10 +391,10 @@ main PROC
 	DisplayString tempNum
 		
 ; //17. Display the City that s2 lives in with an appropriate message.
-	;???????	DOES NOT EXIST									
+	;???????	CITY DOES NOT EXIST									
 	
 ; //18. Display the State that s2 lives in with an appropriate message.
-	;???????	DOES NOT EXIST							
+	;???????	STATE DOES NOT EXIST							
 	
 ; //19. Display the Zip Code for s2 with an appropriate message.
 	MOV numbersASCII, 0										;set first byte of the ascii string array to 0

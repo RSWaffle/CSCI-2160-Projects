@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/23/19 01:20:59
+Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:32
 student.asm						     Page 1 - 1
 
 
@@ -1254,7 +1254,7 @@ student.asm						     Page 1 - 1
 				*@returns outResult:byte                                                     *  
 				*****************************************************************************%
 				Student_equals PROC stdcall uses EBX ECX EDX, ths:dword, sc:dword
-					LOCAL bbyte:byte									;use local directive
+				LOCAL bbyte:byte										;use local directive
  0000064E			MOV ECX, 0												;moves 0 into ecx, to initialize
 				INVOKE Student_getTest, ths, 1							;get the first students test score
  0000064E  55		   *	    push   ebp
@@ -1327,7 +1327,7 @@ student.asm						     Page 1 - 1
  000006C3  C9		   *	    leave  
  000006C4  C2 0008	   *	    ret    00008h
  000006C7
-Microsoft (R) Macro Assembler Version 6.11		    11/23/19 01:20:59
+Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:32
 student.asm						     Symbols 2 - 1
 
 

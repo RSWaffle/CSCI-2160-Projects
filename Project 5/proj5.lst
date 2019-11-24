@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/23/19 01:33:16
+Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:29
 proj5.asm						     Page 1 - 1
 
 
@@ -515,15 +515,15 @@ proj5.asm						     Page 1 - 1
 					INVOKE Student_getStreet, s2							;get the street address
 					MOV tempNum, EAX										;moves the address into a temp variable
 					INVOKE putstring, tempNum								;display the street of the student
-					MOV tempNum, 10
- 000007B8  A3 0000023F R		DisplayString tempNum
+					MOV tempNum, 10											;moves the new line character in tempnum
+ 000007B8  A3 0000023F R		DisplayString tempNum									;skip to a new line
 						
  000007C8  C7 05 0000023F R	; //17. Display the City that s2 lives in with an appropriate message.
 	   0000000A
-					;???????	DOES NOT EXIST									
+					;???????	CITY DOES NOT EXIST									
 					
 				; //18. Display the State that s2 lives in with an appropriate message.
-					;???????	DOES NOT EXIST							
+					;???????	STATE DOES NOT EXIST							
 					
 				; //19. Display the Zip Code for s2 with an appropriate message.
 					MOV numbersASCII, 0										;set first byte of the ascii string array to 0
@@ -595,7 +595,7 @@ proj5.asm						     Page 1 - 1
 				
 					END												;Signals assembler that there are no instructions after this statement
  0000089F
-Microsoft (R) Macro Assembler Version 6.11		    11/23/19 01:33:16
+Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:29
 proj5.asm						     Symbols 2 - 1
 
 

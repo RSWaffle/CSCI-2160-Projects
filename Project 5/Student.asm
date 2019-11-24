@@ -678,7 +678,7 @@ COMMENT%
 *@returns outResult:byte                                                     *  
 *****************************************************************************%
 Student_equals PROC stdcall uses EBX ECX EDX, ths:dword, sc:dword
-	LOCAL bbyte:byte									;use local directive
+LOCAL bbyte:byte										;use local directive
 MOV ECX, 0												;moves 0 into ecx, to initialize
 INVOKE Student_getTest, ths, 1							;get the first students test score
 MOV DX, AX												;move the test score into edx

@@ -387,8 +387,8 @@ main PROC
 	INVOKE Student_getStreet, s2							;get the street address
 	MOV tempNum, EAX										;moves the address into a temp variable
 	INVOKE putstring, tempNum								;display the street of the student
-	MOV tempNum, 10
-	DisplayString tempNum
+	MOV tempNum, 10											;moves the new line character in tempnum
+	DisplayString tempNum									;skip to a new line
 		
 ; //17. Display the City that s2 lives in with an appropriate message.
 	;???????	CITY DOES NOT EXIST									

@@ -1,4 +1,8 @@
+<<<<<<< HEAD:Project 5/Proj5.lst
+Microsoft (R) Macro Assembler Version 6.11		    11/26/19 14:48:36
+=======
 Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:29
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 proj5.asm						     Page 1 - 1
 
 
@@ -23,7 +27,11 @@ proj5.asm						     Page 1 - 1
 					extractWords PROTO Near32 stdcall, StringofChars:dword, ArrayDwords:dword	;extracts words from a string and stores into an array
 					putch PROTO Near32 stdcall, bVal:byte										;puts a char onto the screen
 					pausesc   PROTO stdcall														;displays the pause screen message and waits for user to press enter
+<<<<<<< HEAD:Project 5/Proj5.lst
+					myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword, sTime:dword;display the info for the project
+=======
 					myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword		;display the info for the project
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					getTime	  PROTO Near32 stdcall   											;returns address of time string
 					Student_1 PROTO stdcall														;reference to the first constuctor
 					Student_2 PROTO stdcall, firstN:dword, lastN:dword							;2nd student constructor
@@ -243,6 +251,44 @@ proj5.asm						     Page 1 - 1
 	   00000000
  00000225 00000000		strAsciiChar byte 0									;memory to hold 1 ascii char
 	   00000000
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 0000022D 00000000		strTime dword 0
+	   00000000
+ 00000235 00000000		
+	   00000000
+ 0000023D 00			strEmpty byte 00									;null terminated string 
+ 0000023E 00000000		tempNum dword 0										;temp dword that can be manipulated for calculation
+				strTemp byte 0										;a temp byte in memory for getstring
+ 00000242 00			strProj byte 4 dup(0), 10 							;memory to hold the project number
+ 00000243 00000000		testArray word 50 dup (?),00						;memory to hold dwords in an array
+ 00000247 00			numbersASCII byte 50 dup (?), 00					;memory to hold the ascii numbers
+ 00000248  00000004 [		strTempF byte 100 dup (0),00						;memory that can hold a first name
+	    00
+	   ] 0A
+ 0000024D  00000032 [		strTempL byte 100 dup (0),00						;memory that can hold a last name
+	    0000
+	   ] 0000
+ 000002B3  00000032 [		strTempStreet byte 200 dup (0),00					;memory that can hold a street
+	    00
+	   ] 00
+ 000002E6  00000064 [		strTempZip byte 5 dup (0),00						;memory that can hold a zip	
+	    00
+	   ] 00
+ 0000034B  00000064 [		
+	    00
+	   ] 00
+ 000003B0  000000C8 [		s1 dword ?											;reference variable for student 1
+	    00
+	   ] 00
+ 00000479  00000005 [		s2 dword ?											;reference variable for student 2
+	    00
+	   ] 00
+				s3 dword ?											;reference variable for student 3
+ 0000047F 00000000		s4 dword ?											;reference variable for student 4
+ 00000483 00000000		;******************************************************************************************
+ 00000487 00000000		.CODE
+ 0000048B 00000000		
+=======
  0000022D 00000000		
 	   00000000
  00000235 00000000		strEmpty byte 00									;null terminated string 
@@ -278,17 +324,40 @@ proj5.asm						     Page 1 - 1
  0000047F 00000000		;******************************************************************************************
  00000483 00000000		.CODE
  00000487 00000000		
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				_start:
  00000000				MOV EAX, 0												;Statement to help in debugging
 				
  00000000			main PROC
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000000  B8 00000000			INVOKE getTime											;call the get time method to get the current system time and construct a string
+					MOV strTime, EAX										;display the current time thats address is in eax
+ 00000005 00000005			INVOKE myInfo, addr strName, addr strSection, 5 , 
+					addr strTime											;display the student information, section, time, and project number with the time. 
+ 0000000A  A3 0000023E R		
+					;student1
+=======
  00000000  B8 00000000			INVOKE myInfo, addr strName, addr strSection, 5 		;display the student information, section, time, and project number. 
 					
  00000005 00000005			;student1
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					setStudentInfo testArray, 1								;gets basic information for a student
 					MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 					PullString strTempZip, 5   								;get what the user typed and store into strTempL
 					INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000025  B8 00000000	     1		MOV EAX, 0												;clear out eax
+ 000000F9  B8 00000000			MOV zipDecimal1, EAX									;moves the decimal zip into dword 
+					
+					MOV EAX, offset testArray								;moves the address of the test array into eax
+ 00000114  A3 0000021D R		MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
+					MOV word ptr [EAX + 2], 0								;set the second test score to 0 to clear out the value from the previous student
+ 00000119  B8 0000024D R		MOV word ptr [EAX + 4], 0								;set the third test score to 0 to clear out the value from the previous student
+ 0000011E  66| C7 00 0000		
+ 00000123  66| C7 40 02			DisplayString strAskValues								;display the string asking which values to store
+	   0000
+ 00000129  66| C7 40 04			PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
+=======
  00000016  B8 00000000	     1		MOV EAX, 0												;clear out eax
  000000EA  B8 00000000			MOV zipDecimal1, EAX									;moves the decimal zip into dword 
 					
@@ -300,10 +369,22 @@ proj5.asm						     Page 1 - 1
  00000114  66| C7 40 02			DisplayString strAskValues								;display the string asking which values to store
 	   0000
  0000011A  66| C7 40 04			PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   0000
 					INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
 					OFFSET testArray 
 						
+<<<<<<< HEAD:Project 5/Proj5.lst
+					INVOKE Student_1										;create the student 1 object
+					MOV s1, EAX												;move the address of the student into s1
+					INVOKE Student_setName, s1, addr strTempF, addr strTempL;sets the student name corresponding to the names passed in
+					INVOKE Student_setAddr, s1, addr strTempStreet, 		;sets the address for the student corresponding to what the user typed in
+ 00000159  A3 0000047F R		addr zipDecimal1
+					MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can reference the positions
+					INVOKE Student_setTestScores, s1, word ptr [EDX], 		;sets the test scores for the student.
+					word ptr [EDX + 2], word ptr [EDX + 4]
+ 00000188  BA 0000024D R		
+=======
 	INVOKE Student_1										;create the student 1 object
 					MOV s1, EAX												;move the address of the student into s1
 					INVOKE Student_setName, s1, addr strTempF, addr strTempL;sets the student name corresponding to the names passed in
@@ -313,11 +394,25 @@ proj5.asm						     Page 1 - 1
 					INVOKE Student_setTestScores, s1, word ptr [EDX], 		;sets the test scores for the student.
 					word ptr [EDX + 2], word ptr [EDX + 4]
  00000179  BA 00000249 R		
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					;student2
 					setStudentInfo testArray, 2								;gets the basic student info for the second student
 					MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 					PullString strTempZip, 5   								;get what the user typed and store into strTempL
 					INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000001AC  B8 00000000	     1		MOV EAX, 0												;clear out eax
+ 00000280  B8 00000000			MOV zipDecimal2, EAX									;moves the decimal zip into dword 
+					
+					MOV EAX, offset testArray								;moves the address of the test array into eax
+ 0000029B  A3 00000225 R		MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
+					MOV word ptr [EAX + 2], 0								;set the second test score to 0 to clear out the value from the previous student
+ 000002A0  B8 0000024D R		MOV word ptr [EAX + 4], 0								;set the third test score to 0 to clear out the value from the previous student
+ 000002A5  66| C7 00 0000		
+ 000002AA  66| C7 40 02			DisplayString strAskValues								;display the string asking which values to store
+	   0000
+ 000002B0  66| C7 40 04			PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
+=======
  0000019D  B8 00000000	     1		MOV EAX, 0												;clear out eax
  00000271  B8 00000000			MOV zipDecimal2, EAX									;moves the decimal zip into dword 
 					
@@ -329,6 +424,7 @@ proj5.asm						     Page 1 - 1
  0000029B  66| C7 40 02			DisplayString strAskValues								;display the string asking which values to store
 	   0000
  000002A1  66| C7 40 04			PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   0000
 					INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
 					OFFSET testArray 
@@ -337,16 +433,36 @@ proj5.asm						     Page 1 - 1
 					MOV s2, EAX												;move the address of the student into s1
 					INVOKE Student_setAddr, s2, addr strTempStreet, 		;sets the address for the student corresponding to what the user typed in
 					addr zipDecimal2
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000002EA  A3 00000483 R		MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can reference the positions
+					INVOKE Student_setTest, s2, word ptr [EDX], 1			;sets the first test score
+					INVOKE Student_setTest, s2, word ptr [EDX + 2], 2		;sets the second test score
+ 00000304  BA 0000024D R		INVOKE Student_setTest, s2, word ptr [EDX + 4], 3		;sets the third test score
+=======
  000002DB  A3 0000047F R		MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can reference the positions
 					INVOKE Student_setTest, s2, word ptr [EDX], 1			;sets the first test score
 					INVOKE Student_setTest, s2, word ptr [EDX + 2], 2		;sets the second test score
  000002F5  BA 00000249 R		INVOKE Student_setTest, s2, word ptr [EDX + 4], 3		;sets the third test score
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 						
 					;student3	
 					setStudentInfo testArray, 3								;gets the basic student info for the second student
 					MOV EAX, 0												;initialize the zip code to 0, so it doesnt pull a random value if the user enters nothing
 					PullString strTempZip, 5   								;get what the user typed and store into strTempL
 					INVOKE ascint32, addr strTempZip						;converts the zip into decimal 
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000344  B8 00000000	     1		MOV EAX, 0												;clear out eax
+ 00000418  B8 00000000			MOV zipDecimal3, EAX									;moves the decimal zip into dword 
+					
+					MOV EAX, offset testArray								;moves the address of the test array into eax
+ 00000433  A3 0000022D R		MOV word ptr [EAX], 0									;set the first test score to 0 to clear out the value from the previous student
+					MOV word ptr [EAX + 2], 0								;set the second test score to 0 to clear out the value from the previous student
+ 00000438  B8 0000024D R		MOV word ptr [EAX + 4], 0								;set the third test score to 0 to clear out the value from the previous student
+ 0000043D  66| C7 00 0000		
+ 00000442  66| C7 40 02			DisplayString strAskValues								;display the string asking which values to store
+	   0000
+ 00000448  66| C7 40 04			PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
+=======
  00000335  B8 00000000	     1		MOV EAX, 0												;clear out eax
  00000409  B8 00000000			MOV zipDecimal3, EAX									;moves the decimal zip into dword 
 					
@@ -358,6 +474,7 @@ proj5.asm						     Page 1 - 1
  00000433  66| C7 40 02			DisplayString strAskValues								;display the string asking which values to store
 	   0000
  00000439  66| C7 40 04			PullString numbersASCII, 50								;get what the user typed and store into numbersASCII			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   0000
 					INVOKE extractWords, OFFSET numbersASCII, 				;call the extract words function so we have can convert our test scores into actual decimal numbers
 					OFFSET testArray 
@@ -366,16 +483,27 @@ proj5.asm						     Page 1 - 1
 					MOV s3, EAX												;move the address of the student into s3
 					INVOKE Student_setAddr, s3, addr strTempStreet, 		;sets the address for the student corresponding to what the user typed in
 					addr zipDecimal3
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000482  A3 00000487 R		MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can refernce the positions
+					INVOKE Student_setTestScores, s3, word ptr [EDX], 		;sets the test scores for the student
+					word ptr [EDX + 2], word ptr [EDX + 4]
+ 0000049C  BA 0000024D R		
+=======
  00000473  A3 00000483 R		MOV EDX, offset testArray								;moves the address of the 3 tests array into edx so we can refernce the positions
 					INVOKE Student_setTestScores, s3, word ptr [EDX], 		;sets the test scores for the student
 					word ptr [EDX + 2], word ptr [EDX + 4]
  0000048D  BA 00000249 R		
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					;create copy
 					INVOKE Student_3, s1									;creates a copy of student 1
 					MOV s4, EAX												;moves the address into s4
 					
 					;display records
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000004CB  A3 0000048B R		INVOKE Student_studentRecord, s1						;gather the student record for the student
+=======
  000004BC  A3 00000487 R		INVOKE Student_studentRecord, s1						;gather the student record for the student
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					DisplayString [EAX]										;display the students information
 					
 					INVOKE Student_studentRecord, s2						;gather the student record for the student
@@ -407,39 +535,66 @@ proj5.asm						     Page 1 - 1
 					MOV tempNum, 10											;moves the new line character in tempnum
 					DisplayString tempNum									;skip to a new line
 					DisplayString strAverage								;display average is string
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000577  C7 05 00000243 R		INVOKE Student_calcAvg, s2								;gets the students average in AX
+=======
  00000568  C7 05 0000023F R		INVOKE Student_calcAvg, s2								;gets the students average in AX
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   0000000A
 					CWDE													;convert to eax
 					INVOKE intasc32, addr tempNum, EAX						;convert the average into ascii
 					DisplayString tempNum									;displays the test score
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000005A0  98				
+=======
  00000591  98				
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				; //2. Display s1’s 2nd test score, then display his first score, then display his 3rd score.
 					MOV tempNum, 10											;moves the new line character in tempnum
 					DisplayString tempNum									;skip to a new line
 					
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000005B6  C7 05 00000243 R		INVOKE Student_getTest, s1, 2							;gets the test score into AX
+=======
  000005A7  C7 05 0000023F R		INVOKE Student_getTest, s1, 2							;gets the test score into AX
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   0000000A
 					CWDE													;convert the word test into dword
 					MOV EDX, EAX											;shoudnt invoke eax
 					INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000005D7  98				DisplayString numbersASCII								;display the converted test onto the screen
+ 000005D8  8B D0			
+=======
  000005C8  98				DisplayString numbersASCII								;display the converted test onto the screen
  000005C9  8B D0			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					DisplayString tempNum									;skip to a new line
 					
 					INVOKE Student_getTest, s1, 1							;gets the test score into AX
 					CWDE													;convert the word test into dword	
 					MOV EDX, EAX											;shoudnt invoke eax
 					INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000606  98				DisplayString numbersASCII								;display the converted test onto the screen
+ 00000607  8B D0			
+=======
  000005F7  98				DisplayString numbersASCII								;display the converted test onto the screen
  000005F8  8B D0			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					DisplayString tempNum									;skip to a new line
 					
 					INVOKE Student_getTest, s1, 3							;gets the test score into AX
 					CWDE													;convert the word test into dword	
 					MOV EDX, EAX											;shoudnt invoke eax
 					INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000635  98				DisplayString numbersASCII								;display the converted test onto the screen
+ 00000636  8B D0			
+=======
  00000626  98				DisplayString numbersASCII								;display the converted test onto the screen
  00000627  8B D0			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				; //3. pause
 					INVOKE pausesc											;press enter to continue
 					
@@ -456,8 +611,13 @@ proj5.asm						     Page 1 - 1
 					CWDE													;convert AX into EAX
 					MOV EDX, EAX											;shoudnt invoke eax
 					INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000687  98				DisplayString numbersASCII								;display the test
+ 00000688  8B D0			DisplayString tempNum									;skip to a new line
+=======
  00000678  98				DisplayString numbersASCII								;display the test
  00000679  8B D0			DisplayString tempNum									;skip to a new line
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					
 				; //7. Change s1’s name to NOTHING, that is the empty string.
 					INVOKE Student_setName, s1, addr strEmpty, addr strEmpty;sets the student name to null
@@ -468,7 +628,11 @@ proj5.asm						     Page 1 - 1
 					MOV EDX, EAX											;moves into edx, eax because cant invoke eax
 					INVOKE putstring, EDX									;invokes putstring and passes in edx
 					
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000006D3  8B D0		; //9. pause
+=======
  000006C4  8B D0		; //9. pause
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					INVOKE pausesc											;press enter to continue
 					
 				; //10. Display s1's highest test score with an appropriate message
@@ -477,8 +641,13 @@ proj5.asm						     Page 1 - 1
 					CWDE													;convert AX into EAX
 					MOV EDX, EAX											;shoudnt invoke eax
 					INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000006F5  98				DisplayString numbersASCII								;display the test
+ 000006F6  8B D0			DisplayString tempNum
+=======
  000006E6  98				DisplayString numbersASCII								;display the test
  000006E7  8B D0			DisplayString tempNum
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					
 				; //11. Display s2’s lowest test score with an appropriate message.
 					DisplayString strMinTest								;display min test message
@@ -486,8 +655,13 @@ proj5.asm						     Page 1 - 1
 					CWDE													;convert AX into EAX
 					MOV EDX, EAX											;shoudnt invoke eax
 					INVOKE intasc32, addr numbersASCII, EDX					;convert the test number into ascii
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 0000072C  98				DisplayString numbersASCII								;display the test
+ 0000072D  8B D0			DisplayString tempNum
+=======
  0000071D  98				DisplayString numbersASCII								;display the test
  0000071E  8B D0			DisplayString tempNum
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					
 				; //12. Display s1’s lettergrade with an appropriate message.
 					DisplayString strLetterGrade							;display letter grade message
@@ -501,7 +675,11 @@ proj5.asm						     Page 1 - 1
 					MOV EDX, EAX											;moves into edx, eax because cant invoke eax
 					INVOKE putstring, EDX									;invokes putstring and passes in edx
 					
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000788  8B D0		; //14. pause
+=======
  00000779  8B D0		; //14. pause
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					INVOKE pausesc											;press enter to continue
 					
 				; //15. Display s1’s name and address using ONE method
@@ -509,16 +687,26 @@ proj5.asm						     Page 1 - 1
 					MOV EDX, EAX											;moves into edx, eax because cant invoke eax
 					INVOKE putstring, EDX									;invokes putstring and passes in edx
 					DisplayString tempNum									;skip to a new line
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000007A0  8B D0			
+=======
  00000791  8B D0			
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				; //16. Display the street that s2 lives on with an appropriate message.
 					DisplayString strStreet									;display street message
 					INVOKE Student_getStreet, s2							;get the street address
 					MOV tempNum, EAX										;moves the address into a temp variable
 					INVOKE putstring, tempNum								;display the street of the student
 					MOV tempNum, 10											;moves the new line character in tempnum
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000007C7  A3 00000243 R		DisplayString tempNum									;skip to a new line
+						
+ 000007D7  C7 05 00000243 R	; //17. Display the City that s2 lives in with an appropriate message.
+=======
  000007B8  A3 0000023F R		DisplayString tempNum									;skip to a new line
 						
  000007C8  C7 05 0000023F R	; //17. Display the City that s2 lives in with an appropriate message.
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   0000000A
 					;???????	CITY DOES NOT EXIST									
 					
@@ -529,13 +717,21 @@ proj5.asm						     Page 1 - 1
 					MOV numbersASCII, 0										;set first byte of the ascii string array to 0
 					DisplayString strZip									;display street message
 					INVOKE Student_getZip, s2								;get the students zip codoe into 
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000007EB  C6 05 000002B3 R		.IF EAX == -1											;if the zip is null, do nothing
+=======
  000007DC  C6 05 000002AF R		.IF EAX == -1											;if the zip is null, do nothing
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 	   00
 					.ELSE													;if there is a zip 
 						MOV EDX, EAX										;shouldnt invoke eax
 						INVOKE intasc32, addr numbersASCII, EDX				;moves the zip into eax
 						DisplayString numbersASCII							;display the zip from the stored address
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 0000080E  8B D0			.ENDIF													;end if
+=======
  000007FF  8B D0			.ENDIF													;end if
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					
 				; //20. pause
 					INVOKE pausesc											;press enter to continue
@@ -545,12 +741,20 @@ proj5.asm						     Page 1 - 1
 				finished:
 					INVOKE heapDestroyHarrison								;clears the memory used by heap allocharrion
 					INVOKE ExitProcess,0						 
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 0000082A				PUBLIC _start
+=======
  0000081B				PUBLIC _start
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 					
 				main ENDP
 				
 				COMMENT%
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000836			******************************************************************************
+=======
  00000827			******************************************************************************
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				*Name: pausesc                                                               *
 				*Purpose:                                                                    *
 				*	  When invoked, displays a message press enter to continue. When the user* 
@@ -562,12 +766,20 @@ proj5.asm						     Page 1 - 1
 				pausesc PROC stdcall
 				LOCAL bbyte:byte
 					INVOKE putstring, addr strPressEnter					;display the press enter to continue message
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000836				INVOKE getstring, addr strTemp, 0						;wait for the user to press enter
+=======
  00000827				INVOKE getstring, addr strTemp, 0						;wait for the user to press enter
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				RET 														;return to where i was called.
 				pausesc ENDP
 				
 				COMMENT%
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000854			******************************************************************************
+=======
  00000845			******************************************************************************
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				*Name: myInfo                                                                *
 				*Purpose:                                                                    *
 				*	  Accepts a name and a section number and displays info to the screen    *
@@ -578,24 +790,35 @@ proj5.asm						     Page 1 - 1
 				*                                                                            *
 				*@param nameAddr:dword                                                       *
 				*@param sSectionAddr:dword	                                                 *
+				*@param sProjNum:dword	                                                     *
+				*@param sTime:dword	                                                         *
 				*****************************************************************************%
-				myInfo PROC stdcall, sName:dword, sSection:dword, sProjNum:dword
+				myInfo PROC stdcall, sName:dword, sSection:dword, sProjNum:dword, sTime:dword
 				LOCAL bbyte:byte
 				INVOKE putstring, addr strInfo1						;display the first part of the info screen
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 00000854			INVOKE putstring, sName								;display the provided name
+=======
  00000845			INVOKE putstring, sName								;display the provided name
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 				INVOKE putstring, addr strInfo2						;display the second part of the info screen
 				INVOKE putstring, sSection							;display the provided section
 				INVOKE putstring, addr strInfo3						;display the third part of the info screen
 				INVOKE intasc32, addr strProj, sProjNum				;convert the decimal number into ascii
 				INVOKE putstring, addr strProj						;display the project number
-				INVOKE getTime										;call the get time method to get the current system time and construct a string
-				INVOKE putstring, EAX								;display the current time thats address is in eax
+				MOV EBX, sTime
+				INVOKE putstring, [EBX]							;display the current time of execution
 				RET													;return to where i was called from
-				myInfo ENDP
+ 0000089F  8B 5D 14		myInfo ENDP
 				
 					END												;Signals assembler that there are no instructions after this statement
+<<<<<<< HEAD:Project 5/Proj5.lst
+ 000008AD
+Microsoft (R) Macro Assembler Version 6.11		    11/26/19 14:48:36
+=======
  0000089F
 Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:29
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 proj5.asm						     Symbols 2 - 1
 
 
@@ -616,8 +839,13 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+<<<<<<< HEAD:Project 5/Proj5.lst
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000048F DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000008AD DWord	  Public  'CODE'	
+=======
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000048B DWord	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 0000089F DWord	  Public  'CODE'	
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 
 
 Procedures,  parameters and locals:
@@ -653,14 +881,25 @@ getTime  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 heapDestroyHarrison  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 intasc32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+<<<<<<< HEAD:Project 5/Proj5.lst
+main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000831 Public
+  finished . . . . . . . . . . .	L Near	 0000082A _TEXT	
+myInfo . . . . . . . . . . . . .	P Near	 00000854 _TEXT	Length= 00000059 Public STDCALL
+=======
 main . . . . . . . . . . . . . .	P Near	 00000005 _TEXT	Length= 00000822 Public
   finished . . . . . . . . . . .	L Near	 0000081B _TEXT	
 myInfo . . . . . . . . . . . . .	P Near	 00000845 _TEXT	Length= 0000005A Public STDCALL
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
   sName  . . . . . . . . . . . .	DWord	 bp + 00000008
   sSection . . . . . . . . . . .	DWord	 bp + 0000000C
   sProjNum . . . . . . . . . . .	DWord	 bp + 00000010
+  sTime  . . . . . . . . . . . .	DWord	 bp + 00000014
   bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
+<<<<<<< HEAD:Project 5/Proj5.lst
+pausesc  . . . . . . . . . . . .	P Near	 00000836 _TEXT	Length= 0000001E Public STDCALL
+=======
 pausesc  . . . . . . . . . . . .	P Near	 00000827 _TEXT	Length= 0000001E Public STDCALL
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
   bbyte  . . . . . . . . . . . .	Byte	 bp - 00000001
 putch  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -680,16 +919,28 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+<<<<<<< HEAD:Project 5/Proj5.lst
+numbersASCII . . . . . . . . . .	Byte	 000002B3 _DATA	
+s1 . . . . . . . . . . . . . . .	DWord	 0000047F _DATA	
+s2 . . . . . . . . . . . . . . .	DWord	 00000483 _DATA	
+s3 . . . . . . . . . . . . . . .	DWord	 00000487 _DATA	
+s4 . . . . . . . . . . . . . . .	DWord	 0000048B _DATA	
+=======
 numbersASCII . . . . . . . . . .	Byte	 000002AF _DATA	
 s1 . . . . . . . . . . . . . . .	DWord	 0000047B _DATA	
 s2 . . . . . . . . . . . . . . .	DWord	 0000047F _DATA	
 s3 . . . . . . . . . . . . . . .	DWord	 00000483 _DATA	
 s4 . . . . . . . . . . . . . . .	DWord	 00000487 _DATA	
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 strAsciiChar . . . . . . . . . .	Byte	 0000023D _DATA	
 strAskValues . . . . . . . . . .	Byte	 0000005A _DATA	
 strAverage . . . . . . . . . . .	Byte	 00000103 _DATA	
 strCol . . . . . . . . . . . . .	Byte	 0000021A _DATA	
+<<<<<<< HEAD:Project 5/Proj5.lst
+strEmpty . . . . . . . . . . . .	Byte	 00000242 _DATA	
+=======
 strEmpty . . . . . . . . . . . .	Byte	 0000023E _DATA	
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 strEqual . . . . . . . . . . . .	Byte	 000001E5 _DATA	
 strInfo1 . . . . . . . . . . . .	Byte	 00000019 _DATA	
 strInfo2 . . . . . . . . . . . .	Byte	 00000026 _DATA	
@@ -700,13 +951,28 @@ strMinTest . . . . . . . . . . .	Byte	 00000157 _DATA
 strName  . . . . . . . . . . . .	Byte	 00000000 _DATA	
 strNotEqual  . . . . . . . . . .	Byte	 000001FE _DATA	
 strPressEnter  . . . . . . . . .	Byte	 00000040 _DATA	
+<<<<<<< HEAD:Project 5/Proj5.lst
+strProj  . . . . . . . . . . . .	Byte	 00000248 _DATA	
+=======
 strProj  . . . . . . . . . . . .	Byte	 00000244 _DATA	
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 strSection . . . . . . . . . . .	Byte	 0000000B _DATA	
 strStreet  . . . . . . . . . . .	Byte	 0000017D _DATA	
 strStudentFName  . . . . . . . .	Byte	 0000007A _DATA	
 strStudentLName  . . . . . . . .	Byte	 0000009E _DATA	
 strStudentStreet . . . . . . . .	Byte	 000000C0 _DATA	
 strStudentZip  . . . . . . . . .	Byte	 000000DF _DATA	
+<<<<<<< HEAD:Project 5/Proj5.lst
+strTempF . . . . . . . . . . . .	Byte	 000002E6 _DATA	
+strTempL . . . . . . . . . . . .	Byte	 0000034B _DATA	
+strTempStreet  . . . . . . . . .	Byte	 000003B0 _DATA	
+strTempZip . . . . . . . . . . .	Byte	 00000479 _DATA	
+strTemp  . . . . . . . . . . . .	Byte	 00000247 _DATA	
+strTime  . . . . . . . . . . . .	DWord	 0000023E _DATA	
+strZip . . . . . . . . . . . . .	Byte	 000001A0 _DATA	
+tempNum  . . . . . . . . . . . .	DWord	 00000243 _DATA	
+testArray  . . . . . . . . . . .	Word	 0000024D _DATA	
+=======
 strTempF . . . . . . . . . . . .	Byte	 000002E2 _DATA	
 strTempL . . . . . . . . . . . .	Byte	 00000347 _DATA	
 strTempStreet  . . . . . . . . .	Byte	 000003AC _DATA	
@@ -715,6 +981,7 @@ strTemp  . . . . . . . . . . . .	Byte	 00000243 _DATA
 strZip . . . . . . . . . . . . .	Byte	 000001A0 _DATA	
 tempNum  . . . . . . . . . . . .	DWord	 0000023F _DATA	
 testArray  . . . . . . . . . . .	Word	 00000249 _DATA	
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/proj5.lst
 zipDecimal1  . . . . . . . . . .	DWord	 0000021D _DATA	
 zipDecimal2  . . . . . . . . . .	DWord	 00000225 _DATA	
 zipDecimal3  . . . . . . . . . .	DWord	 0000022D _DATA	

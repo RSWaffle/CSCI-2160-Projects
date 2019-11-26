@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+Microsoft (R) Macro Assembler Version 6.11		    11/26/19 14:47:36
+=======
 Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:39
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45
 time.asm						     Page 1 - 1
 
 
@@ -336,7 +340,11 @@ time.asm						     Page 1 - 1
 				
  000003A1			
 				END
+<<<<<<< HEAD
+Microsoft (R) Macro Assembler Version 6.11		    11/26/19 14:47:36
+=======
 Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:39
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45
 time.asm						     Symbols 2 - 1
 
 

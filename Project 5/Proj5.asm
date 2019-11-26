@@ -19,7 +19,11 @@
 	extractWords PROTO Near32 stdcall, StringofChars:dword, ArrayDwords:dword	;extracts words from a string and stores into an array
 	putch PROTO Near32 stdcall, bVal:byte										;puts a char onto the screen
 	pausesc   PROTO stdcall														;displays the pause screen message and waits for user to press enter
+<<<<<<< HEAD
+	myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword, sTime:dword;display the info for the project
+=======
 	myInfo    PROTO stdcall, sName:dword, sSection:dword, sProjNum:dword		;display the info for the project
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45
 	getTime	  PROTO Near32 stdcall   											;returns address of time string
 	Student_1 PROTO stdcall														;reference to the first constuctor
 	Student_2 PROTO stdcall, firstN:dword, lastN:dword							;2nd student constructor
@@ -142,6 +146,10 @@ zipDecimal2 dword 0,0								;memory to hold a decimal zip
 zipDecimal3 dword 0,0								;memory to hold a decimal zip	
 zipDecimal4 dword 0,0								;memory to hold a decimal zip	
 strAsciiChar byte 0									;memory to hold 1 ascii char
+<<<<<<< HEAD
+strTime dword 0
+=======
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45
 
 strEmpty byte 00									;null terminated string 
 tempNum dword 0										;temp dword that can be manipulated for calculation
@@ -165,7 +173,14 @@ _start:
 	MOV EAX, 0												;Statement to help in debugging
 
 main PROC
+<<<<<<< HEAD
+	INVOKE getTime											;call the get time method to get the current system time and construct a string
+	MOV strTime, EAX										;display the current time thats address is in eax
+	INVOKE myInfo, addr strName, addr strSection, 5 , 
+	addr strTime											;display the student information, section, time, and project number with the time. 
+=======
 	INVOKE myInfo, addr strName, addr strSection, 5 		;display the student information, section, time, and project number. 
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45
 	
 	;student1
 	setStudentInfo testArray, 1								;gets basic information for a student
@@ -443,13 +458,15 @@ COMMENT%
 *	  Accepts a name and a section number and displays info to the screen    *
 *		accordingly 														 *
 *Date Created: 11/15/2019                                                    *
-*Date Modified: 11/15/2019                                                   *
+*Date Modified: 11/26/2019                                                   *
 *                                                                            *
 *                                                                            *
 *@param nameAddr:dword                                                       *
 *@param sSectionAddr:dword	                                                 *
+*@param sProjNum:dword	                                                     *
+*@param sTime:dword	                                                         *
 *****************************************************************************%
-myInfo PROC stdcall, sName:dword, sSection:dword, sProjNum:dword
+myInfo PROC stdcall uses ebx, sName:dword, sSection:dword, sProjNum:dword, sTime:dword
 LOCAL bbyte:byte
 INVOKE putstring, addr strInfo1						;display the first part of the info screen
 INVOKE putstring, sName								;display the provided name
@@ -458,8 +475,8 @@ INVOKE putstring, sSection							;display the provided section
 INVOKE putstring, addr strInfo3						;display the third part of the info screen
 INVOKE intasc32, addr strProj, sProjNum				;convert the decimal number into ascii
 INVOKE putstring, addr strProj						;display the project number
-INVOKE getTime										;call the get time method to get the current system time and construct a string
-INVOKE putstring, EAX								;display the current time thats address is in eax
+MOV EBX, sTime										;move the address of the current time into ebx
+INVOKE putstring, [EBX]								;display the current time of execution
 RET													;return to where i was called from
 myInfo ENDP
 

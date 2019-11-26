@@ -1,4 +1,8 @@
+<<<<<<< HEAD:Project 5/ShupeStrings.lst
+Microsoft (R) Macro Assembler Version 6.11		    11/26/19 14:42:43
+=======
 Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:36
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/shupestrings.lst
 shupestrings.asm					     Page 1 - 1
 
 
@@ -303,7 +307,11 @@ shupestrings.asm					     Page 1 - 1
  0000019C  5D
  000001A2  C2 0004
  000001A5
+<<<<<<< HEAD:Project 5/ShupeStrings.lst
+Microsoft (R) Macro Assembler Version 6.11		    11/26/19 14:42:43
+=======
 Microsoft (R) Macro Assembler Version 6.11		    11/23/19 19:00:36
+>>>>>>> 900cf4b6f4d7d1fd1b3096de2d547a21db4cae45:Project 5/shupestrings.lst
 shupestrings.asm					     Symbols 2 - 1
 
 

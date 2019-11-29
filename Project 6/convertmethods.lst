@@ -1,0 +1,207 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 03:43:47
+convertmethods.asm					     Page 1 - 1
+
+
+				;******************************************************************************************
+				;*  Program Name: convertMethods.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160-001
+				;*  Lab:		  Project 6b
+				;*  Date:         Created 12/07/2019
+				;*  Purpose:      Methods to convert ascii characters to hex characters and vise versa, with encryption
+				;******************************************************************************************
+					.486						;This tells assembler to generate 32-bit code
+					.model flat					;This tells assembler that all addresses are real addresses
+					.stack 100h					;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
+					memoryallocBailey PROTO Near32 stdcall, dSize:DWORD							;dynamically allocate bytes in memory
+				;******************************************************************************************
+ 00000000			.DATA
+				;******************************************************************************************
+ 00000000			.CODE
+				COMMENT%
+				******************************************************************************
+				*Name: hexToCharacter                                                        *
+				*Purpose:                                                                    *
+				*	  Intakes a address of hex chars, converts them to ascii, then returns a *
+				*		new address with ascii characters									 *
+				*Date Created: 11/28/2019                                                    *
+				*Date Modified: 11/28/2019                                                   *
+				*                                                                            *
+				*@param lpDestination:dword                                                  *
+				*@param lpSource:dword                                                       *
+				*@param numBytes:dword                                                       *
+				*****************************************************************************%
+ 00000000			hexToCharacter PROC stdcall uses EBX EDX EDI ESI, lpDestination:dword, lpSource:dword, numBytes:dword
+				LOCAL lpCheck:byte, tempByte:byte
+ 0000000A  8B 5D 10		MOV EBX, numBytes				;move the number of bytes to be copied into ebx
+
+				.IF EBX == 0					;if it is equal to 0
+ 00000011  BF 00000004			MOV EDI, 4					;if the number of bytes is 0, then we are going to treat the 2nd param as a dword
+					
+ 00000016  8B 5D 0C			MOV EBX, lpSource			;load the address of the source into ebx
+ 00000019  8B 55 08			MOV EDX, lpDestination		;load the address of the destination into edx
+ 0000001C  BE 00000000			MOV ESI, 0					;set the starting point in the destination 
+
+					.WHILE EDI != 0				;while there are still bytes to copy
+ 00000023  4F					DEC EDI					;get 1 less the max
+ 00000024  8A 04 1F				MOV AL, [EBX + EDI]		;retreive the byte at position ebx + n
+ 00000027  C0 E8 04				SHR AL , 4				;shift the bits right to clear out the bits below to get the LO
+
+						.IF AL >= 10			;if the nibble grabbed is greater than or equal to 10
+ 0000002E  04 57					ADD AL, 87			;we need to add 87 to get the correct hex value
+						.ELSE					;if it is not
+ 00000032  04 30					ADD AL, 48			;we need to add 48 to get the correct hex value
+						.ENDIF					;endif
+						
+ 00000034  88 04 16				MOV [EDX + ESI], AL		;move into the destination our hex digit
+ 00000037  46					INC ESI					;increment to the next output position
+						
+ 00000038  8A 04 1F				MOV AL, [EBX + EDI]		;move the same byte into al 
+ 0000003B  C0 E0 04				SHL AL , 4				;clear out the bits above so we get the HO of the byte
+ 0000003E  C0 E8 04				SHR AL , 4				;shift it back so we can properly do calculation
+
+						.IF AL >= 10			;if the nibble grabbed is greater than or equal to 10
+ 00000045  04 57					ADD AL, 87			;we need to add 87 to get the correct hex value
+						.ELSE					;if it is not
+ 00000049  04 30					ADD AL, 48			;we need to add 48 to get the correct hex value
+						.ENDIF					;endif
+						
+ 0000004B  88 04 16				MOV [EDX + ESI], AL		;move into the destination our hex digit
+ 0000004E  46					INC ESI					;increment to the next output position
+					.ENDW						;end while
+
+ 00000053  B0 00			MOV AL, 0					;move null character into AL
+ 00000055  88 04 16			MOV [EDX + ESI], AL			;append null
+
+				.ELSE							;if it is not 0
+ 0000005A  8B CB			MOV ECX, EBX				;if it is not 0 then we will put the number of bytes to be converted into edi
+					
+ 0000005C  8B 5D 0C			MOV EBX, lpSource			;load the address of the source into ebx
+ 0000005F  8B 55 08			MOV EDX, lpDestination		;load the address of the destination into edx
+ 00000062  BE 00000000			MOV ESI, 0					;set the starting point in the destination 
+ 00000067  BF 00000000			MOV EDI, 0
+					.REPEAT
+ 0000006C  49					DEC ECX
+						
+ 0000006D  8A 04 1E				MOV AL, [EBX + ESI]		;retreive the byte at position ebx + n
+ 00000070  88 45 FE				MOV tempByte, AL
+ 00000073  C0 E8 04				SHR AL , 4				;shift the bits right to clear out the bits below to get the LO
+
+						.IF AL >= 10			;if the nibble grabbed is greater than or equal to 10
+ 0000007A  04 57					ADD AL, 87			;we need to add 87 to get the correct hex value
+						.ELSE					;if it is not
+ 0000007E  04 30					ADD AL, 48			;we need to add 48 to get the correct hex value
+						.ENDIF					;endif
+						
+ 00000080  88 04 17				MOV [EDX + EDI], AL		;move into the destination our hex digit
+ 00000083  47					INC EDI
+ 00000084  46					INC ESI					;increment to the next output position
+						
+ 00000085  8A 45 FE				MOV AL, tempByte		;move the same byte into al 
+ 00000088  C0 E0 04				SHL AL , 4				;clear out the bits above so we get the HO of the byte
+ 0000008B  C0 E8 04				SHR AL , 4				;shift it back so we can properly do calculation
+
+						.IF AL >= 10			;if the nibble grabbed is greater than or equal to 10
+ 00000092  04 57					ADD AL, 87			;we need to add 87 to get the correct hex value
+						.ELSE					;if it is not
+ 00000096  04 30					ADD AL, 48			;we need to add 48 to get the correct hex value
+						.ENDIF					;endif
+						
+ 00000098  88 04 17				MOV [EDX + EDI], AL		;move into the destination our hex digit
+ 0000009B  47					INC EDI
+
+					.UNTIL ECX == 0
+					
+ 000000A0  B0 00			MOV AL, 0					;move null character into AL
+ 000000A2  88 04 17			MOV [EDX + EDI], AL			;append null
+				.ENDIF
+
+				RET 							;return back with 12 bytes used
+ 000000AD			hexToCharacter ENDP
+
+				COMMENT%
+				******************************************************************************
+				*Name: charTo4HexDigits                                                      *
+				*Purpose:                                                                    *
+				*	  Accepts a null terminated strings and returns a dword mask    		 *
+				*Date Created: 11/28/2019                                                    *
+				*Date Modified: 11/28/2019                                                   *
+				*                                                                            *
+				*@param lpSourceString:dword                                                 *
+				*@returns dMask:dword                                                        *
+				*****************************************************************************%
+ 000000AD			charTo4HexDigits PROC stdcall, lpSourceString:dword
+ 000000AD			charTo4HexDigits ENDP
+
+				COMMENT%
+				******************************************************************************
+				*Name: encrypt32Bit                                                          *
+				*Purpose:                                                                    *
+				*	  Intakes a address of hex chars, converts them to ascii, then returns a *
+				*		new address with ascii characters									 *
+				*Date Created: 11/28/2019                                                    *
+				*Date Modified: 11/28/2019                                                   *
+				*                                                                            *
+				*@param lpSourceString:dword                                                 *
+				*@param dMask:dword                                                          *
+				*@param numBytes:dword                                                       *
+				*****************************************************************************%
+ 000000AD			encrypt32Bit PROC stdcall, lpSourceString:dword, dMask:dword , numBytes:dword
+ 000000AD			encrypt32Bit ENDP
+				;************************************* the instructions below calls for "normal termination"	
+
+				END
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 03:43:47
+convertmethods.asm					     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000AD DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+charTo4HexDigits . . . . . . . .	P Near	 000000AD _TEXT	Length= 00000000 Public STDCALL
+  lpSourceString . . . . . . . .	DWord	 bp + 00000008
+encrypt32Bit . . . . . . . . . .	P Near	 000000AD _TEXT	Length= 00000000 Public STDCALL
+  lpSourceString . . . . . . . .	DWord	 bp + 00000008
+  dMask  . . . . . . . . . . . .	DWord	 bp + 0000000C
+  numBytes . . . . . . . . . . .	DWord	 bp + 00000010
+hexToCharacter . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000AD Public STDCALL
+  lpDestination  . . . . . . . .	DWord	 bp + 00000008
+  lpSource . . . . . . . . . . .	DWord	 bp + 0000000C
+  numBytes . . . . . . . . . . .	DWord	 bp + 00000010
+  lpCheck  . . . . . . . . . . .	Byte	 bp - 00000001
+  tempByte . . . . . . . . . . .	Byte	 bp - 00000002
+memoryallocBailey  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+
+	   0 Warnings
+	   0 Errors

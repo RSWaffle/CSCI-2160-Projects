@@ -11,12 +11,24 @@
 	.stack 100h					;EVERY program needs to have a stack allocated
 ;******************************************************************************************
 	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
+	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword
+	hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
 ;******************************************************************************************
 .DATA
+strChar	byte "ABCDEFG" ,0
+hexNums dword 1234ABCDh
+strHexChars byte 80 dup(?)	;holds converted string of characters
+
+
 ;******************************************************************************************
 .CODE
-
+	XOR EAX, EAX
 _start:
+
+INVOKE hexToCharacter, addr strHexChars, addr strChar, 8
+INVOKE putstring, addr strHexChars
+
+MOV EAX, 0
 
 ;************************************* the instructions below calls for "normal termination"	
 INVOKE ExitProcess,0						 

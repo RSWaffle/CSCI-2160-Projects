@@ -1,0 +1,189 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 01:42:45
+proj6a.asm						     Page 1 - 1
+
+
+
+				;******************************************************************************************
+				;*  Program Name: Proj6a.asm
+				;*  Programmer:   Ryan Shupe
+				;*  Class:        CSCI 2160-001
+				;*  Lab:		  Project 6a
+				;*  Date:         Created 12/07/2019
+				;*  Purpose:      Calculates though a recursion problem outlined in the project specs
+				;******************************************************************************************
+					.486						;This tells assembler to generate 32-bit code
+					.model flat					;This tells assembler that all addresses are real addresses
+					.stack 100h					;EVERY program needs to have a stack allocated
+				;******************************************************************************************
+					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
+				;******************************************************************************************
+ 00000000			.DATA
+ 00000000 00000005		x dword 5
+ 00000004  0000000A [		dValArray dword 10 dup (0)
+	    00000000
+	   ]
+ 0000002C 00000000		xTemp dword 0
+ 00000030 01			loopCheck byte 1
+				;******************************************************************************************
+ 00000000			.CODE
+
+ 00000000			_start:
+ 00000000
+ 00000000  B8 00000000			MOV EAX, 0
+ 00000005  BA 00000000			MOV EDX, 0
+ 0000000A 0000000A		main PROC
+
+ 0000000A  FF 35 00000000 R		PUSH x
+ 00000010  E8 00000003			call fun
+ 00000015  83 C4 04			ADD esp, 4
+ 00000018			main ENDP
+
+
+
+				COMMENT%
+
+				******************************************************************************
+				*Name: fun	                                                                 *
+				*Purpose:                                                                    *
+				*	  A recursive equation for fun(n-1) + 2*fun(n-2)+3*fun(n-3), for n>2     *
+				*		 					possible array to track the results	     		 *
+				*Date Created: 11/26/2019                                                    *
+				*Date Modified: 11/26/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param inVal:dword                                                          *
+				*****************************************************************************%
+ 00000018			fun PROC stdcall
+ 00000018  55				PUSH EBP 							;preserve the old stack frame
+ 00000019  8B EC			MOV EBP, ESP						;set a new stack frame
+					
+ = DWORD PTR [EBP + 8]			@n EQU DWORD PTR [EBP + 8]			;point @n to ebp + 8 so we don't have to reference it all the time
+
+ 0000001B  8B 5D 08			MOV EBX, @n							;moves the n value into ebx
+ 0000001E  89 1D 0000002C R		MOV xTemp, EBX
+ 00000024  4B				DEC EBX								;decrement it to get n-1
+ 00000025  53				PUSH EBX							;push to the stack for calling
+ 00000026  E8 00000026			CALL funplus							;call the function again
+ 0000002B  83 C4 04			ADD ESP, 4							;add back the number of bytes we used
+ 0000002E  01 05 00000004 R		ADD dValArray, EAX
+
+					
+ 00000034  8B 1D 0000002C R		MOV EBX, xTemp							;moves the n value into ebx
+ 0000003A  4B				DEC EBX
+ 0000003B  4B				DEC EBX
+ 0000003C  53				PUSH EBX							;push to the stack for calling
+ 0000003D  E8 0000000F			CALL funplus						;call the function again
+ 00000042  83 C4 04			ADD ESP, 4							;add back the number of bytes we used
+ 00000045  5B				POP EBX
+					
+ 00000046  03 C0			ADD EAX, EAX
+ 00000048  01 05 00000004 R		ADD dValArray, EAX
+					
+
+ 0000004E				Done:
+ 0000004E  5B				POP EBX
+ 0000004F  5D				POP EBP								;restore the original EBP
+ 00000050  C3				RET 								;return 
+					
+ 00000051			fun ENDP
+
+				COMMENT%
+
+				******************************************************************************
+				*Name: funplus	                                                             *
+				*Purpose:                                                                    *
+				*	  A recursive equation for fun(n-1) + 2*fun(n-2)+3*fun(n-3), for n>2     *
+				*		 					possible array to track the results	     		 *
+				*Date Created: 11/26/2019                                                    *
+				*Date Modified: 11/26/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param inVal:dword                                                          *
+				*****************************************************************************%
+ 00000051			funplus PROC stdcall
+ 00000051  55				PUSH EBP 							;preserve the old stack frame
+ 00000052  8B EC			MOV EBP, ESP						;set a new stack frame
+					
+ = DWORD PTR [EBP + 8]			@n EQU DWORD PTR [EBP + 8]			;point @n to ebp + 8 so we don't have to reference it all the time
+ 00000054  FF 75 08			PUSH @n								;preserve the value @n points to
+					
+					.IF @n == 1							;if @n is equal to 1
+ 0000005D  B8 00000002				MOV EAX, 2						;move 2 into the output
+ 00000062  EB 2B				JMP Done						;jump to done section
+					.ELSEIF @n == 0						;if @n is equal to 0
+ 0000006C  B8 00000001				MOV EAX, 1						;move 1 into the output
+ 00000071  EB 1C				JMP Done						;jump to done
+					.ELSEIF @n == 2						;if @n is equal to 2
+ 0000007B  B8 00000007				MOV EAX, 7						;move 7 into the output	
+ 00000080  EB 0D				JMP Done						;jump to the done section
+					.ENDIF								;end if
+
+ 00000082  8B 5D 08			MOV EBX, @n							;moves the n value into ebx
+ 00000085  4B				DEC EBX								;decrement it to get n-1
+ 00000086  53				PUSH EBX							;push to the stack for calling
+ 00000087  E8 FFFFFF8C			CALL fun							;call the function again
+ 0000008C  83 C4 04			ADD ESP, 4							;add back the number of bytes we used
+ 0000008F				Done:
+ 0000008F  5B				POP EBX
+ 00000090  5D				POP EBP								;restore the original EBP
+ 00000091  C3				RET 								;return 
+					
+ 00000092			funplus ENDP
+ 00000092
+					
+				;************************************* the instructions below calls for "normal termination"	
+				INVOKE ExitProcess,0						 
+ 00000099			PUBLIC _start
+				END
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 01:42:45
+proj6a.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000031 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000099 DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000A Private
+$$$$$$00005  . . . . . . . . . .	P Near	 00000092 _TEXT	Length= 00000007 Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+funplus  . . . . . . . . . . . .	P Near	 00000051 _TEXT	Length= 00000041 Public STDCALL
+  Done . . . . . . . . . . . . .	L Near	 0000008F _TEXT	
+fun  . . . . . . . . . . . . . .	P Near	 00000018 _TEXT	Length= 00000039 Public STDCALL
+  Done . . . . . . . . . . . . .	L Near	 0000004E _TEXT	
+main . . . . . . . . . . . . . .	P Near	 0000000A _TEXT	Length= 0000000E Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@n . . . . . . . . . . . . . . .	Text   	 DWORD PTR [EBP + 8]
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+dValArray  . . . . . . . . . . .	DWord	 00000004 _DATA	
+loopCheck  . . . . . . . . . . .	Byte	 00000030 _DATA	
+xTemp  . . . . . . . . . . . . .	DWord	 0000002C _DATA	
+x  . . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+
+	   0 Warnings
+	   0 Errors

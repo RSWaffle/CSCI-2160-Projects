@@ -172,8 +172,7 @@ COMMENT%
 *@returns dMask:dword                                                        *
 *****************************************************************************%
 charTo4HexDigits PROC stdcall uses EBX ECX EDX EDI ESI, lpSourceString:dword
-LOCAL outVal:dword, inASCII:dword, numBytes:Byte
-												;sets up our stack frame and declares our local variables.
+LOCAL outVal:dword, inASCII:dword, numBytes:Byte;sets up our stack frame and declares our local variables.
 	MOV EAX, lpSourceString						;moves into EAX the address of the array with ascii values.
 	MOV inASCII, EAX							;moves the address into our local variable for clarity.
 

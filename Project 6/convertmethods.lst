@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:41:02
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:56:46
 convertmethods.asm					     Page 1 - 1
 
 
@@ -57,12 +57,13 @@ convertmethods.asm					     Page 1 - 1
 				ENDM
 				;******************************************************************************************
  00000000			.DATA
- 00000000 30 31 32 33 34		WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 61h, 62h, 63h, 64h, 65h, 66h, 41h, 42h, 43h, 44h, 45h, 46h 		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 ABCDEF (upper and lower case)
+ 00000000 30 31 32 33 34		WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 61h, 62h, 63h, 64h, 65h, 66h, 41h, 42h, 43h, 44h, 45h, 46h 		
 	   35 36 37 38 39
 	   61 62 63 64 65
 	   66 41 42 43 44
 	   45 46
- 00000016  00000032 [			bTemps byte 50 dup(?)													;memory to hold the number that is built in extractDwords
+																	;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 ABCDEF (upper and lower case)
+ 00000016  00000032 [			bTemps byte 50 dup(?)							;memory to hold the number that is built in extractDwords
 	    00
 	   ]
  00000048 0A 0D 00			crlf byte  10,13,0								;Null-terminated string to skip to new line
@@ -315,14 +316,15 @@ convertmethods.asm					     Page 1 - 1
 				******************************************************************************
 				*Name: encrypt32Bit                                                          *
 				*Purpose:                                                                    *
-				*	  Intakes a address of hex chars, converts them to ascii, then returns a *
-				*		new address with ascii characters									 *
+				*	  Intakes a source string, a mask and the number of bytes, encryptes them*
+				*		and returns a new address with the encripted values                  *
 				*Date Created: 11/28/2019                                                    *
-				*Date Modified: 11/28/2019                                                   *
+				*Date Modified: 11/30/2019                                                   *
 				*                                                                            *
 				*@param lpSourceString:dword                                                 *
 				*@param dMask:dword                                                          *
 				*@param numBytes:dword                                                       *
+				*@returns encryptedAddr:dword                                                *
 				*****************************************************************************%
  000001EF			encrypt32Bit PROC stdcall uses EBX ECX EDX ESI, lpSourceString:dword, dMask:dword , numBytes:dword
 				LOCAL outAddr:dword, remainder:byte 		;set up stack frame and declare local variables
@@ -331,7 +333,6 @@ convertmethods.asm					     Page 1 - 1
  00000201  89 45 FC			MOV outAddr, EAX						;stores the output address inside a local variable
 
  00000204  8B 45 10			MOV EAX, numBytes						;move the number of bytes into eax so we can calculate if string is apporopiate size
-					;DEC EAX									;ignore the null character
  00000207  BB 00000004			MOV EBX, 4								;move into ebx 4 so we can divide
  0000020C  33 D2			XOR EDX, EDX							;set EDX to 0
  0000020E  F7 F3			DIV EBX									;divide by 4 to get remainder 
@@ -381,7 +382,7 @@ convertmethods.asm					     Page 1 - 1
 				;************************************* the instructions below calls for "normal termination"	
 
 				END
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:41:02
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:56:46
 convertmethods.asm					     Symbols 2 - 1
 
 

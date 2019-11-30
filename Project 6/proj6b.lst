@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:39:34
+Microsoft (R) Macro Assembler Version 6.11		    11/30/19 00:33:59
 proj6b.asm						     Page 1 - 1
 
 
@@ -6,7 +6,7 @@ proj6b.asm						     Page 1 - 1
 				;*  Program Name: Proj6a.asm
 				;*  Programmer:   Ryan Shupe
 				;*  Class:        CSCI 2160-001
-				;*  Lab:		  Project 6a
+				;*  Lab:		  Project 6b
 				;*  Date:         Created 12/07/2019
 				;*  Purpose:      Driver to test the methods written in convertMethods
 				;******************************************************************************************
@@ -19,57 +19,213 @@ proj6b.asm						     Page 1 - 1
 					hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
 					charTo4HexDigits PROTO stdcall, lpSourceString:dword
 					encrypt32Bit PROTO stdcall, lpSourceString:dword, dMask:dword , numBytes:dword
+					getstring 	PROTO stdcall, lpStringToHoldInput:dword, maxNumChars:dword ;Get input from user and convert. 
+					ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				;This converts ASCII characters to the dword value
+					heapDestroyHarrison PROTO Near32 stdcall								;Destroys the memory allocated by the allocate proc 
+				;******************************************************************************************
+				COMMENT %
+
+				******************************************************************************
+				*Name: getBytes                                                              *
+				*Purpose:                                                                    *
+				*	  Intakes an address and counts the number of bytes into a string including*
+				*     the null char and returns the number.                                  *
+				*Date Created: 10/24/2019                                                    *
+				*Date Modified: 10/25/2019                                                   *
+				*                                                                            *
+				*                                                                            *
+				*@param String1:byte                                                         *
+				*****************************************************************************%
+				getBytes MACRO String:REQ
+					LOCAL stLoop						;add a local label so the assembler doesnt yell when this is called more than once
+					LOCAL done							;add a local label so the assembler doesnt yell when this is called more than once
+					PUSH EBP							;preserves base register
+					MOV EBP, ESP						;sets a new stack frame
+					PUSH EBX							;pushes EBX to the stack to store this
+					PUSH ESI							;pushes ESI to the stack to preseve
+					MOV EBX, String						;;moves into ebx the first val in the stack that we are going to use
+					MOV ESI, 0							;sets the initial point to 0
+						
+					stLoop:
+						CMP byte ptr [EBX + ESI], 0		;compares the two positions to determine if this is the end of the string
+						JE done							;;if it is jump to finished
+						INC ESI							;if not increment esi
+						JMP stLoop						;;jump to the top of the loop and look at the next char
+					done:		
+						INC ESI							;increment esi to include the null character in the string
+						MOV EAX, ESI					;move the value of esi into eax for proper output and return
+					
+					POP ESI								;restore original esi
+					POP EBX								;restore original ebx
+					POP EBP								;restore originla ebp
+				ENDM
+
 				;******************************************************************************************
  00000000			.DATA
- 00000000 41 42 43 64 65	strChar	byte "ABCdeF05" ,0
-	   46 30 35 00
- 00000009 54 68 69 73 20	strString byte "This is a sentence!!",0
-	   69 73 20 61 20
-	   73 65 6E 74 65
-	   6E 63 65 21 21
-	   00
- 0000001E 1234ABCD		hexNums dword 1234ABCDh
- 00000022  00000050 [		strHexChars byte 80 dup(?)	;holds converted string of characters
+ 00000000 0A 0D 09 4E 61	strProjInfo byte  10,13,9,
+	   6D 65 3A 20 52
+	   79 61 6E 20 53
+	   68 75 70 65 0A
+	   20 20 20 20 20
+	   20 20 43 6C 61
+	   73 73 3A 20 43
+	   53 43 49 20 32
+	   31 36 30 2D 30
+	   30 31 0A 20 20
+	   20 20 20 20 20
+	   20 44 61 74 65
+	   3A 20 31 32 2F
+	   30 37 2F 32 30
+	   31 39 0A 20 20
+	   20 20 20 20 20
+	   20 20 4C 61 62
+	   3A 20 50 72 6F
+	   6A 65 63 74 20
+	   36 62 00
+				        "Name: Ryan Shupe",10,
+				"       Class: CSCI 2160-001",10,
+				"        Date: 12/07/2019",10,
+				"         Lab: Project 6b",0
+ 00000062  0000000A [		strChar byte 10 dup (0)					;memory to hold a key the user types
 	    00
 	   ]
- 00000072 0A 0D 00		crlf byte  10,13,0								;Null-terminated string to skip to new line
- 00000075 00000000		hexKey DWORD ?
+ 0000006C  00000100 [		strString byte 256 dup (0),0			;hold a string that the user types in
+	    00
+	   ] 00
+ 0000016D  00000064 [		strHexChars byte 100 dup(0)				;holds converted string of characters
+	    00
+	   ]
+ 000001D1 0A 0D 00		crlf byte  10,13,0						;Null-terminated string to skip to new line
+ 000001D4 00000000		hexKey DWORD ?							;converted key into a dword
+ 000001D8 00000000		numBytes dword ?						;number of bytes in the user typed string
 
-
+ 000001DC 45 6E 74 65 72	strAsk4Key byte "Enter a 8 character encryption key: ", 0
+	   20 61 20 38 20
+	   63 68 61 72 61
+	   63 74 65 72 20
+	   65 6E 63 72 79
+	   70 74 69 6F 6E
+	   20 6B 65 79 3A
+	   20 00
+ 00000201 54 79 70 65 20	strAskSentence byte "Type a sentence you wish to encrypt: ", 0
+	   61 20 73 65 6E
+	   74 65 6E 63 65
+	   20 79 6F 75 20
+	   77 69 73 68 20
+	   74 6F 20 65 6E
+	   63 72 79 70 74
+	   3A 20 00
+ 00000227 54 68 69 73 20	strNormal byte "This is the unencrypted sentence in HEX: ", 0 
+	   69 73 20 74 68
+	   65 20 75 6E 65
+	   6E 63 72 79 70
+	   74 65 64 20 73
+	   65 6E 74 65 6E
+	   63 65 20 69 6E
+	   20 48 45 58 3A
+	   20 00
+ 00000251 20 20 54 68 69	strEncrypted byte "  This is the encrypted sentence in HEX: ", 0 
+	   73 20 69 73 20
+	   74 68 65 20 65
+	   6E 63 72 79 70
+	   74 65 64 20 73
+	   65 6E 74 65 6E
+	   63 65 20 69 6E
+	   20 48 45 58 3A
+	   20 00
+ 0000027B 20 20 54 68 69	strAfter byte "  This is the decrypted sentence in HEX: ", 0
+	   73 20 69 73 20
+	   74 68 65 20 64
+	   65 63 72 79 70
+	   74 65 64 20 73
+	   65 6E 74 65 6E
+	   63 65 20 69 6E
+	   20 48 45 58 3A
+	   20 00
+ 000002A5 20 74 72 61 6E	strTranslates byte " translates to: ", 0
+	   73 6C 61 74 65
+	   73 20 74 6F 3A
+	   20 00
 				;******************************************************************************************
  00000000			.CODE
- 00000000  33 C0			XOR EAX, EAX
+ 00000000  33 C0			XOR EAX, EAX													;aid in debugging
+					
  00000002			_start:
+				INVOKE putstring, addr strProjInfo									;display the project information
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr strAskSentence								;ask the user to type in a sentence to encrypt
+				INVOKE getstring, addr strString, 256								;wait for input with a max of 256 characters
+ 00000039  B8 0000006C R	MOV EAX, offset strString											;move the address of the user typed string into eax to get the number of bytes
+				getBytes EAX														;return the number of bytes
+ 0000003E  55		     1		PUSH EBP							
+ 0000003F  8B EC	     1		MOV EBP, ESP						
+ 00000041  53		     1		PUSH EBX							
+ 00000042  56		     1		PUSH ESI							
+ 00000043  8B D8	     1		MOV EBX, EAX						
+ 00000045  BE 00000000	     1		MOV ESI, 0							
+ 0000004A		     1		??0000:
+ 0000004A  80 3C 1E 00	     1			CMP byte ptr [EBX + ESI], 0		
+ 0000004E  74 03	     1			JE ??0001							
+ 00000050  46		     1			INC ESI							
+ 00000051  EB F7	     1			JMP ??0000						
+ 00000053		     1		??0001:		
+ 00000053  46		     1			INC ESI							
+ 00000054  8B C6	     1			MOV EAX, ESI					
+ 00000056  5E		     1		POP ESI								
+ 00000057  5B		     1		POP EBX								
+ 00000058  5D		     1		POP EBP								
+ 00000059  48			DEC EAX																;remove null
+ 0000005A  A3 000001D8 R	MOV numBytes, EAX													;store the number of bytes
 
+ 0000005F			tryAgainBuddy:
+					INVOKE putstring, addr crlf										;skip to a new line
+					INVOKE putstring, addr strAsk4Key								;ask the user to enter a key
+					INVOKE getstring, addr strChar, 8								;get the 8 character key
+					INVOKE charTo4HexDigits, addr strChar							;convert into the 4 byte dword the user typed key
+				.IF EAX == -1														;if eax returns a -1
+ 0000008E  EB CF			JMP tryAgainBuddy												;if the key is invalid then jump back up
+				.ENDIF																;endif
 
-				INVOKE charTo4HexDigits, addr strChar
- 0000000C  A3 00000075 R	MOV hexKey, EAX
-				INVOKE putstring, addr crlf
-				INVOKE hexToCharacter, addr strHexChars, addr strString, 20
-				INVOKE putString, addr strHexChars
+ 00000090  A3 000001D4 R	MOV hexKey, EAX														;store the user entered key
 
-				INVOKE encrypt32Bit, addr strString, hexKey, 20
- 00000048  8B D8		MOV EBX, EAX
-				INVOKE putstring, addr crlf
-				INVOKE hexToCharacter, addr strHexChars, EAX, 20
-				INVOKE putString, addr strHexChars
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr strNormal									;display that this is the normal string
+				INVOKE hexToCharacter, addr strHexChars, addr strString, numBytes	;convert into hex characters ascii format
+				INVOKE putstring, addr strHexChars									;display the ascii hex chars
+				INVOKE putstring, addr crlf											;skip to a new line
 
+				INVOKE putstring, addr strEncrypted									;display that this is the encrypted string
+				INVOKE encrypt32Bit, addr strString, hexKey, numBytes				;call the encryption method
+ 000000FC  8B D8		MOV EBX, EAX														;keep this for later because eax is going to be overridden
+				INVOKE hexToCharacter, addr strHexChars, EAX, numBytes				;convert the encryped hex values to the appropriate ascii 
+				INVOKE putstring, addr strHexChars									;display the encrypted string
 
-				INVOKE encrypt32Bit, EBX, hexKey, 20
-				INVOKE putstring, addr crlf
-				INVOKE hexToCharacter, addr strHexChars, EAX, 20
-				INVOKE putString, addr strHexChars
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr strAfter										;display that this is the string after passing through the method again
+				INVOKE encrypt32Bit, EBX, hexKey, numBytes							;call the encryption method to decrypt the message
+				INVOKE hexToCharacter, addr strHexChars, EAX, numBytes				;convert the hex to appropriate ascii
+				INVOKE putstring, addr strHexChars									;display the converted back string 
 
- 0000009A  B8 00000000		MOV EAX, 0
+ 0000015A  33 C0		XOR EAX, EAX														;aid in debugging
 
-				;************************************* the instructions below calls for "normal termination"	
+				;************************************* the instructions below calls for "normal termination"
+				INVOKE heapDestroyHarrison											;clears the memory used by heap allocharrion	
 				INVOKE ExitProcess,0						 
- 000000A6			PUBLIC _start
+ 00000168			PUBLIC _start
 				END
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:39:34
+Microsoft (R) Macro Assembler Version 6.11		    11/30/19 00:33:59
 proj6b.asm						     Symbols 2 - 1
 
 
+
+
+Macros:
+
+                N a m e                 Type
+
+getBytes . . . . . . . . . . . .	Proc
 
 
 Segments and Groups:
@@ -78,19 +234,25 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000079 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A6 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000002B6 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000168 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000A6 Private
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000168 Private
   _start . . . . . . . . . . . .	L Near	 00000002 _TEXT	
+  ??0000 . . . . . . . . . . . .	L Near	 0000004A _TEXT	
+  ??0001 . . . . . . . . . . . .	L Near	 00000053 _TEXT	
+  tryAgainBuddy  . . . . . . . .	L Near	 0000005F _TEXT	
 ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 charTo4HexDigits . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 encrypt32Bit . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+getstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+heapDestroyHarrison  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 hexToCharacter . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
@@ -99,6 +261,8 @@ Symbols:
 
                 N a m e                 Type     Value    Attr
 
+??0000 . . . . . . . . . . . . .	L Near	 0000004A _TEXT	
+??0001 . . . . . . . . . . . . .	L Near	 00000053 _TEXT	
 @CodeSize  . . . . . . . . . . .	Number	 00000000h   
 @DataSize  . . . . . . . . . . .	Number	 00000000h   
 @Interface . . . . . . . . . . .	Number	 00000000h   
@@ -109,12 +273,20 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000002 _TEXT	Public
-crlf . . . . . . . . . . . . . .	Byte	 00000072 _DATA	
-hexKey . . . . . . . . . . . . .	DWord	 00000075 _DATA	
-hexNums  . . . . . . . . . . . .	DWord	 0000001E _DATA	
-strChar  . . . . . . . . . . . .	Byte	 00000000 _DATA	
-strHexChars  . . . . . . . . . .	Byte	 00000022 _DATA	
-strString  . . . . . . . . . . .	Byte	 00000009 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 000001D1 _DATA	
+hexKey . . . . . . . . . . . . .	DWord	 000001D4 _DATA	
+numBytes . . . . . . . . . . . .	DWord	 000001D8 _DATA	
+strAfter . . . . . . . . . . . .	Byte	 0000027B _DATA	
+strAsk4Key . . . . . . . . . . .	Byte	 000001DC _DATA	
+strAskSentence . . . . . . . . .	Byte	 00000201 _DATA	
+strChar  . . . . . . . . . . . .	Byte	 00000062 _DATA	
+strEncrypted . . . . . . . . . .	Byte	 00000251 _DATA	
+strHexChars  . . . . . . . . . .	Byte	 0000016D _DATA	
+strNormal  . . . . . . . . . . .	Byte	 00000227 _DATA	
+strProjInfo  . . . . . . . . . .	Byte	 00000000 _DATA	
+strString  . . . . . . . . . . .	Byte	 0000006C _DATA	
+strTranslates  . . . . . . . . .	Byte	 000002A5 _DATA	
+tryAgainBuddy  . . . . . . . . .	L Near	 0000005F _TEXT	
 
 	   0 Warnings
 	   0 Errors

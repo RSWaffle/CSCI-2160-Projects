@@ -53,8 +53,9 @@ getBytes MACRO String:REQ
 ENDM
 ;******************************************************************************************
 .DATA
-	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 61h, 62h, 63h, 64h, 65h, 66h, 41h, 42h, 43h, 44h, 45h, 46h 		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 ABCDEF (upper and lower case)
-	bTemps byte 50 dup(?)													;memory to hold the number that is built in extractDwords
+	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 61h, 62h, 63h, 64h, 65h, 66h, 41h, 42h, 43h, 44h, 45h, 46h 		
+													;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 ABCDEF (upper and lower case)
+	bTemps byte 50 dup(?)							;memory to hold the number that is built in extractDwords
 	crlf byte  10,13,0								;Null-terminated string to skip to new line
 ;******************************************************************************************
 .CODE
@@ -287,14 +288,15 @@ COMMENT%
 ******************************************************************************
 *Name: encrypt32Bit                                                          *
 *Purpose:                                                                    *
-*	  Intakes a address of hex chars, converts them to ascii, then returns a *
-*		new address with ascii characters									 *
+*	  Intakes a source string, a mask and the number of bytes, encryptes them*
+*		and returns a new address with the encripted values                  *
 *Date Created: 11/28/2019                                                    *
-*Date Modified: 11/28/2019                                                   *
+*Date Modified: 11/30/2019                                                   *
 *                                                                            *
 *@param lpSourceString:dword                                                 *
 *@param dMask:dword                                                          *
 *@param numBytes:dword                                                       *
+*@returns encryptedAddr:dword                                                *
 *****************************************************************************%
 encrypt32Bit PROC stdcall uses EBX ECX EDX ESI, lpSourceString:dword, dMask:dword , numBytes:dword
 LOCAL outAddr:dword, remainder:byte 		;set up stack frame and declare local variables

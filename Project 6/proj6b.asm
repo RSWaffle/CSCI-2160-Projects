@@ -14,11 +14,15 @@
 	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword
 	hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
 	charTo4HexDigits PROTO stdcall, lpSourceString:dword
+	encrypt32Bit PROTO stdcall, lpSourceString:dword, dMask:dword , numBytes:dword
 ;******************************************************************************************
 .DATA
 strChar	byte "ABCdeF05" ,0
+strString byte "This is a sentence!!",0
 hexNums dword 1234ABCDh
 strHexChars byte 80 dup(?)	;holds converted string of characters
+crlf byte  10,13,0								;Null-terminated string to skip to new line
+hexKey DWORD ?
 
 
 ;******************************************************************************************
@@ -26,10 +30,24 @@ strHexChars byte 80 dup(?)	;holds converted string of characters
 	XOR EAX, EAX
 _start:
 
-INVOKE hexToCharacter, addr strHexChars, addr strChar, 8
-INVOKE putstring, addr strHexChars
 
 INVOKE charTo4HexDigits, addr strChar
+MOV hexKey, EAX
+INVOKE putstring, addr crlf
+INVOKE hexToCharacter, addr strHexChars, addr strString, 20
+INVOKE putString, addr strHexChars
+
+INVOKE encrypt32Bit, addr strString, hexKey, 20
+MOV EBX, EAX
+INVOKE putstring, addr crlf
+INVOKE hexToCharacter, addr strHexChars, EAX, 20
+INVOKE putString, addr strHexChars
+
+
+INVOKE encrypt32Bit, EBX, hexKey, 20
+INVOKE putstring, addr crlf
+INVOKE hexToCharacter, addr strHexChars, EAX, 20
+INVOKE putString, addr strHexChars
 
 MOV EAX, 0
 

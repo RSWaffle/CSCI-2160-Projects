@@ -12,7 +12,8 @@
 ;******************************************************************************************
 	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
 	memoryallocBailey PROTO Near32 stdcall, dSize:DWORD							;dynamically allocate bytes in memory
-		ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				  ;This converts ASCII characters to the dword value
+	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword
+	hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
 ;******************************************************************************************
 COMMENT %
 
@@ -53,7 +54,8 @@ ENDM
 ;******************************************************************************************
 .DATA
 	WhiteListChars byte 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 61h, 62h, 63h, 64h, 65h, 66h, 41h, 42h, 43h, 44h, 45h, 46h 		;set of whitelisted characters, 0 1 2 3 4 5 6 7 8 9 ABCDEF (upper and lower case)
-	bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
+	bTemps byte 50 dup(?)													;memory to hold the number that is built in extractDwords
+	crlf byte  10,13,0								;Null-terminated string to skip to new line
 ;******************************************************************************************
 .CODE
 COMMENT%
@@ -70,7 +72,7 @@ COMMENT%
 *@param numBytes:dword                                                       *
 *****************************************************************************%
 hexToCharacter PROC stdcall uses EBX EDX EDI ESI, lpDestination:dword, lpSource:dword, numBytes:dword
-LOCAL tempByte:byte
+LOCAL tempByte:byte				;sets up our stack frame and declares our local variables.
 MOV EBX, numBytes				;move the number of bytes to be copied into ebx
 
 .IF EBX == 0					;if it is equal to 0
@@ -163,13 +165,13 @@ COMMENT%
 *Purpose:                                                                    *
 *	  Accepts a null terminated strings and returns a dword mask    		 *
 *Date Created: 11/28/2019                                                    *
-*Date Modified: 11/28/2019                                                   *
+*Date Modified: 11/29/2019                                                   *
 *                                                                            *
 *@param lpSourceString:dword                                                 *
 *@returns dMask:dword                                                        *
 *****************************************************************************%
 charTo4HexDigits PROC stdcall uses EBX ECX EDX EDI ESI, lpSourceString:dword
-	LOCAL outVal:dword, inASCII:dword, numBytes:Byte
+LOCAL outVal:dword, inASCII:dword, numBytes:Byte
 												;sets up our stack frame and declares our local variables.
 	MOV EAX, lpSourceString						;moves into EAX the address of the array with ascii values.
 	MOV inASCII, EAX							;moves the address into our local variable for clarity.
@@ -294,7 +296,58 @@ COMMENT%
 *@param dMask:dword                                                          *
 *@param numBytes:dword                                                       *
 *****************************************************************************%
-encrypt32Bit PROC stdcall, lpSourceString:dword, dMask:dword , numBytes:dword
+encrypt32Bit PROC stdcall uses EBX ECX EDX ESI, lpSourceString:dword, dMask:dword , numBytes:dword
+LOCAL outAddr:dword, remainder:byte 		;set up stack frame and declare local variables
+
+	INVOKE memoryallocBailey, numBytes		;allocate enough memory on the heap to store the output 
+	MOV outAddr, EAX						;stores the output address inside a local variable
+
+	MOV EAX, numBytes						;move the number of bytes into eax so we can calculate if string is apporopiate size
+	MOV EBX, 4								;move into ebx 4 so we can divide
+	XOR EDX, EDX							;set EDX to 0
+	DIV EBX									;divide by 4 to get remainder 
+	MOV remainder, DL						;store the remainder
+	MOVSX ECX, AX							;move the number of times 4 goes into othe number of bytes into ecx
+
+	MOV EAX, dMask							;move the mask passed in into eax
+	XOR ESI, ESI							;set ESi to 0
+	XOR EBX, EBX							;set ebx to 0
+
+	.WHILE ECX !=0							;while ecx is not 0
+		MOV EDX, lpSourceString				;move the source string into edx
+		MOV EBX, [EDX + ESI]				;move the 4 bytes in location edx + esi into ebx
+		XOR EBX, EAX						;xor the two registers together for encryption
+		MOV EDX, outAddr					;moves the out address into edx
+		MOV [EDX + ESI], EBX				;moves the encrypted 4 bytes into the output address location
+		
+		ADD ESI, 4							;add 4 to esi to get the next 4 bytes
+		DEC ECX								;dec ecx so we can terminate the loop
+	.ENDW
+
+	MOVSX EBX, remainder					;move the remainder into ebx
+	.IF remainder == 0						;if the remainder is 0, we are done
+		JMP Done							;jump to done
+	.ELSEIF remainder == 1					;if the remainder is 1
+		MOV CL, 24							;move the number of bits we need to shift
+	.ELSEIF remainder ==2 					;if the remainder is 2
+		MOV CL, 16							;move into cl the number of bits we need to shift
+	.ELSE 									;if the remainder is 3
+		MOV CL, 8							;move into cl the number of bits we need to shift
+	.ENDIF									;endif
+
+	MOV EAX, dMask							;move the mask into eax for encryption of the remaining bits
+	SHR EAX, CL								;shift the mask cl number of bits to appropriately encrypt
+	XOR EBX, EBX							;set ebx to 0
+		
+	MOV EDX, lpSourceString					;move the source string into edx
+	MOV EBX, [EDX + ESI]					;move the 4 bytes in location edx + esi into ebx
+	XOR EBX, EAX							;xor the two registers together for encryption
+	MOV EDX, outAddr						;moves the out address into edx
+	MOV [EDX + ESI], EBX					;moves the encrypted 4 bytes into the output address location
+
+	Done:
+		MOV EAX, outAddr					;move the encrypted output address into eax
+		RET									;return to where i was called from
 encrypt32Bit ENDP
 ;************************************* the instructions below calls for "normal termination"	
 

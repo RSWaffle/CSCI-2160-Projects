@@ -1,5 +1,5 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 21:29:58
-convertMethods.asm					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:41:02
+convertmethods.asm					     Page 1 - 1
 
 
 				;******************************************************************************************
@@ -16,7 +16,8 @@ convertMethods.asm					     Page 1 - 1
 				;******************************************************************************************
 					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
 					memoryallocBailey PROTO Near32 stdcall, dSize:DWORD							;dynamically allocate bytes in memory
-						ascint32 PROTO NEAR32 stdcall, lpStringToConvert:dword  				  ;This converts ASCII characters to the dword value
+					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword
+					hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
 				;******************************************************************************************
 				COMMENT %
 
@@ -61,7 +62,10 @@ convertMethods.asm					     Page 1 - 1
 	   61 62 63 64 65
 	   66 41 42 43 44
 	   45 46
- 00000016				bTemps byte 0 dup(?)													;memory to hold the number that is built in extractDwords
+ 00000016  00000032 [			bTemps byte 50 dup(?)													;memory to hold the number that is built in extractDwords
+	    00
+	   ]
+ 00000048 0A 0D 00			crlf byte  10,13,0								;Null-terminated string to skip to new line
 				;******************************************************************************************
  00000000			.CODE
 				COMMENT%
@@ -78,7 +82,7 @@ convertMethods.asm					     Page 1 - 1
 				*@param numBytes:dword                                                       *
 				*****************************************************************************%
  00000000			hexToCharacter PROC stdcall uses EBX EDX EDI ESI, lpDestination:dword, lpSource:dword, numBytes:dword
-				LOCAL tempByte:byte
+				LOCAL tempByte:byte				;sets up our stack frame and declares our local variables.
  0000000A  8B 5D 10		MOV EBX, numBytes				;move the number of bytes to be copied into ebx
 
 				.IF EBX == 0					;if it is equal to 0
@@ -171,13 +175,14 @@ convertMethods.asm					     Page 1 - 1
 				*Purpose:                                                                    *
 				*	  Accepts a null terminated strings and returns a dword mask    		 *
 				*Date Created: 11/28/2019                                                    *
-				*Date Modified: 11/28/2019                                                   *
+				*Date Modified: 11/29/2019                                                   *
 				*                                                                            *
 				*@param lpSourceString:dword                                                 *
 				*@returns dMask:dword                                                        *
 				*****************************************************************************%
  000000AD			charTo4HexDigits PROC stdcall uses EBX ECX EDX EDI ESI, lpSourceString:dword
-					LOCAL outVal:dword, inASCII:dword, numBytes:Byte;sets up our stack frame and declares our local variables.
+				LOCAL outVal:dword, inASCII:dword, numBytes:Byte
+																;sets up our stack frame and declares our local variables.
  000000B8  8B 45 08			MOV EAX, lpSourceString						;moves into EAX the address of the array with ascii values.
  000000BB  89 45 F8			MOV inASCII, EAX							;moves the address into our local variable for clarity.
 
@@ -203,7 +208,7 @@ convertMethods.asm					     Page 1 - 1
 					.IF AL >= 10								;if theyre more than 4 bytes then 
  000000E0  B8 FFFFFFFF				MOV EAX, -1								;move -1 into the output
  000000E5  E9 000000FC				JMP finished							;jump to return 
-					.ENDIF
+					.ENDIF										;endif
 					
  000000EA  BB 00000000			MOV EBX, 0									;set EBX to 0 to avoid calculation error
  000000EF  BF 00000000			MOV EDI, 0									;sets our initial point in bTemps to the first place
@@ -268,47 +273,39 @@ convertMethods.asm					     Page 1 - 1
  00000184  EB 60						JMP finished					;jump to return 
 							.ENDIF								;endif
 							
-							;.IF BL >= 61h && BL <= 66h			;if the character is a lowercase letter
-							;	AND BL, 11011111b
-							;.ENDIF
+							.IF BL >= 65						;if the nibble grabbed is greater than or equal to 10
+ 0000018B  80 EB 37						SUB BL, 55						;we need to sub 55 to get the correct hex value
+							.ELSE								;if it is not
+ 00000190  80 EB 30						SUB BL, 48						;we need to sub 48 to get the correct hex value
+							.ENDIF								;endif
 							
-							.IF BL >= 65			;if the nibble grabbed is greater than or equal to 10
- 0000018B  80 EB 37						SUB BL, 55			;we need to sub 55 to get the correct hex value
-							.ELSE					;if it is not
- 00000190  80 EB 30						SUB BL, 48			;we need to seb 48 to get the correct hex value
-							.ENDIF					;endif
-							
- 00000193  66| C1 E3 08					SHL BX, 8
-
+ 00000193  66| C1 E3 08					SHL BX, 8							;shoft bx over to get it out of bl so we dont override it
  00000197  46						INC ESI								;increment esi if it is not valid to get to the next position in whitelisted characters
 							
- 00000198  8A 9E 00000016 R				MOV BL, bTemps[ESI]
+ 00000198  8A 9E 00000016 R				MOV BL, bTemps[ESI]					;move the current byte into bl
 							.IF BL < 30h && BL < 41h || BL > 46h && BL < 61h || BL > 66h
- 000001B7  B8 FFFFFFFF						MOV EAX, -1								;move -1 into the output
- 000001BC  EB 28						JMP finished							;jump to return 
+																;the above statement checks to see if the current character is invalid
+ 000001B7  B8 FFFFFFFF						MOV EAX, -1						;move -1 into the output
+ 000001BC  EB 28						JMP finished					;jump to return 
 							.ENDIF
 							
-							;.IF BL >= 61h && BL <= 66h
-							;	AND BL, 11011111b
-							;.ENDIF
+							.IF BL >= 65						;if the nibble grabbed is greater than or equal to 10
+ 000001C3  80 EB 37						SUB BL, 55						;we need to sub 55 to get the correct hex value
+							.ELSE								;if it is not
+ 000001C8  80 EB 30						SUB BL, 48						;we need to sub 48 to get the correct hex value
+							.ENDIF								;endif
 							
-							.IF BL >= 65			;if the nibble grabbed is greater than or equal to 10
- 000001C3  80 EB 37						SUB BL, 55			;we need to sub 55 to get the correct hex value
-							.ELSE					;if it is not
- 000001C8  80 EB 30						SUB BL, 48			;we need to seb 48 to get the correct hex value
-							.ENDIF					;endif
+ 000001CB  C0 E3 04					SHL BL, 4							;shift bl over by 4 bytes so it lines up with the previously pushed nibble
+ 000001CE  66| C1 EB 04					SHR BX, 4							;shift bx back to get the value into bl
+ 000001D2  8A C3					MOV AL, BL							;move the result into al
 							
- 000001CB  C0 E3 04					SHL BL, 4
- 000001CE  66| C1 EB 04					SHR BX, 4
- 000001D2  8A C3					MOV AL, BL
-							
-							.IF ECX != 1
- 000001D9  C1 E0 08						SHL EAX, 8
-							.ENDIF
+							.IF ECX != 1						;if we are not in the last iteration of the loop
+ 000001D9  C1 E0 08						SHL EAX, 8						;shift eax left to make room for a new value
+							.ENDIF								;endif
 
  000001DC  46						INC ESI								;increment esi if it is not valid to get to the next position in whitelisted characters
- 000001DD  49						DEC ECX
-						.ENDW								;decrement ECX and go to the top of the current loop
+ 000001DD  49						DEC ECX								;decrement ecx to eventually terminate the loop
+						.ENDW									;go to the top of the current loop
 
  000001E6				finished:
 						RET										;return back to where i was called 
@@ -327,13 +324,65 @@ convertMethods.asm					     Page 1 - 1
 				*@param dMask:dword                                                          *
 				*@param numBytes:dword                                                       *
 				*****************************************************************************%
- 000001EF			encrypt32Bit PROC stdcall, lpSourceString:dword, dMask:dword , numBytes:dword
- 000001EF			encrypt32Bit ENDP
+ 000001EF			encrypt32Bit PROC stdcall uses EBX ECX EDX ESI, lpSourceString:dword, dMask:dword , numBytes:dword
+				LOCAL outAddr:dword, remainder:byte 		;set up stack frame and declare local variables
+
+					INVOKE memoryallocBailey, numBytes		;allocate enough memory on the heap to store the output 
+ 00000201  89 45 FC			MOV outAddr, EAX						;stores the output address inside a local variable
+
+ 00000204  8B 45 10			MOV EAX, numBytes						;move the number of bytes into eax so we can calculate if string is apporopiate size
+					;DEC EAX									;ignore the null character
+ 00000207  BB 00000004			MOV EBX, 4								;move into ebx 4 so we can divide
+ 0000020C  33 D2			XOR EDX, EDX							;set EDX to 0
+ 0000020E  F7 F3			DIV EBX									;divide by 4 to get remainder 
+ 00000210  88 55 FB			MOV remainder, DL						;store the remainder
+ 00000213  0F BF C8			MOVSX ECX, AX							;move the number of times 4 goes into othe number of bytes into ecx
+
+ 00000216  8B 45 0C			MOV EAX, dMask							;move the mask passed in into eax
+ 00000219  33 F6			XOR ESI, ESI							;set ESi to 0
+ 0000021B  33 DB			XOR EBX, EBX							;set ebx to 0
+
+					.WHILE ECX !=0							;while ecx is not 0
+ 0000021F  8B 55 08				MOV EDX, lpSourceString				;move the source string into edx
+ 00000222  8B 1C 16				MOV EBX, [EDX + ESI]				;move the 4 bytes in location edx + esi into ebx
+ 00000225  33 D8				XOR EBX, EAX						;xor the two registers together for encryption
+ 00000227  8B 55 FC				MOV EDX, outAddr					;moves the out address into edx
+ 0000022A  89 1C 16				MOV [EDX + ESI], EBX				;moves the encrypted 4 bytes into the output address location
+						
+ 0000022D  83 C6 04				ADD ESI, 4							;add 4 to esi to get the next 4 bytes
+ 00000230  49					DEC ECX								;dec ecx so we can terminate the loop
+					.ENDW
+
+ 00000235  0F BE 5D FB			MOVSX EBX, remainder					;move the remainder into ebx
+					.IF remainder == 0						;if the remainder is 0, we are done
+ 0000023F  EB 2D				JMP Done							;jump to done
+					.ELSEIF remainder == 1					;if the remainder is 1
+ 00000249  B1 18				MOV CL, 24							;move the number of bits we need to shift
+					.ELSEIF remainder ==2 					;if the remainder is 2
+ 00000253  B1 10				MOV CL, 16							;move into cl the number of bits we need to shift
+					.ELSE 									;if the remainder is 3
+ 00000257  B1 08				MOV CL, 8							;move into cl the number of bits we need to shift
+					.ENDIF									;endif
+
+ 00000259  8B 45 0C			MOV EAX, dMask							;move the mask into eax for encryption of the remaining bits
+ 0000025C  D3 E8			SHR EAX, CL								;shift the mask cl number of bits to appropriately encrypt
+ 0000025E  33 DB			XOR EBX, EBX							;set ebx to 0
+						
+ 00000260  8B 55 08			MOV EDX, lpSourceString					;move the source string into edx
+ 00000263  8B 1C 16			MOV EBX, [EDX + ESI]					;move the 4 bytes in location edx + esi into ebx
+ 00000266  33 D8			XOR EBX, EAX							;xor the two registers together for encryption
+ 00000268  8B 55 FC			MOV EDX, outAddr						;moves the out address into edx
+ 0000026B  89 1C 16			MOV [EDX + ESI], EBX					;moves the encrypted 4 bytes into the output address location
+
+ 0000026E				Done:
+ 0000026E  8B 45 FC				MOV EAX, outAddr					;move the encrypted output address into eax
+						RET									;return to where i was called from
+ 00000279			encrypt32Bit ENDP
 				;************************************* the instructions below calls for "normal termination"	
 
 				END
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 21:29:58
-convertMethods.asm					     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:41:02
+convertmethods.asm					     Symbols 2 - 1
 
 
 
@@ -351,8 +400,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000016 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001EF DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000004B DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000279 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -360,7 +409,6 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-ascint32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 charTo4HexDigits . . . . . . . .	P Near	 000000AD _TEXT	Length= 00000149 Public STDCALL
   lpSourceString . . . . . . . .	DWord	 bp + 00000008
   outVal . . . . . . . . . . . .	DWord	 bp - 00000004
@@ -375,16 +423,20 @@ charTo4HexDigits . . . . . . . .	P Near	 000000AD _TEXT	Length= 00000149 Public 
   ValidNextChar  . . . . . . . .	L Near	 00000143 _TEXT	
   Packnfinish  . . . . . . . . .	L Near	 00000149 _TEXT	
   finished . . . . . . . . . . .	L Near	 000001E6 _TEXT	
-encrypt32Bit . . . . . . . . . .	P Near	 000001EF _TEXT	Length= 00000000 Public STDCALL
+encrypt32Bit . . . . . . . . . .	P Near	 000001EF _TEXT	Length= 0000008A Public STDCALL
   lpSourceString . . . . . . . .	DWord	 bp + 00000008
   dMask  . . . . . . . . . . . .	DWord	 bp + 0000000C
   numBytes . . . . . . . . . . .	DWord	 bp + 00000010
+  outAddr  . . . . . . . . . . .	DWord	 bp - 00000004
+  remainder  . . . . . . . . . .	Byte	 bp - 00000005
+  Done . . . . . . . . . . . . .	L Near	 0000026E _TEXT	
 hexToCharacter . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000AD Public STDCALL
   lpDestination  . . . . . . . .	DWord	 bp + 00000008
   lpSource . . . . . . . . . . .	DWord	 bp + 0000000C
   numBytes . . . . . . . . . . .	DWord	 bp + 00000010
   tempByte . . . . . . . . . . .	Byte	 bp - 00000001
 memoryallocBailey  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
 Symbols:
@@ -402,6 +454,7 @@ Symbols:
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 WhiteListChars . . . . . . . . .	Byte	 00000000 _DATA	
 bTemps . . . . . . . . . . . . .	Byte	 00000016 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 00000048 _DATA	
 
 	   0 Warnings
 	   0 Errors

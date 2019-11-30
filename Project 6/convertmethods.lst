@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:56:46
+Microsoft (R) Macro Assembler Version 6.11		    11/30/19 13:53:06
 convertmethods.asm					     Page 1 - 1
 
 
@@ -206,7 +206,7 @@ convertmethods.asm					     Page 1 - 1
  000000D7  5B		     1		POP EBX								
  000000D8  5D		     1		POP EBP								
  000000D9  88 45 F7			MOV numBytes, AL							;store the number of bytes for later calculation
-					.IF AL >= 10								;if theyre more than 4 bytes then 
+					.IF AL > 9								;if theyre more than 4 bytes then 
  000000E0  B8 FFFFFFFF				MOV EAX, -1								;move -1 into the output
  000000E5  E9 000000FC				JMP finished							;jump to return 
 					.ENDIF										;endif
@@ -382,7 +382,7 @@ convertmethods.asm					     Page 1 - 1
 				;************************************* the instructions below calls for "normal termination"	
 
 				END
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 23:56:46
+Microsoft (R) Macro Assembler Version 6.11		    11/30/19 13:53:06
 convertmethods.asm					     Symbols 2 - 1
 
 

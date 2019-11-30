@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/30/19 00:33:59
+Microsoft (R) Macro Assembler Version 6.11		    11/30/19 13:52:59
 proj6b.asm						     Page 1 - 1
 
 
@@ -86,20 +86,26 @@ proj6b.asm						     Page 1 - 1
 				"       Class: CSCI 2160-001",10,
 				"        Date: 12/07/2019",10,
 				"         Lab: Project 6b",0
- 00000062  0000000A [		strChar byte 10 dup (0)					;memory to hold a key the user types
+ 00000062 50 72 65 73 73	strPressEnter byte "Press ENTER to continue!",0
+	   20 45 4E 54 45
+	   52 20 74 6F 20
+	   63 6F 6E 74 69
+	   6E 75 65 21 00
+
+ 0000007B  0000000A [		strChar byte 10 dup (0)					;memory to hold a key the user types
 	    00
 	   ]
- 0000006C  00000100 [		strString byte 256 dup (0),0			;hold a string that the user types in
+ 00000085  00000100 [		strString byte 256 dup (0),0			;hold a string that the user types in
 	    00
 	   ] 00
- 0000016D  00000064 [		strHexChars byte 100 dup(0)				;holds converted string of characters
+ 00000186  00000064 [		strHexChars byte 100 dup(0)				;holds converted string of characters
 	    00
 	   ]
- 000001D1 0A 0D 00		crlf byte  10,13,0						;Null-terminated string to skip to new line
- 000001D4 00000000		hexKey DWORD ?							;converted key into a dword
- 000001D8 00000000		numBytes dword ?						;number of bytes in the user typed string
+ 000001EA 0A 0D 00		crlf byte  10,13,0						;Null-terminated string to skip to new line
+ 000001ED 00000000		hexKey DWORD ?							;converted key into a dword
+ 000001F1 00000000		numBytes dword ?						;number of bytes in the user typed string
 
- 000001DC 45 6E 74 65 72	strAsk4Key byte "Enter a 8 character encryption key: ", 0
+ 000001F5 45 6E 74 65 72	strAsk4Key byte "Enter a 8 character encryption key: ", 0
 	   20 61 20 38 20
 	   63 68 61 72 61
 	   63 74 65 72 20
@@ -107,7 +113,7 @@ proj6b.asm						     Page 1 - 1
 	   70 74 69 6F 6E
 	   20 6B 65 79 3A
 	   20 00
- 00000201 54 79 70 65 20	strAskSentence byte "Type a sentence you wish to encrypt: ", 0
+ 0000021A 54 79 70 65 20	strAskSentence byte "Type a sentence you wish to encrypt: ", 0
 	   61 20 73 65 6E
 	   74 65 6E 63 65
 	   20 79 6F 75 20
@@ -115,7 +121,7 @@ proj6b.asm						     Page 1 - 1
 	   74 6F 20 65 6E
 	   63 72 79 70 74
 	   3A 20 00
- 00000227 54 68 69 73 20	strNormal byte "This is the unencrypted sentence in HEX: ", 0 
+ 00000240 54 68 69 73 20	strNormal byte "This is the unencrypted sentence in HEX: ", 0 
 	   69 73 20 74 68
 	   65 20 75 6E 65
 	   6E 63 72 79 70
@@ -124,7 +130,7 @@ proj6b.asm						     Page 1 - 1
 	   63 65 20 69 6E
 	   20 48 45 58 3A
 	   20 00
- 00000251 20 20 54 68 69	strEncrypted byte "  This is the encrypted sentence in HEX: ", 0 
+ 0000026A 20 20 54 68 69	strEncrypted byte "  This is the encrypted sentence in HEX: ", 0 
 	   73 20 69 73 20
 	   74 68 65 20 65
 	   6E 63 72 79 70
@@ -133,7 +139,7 @@ proj6b.asm						     Page 1 - 1
 	   63 65 20 69 6E
 	   20 48 45 58 3A
 	   20 00
- 0000027B 20 20 54 68 69	strAfter byte "  This is the decrypted sentence in HEX: ", 0
+ 00000294 20 20 54 68 69	strAfter byte "  This is the decrypted sentence in HEX: ", 0
 	   73 20 69 73 20
 	   74 68 65 20 64
 	   65 63 72 79 70
@@ -142,7 +148,7 @@ proj6b.asm						     Page 1 - 1
 	   63 65 20 69 6E
 	   20 48 45 58 3A
 	   20 00
- 000002A5 20 74 72 61 6E	strTranslates byte " translates to: ", 0
+ 000002BE 20 74 72 61 6E	strTranslates byte " translates to: ", 0
 	   73 6C 61 74 65
 	   73 20 74 6F 3A
 	   20 00
@@ -156,7 +162,7 @@ proj6b.asm						     Page 1 - 1
 				INVOKE putstring, addr crlf											;skip to a new line
 				INVOKE putstring, addr strAskSentence								;ask the user to type in a sentence to encrypt
 				INVOKE getstring, addr strString, 256								;wait for input with a max of 256 characters
- 00000039  B8 0000006C R	MOV EAX, offset strString											;move the address of the user typed string into eax to get the number of bytes
+ 00000039  B8 00000085 R	MOV EAX, offset strString											;move the address of the user typed string into eax to get the number of bytes
 				getBytes EAX														;return the number of bytes
  0000003E  55		     1		PUSH EBP							
  0000003F  8B EC	     1		MOV EBP, ESP						
@@ -176,7 +182,7 @@ proj6b.asm						     Page 1 - 1
  00000057  5B		     1		POP EBX								
  00000058  5D		     1		POP EBP								
  00000059  48			DEC EAX																;remove null
- 0000005A  A3 000001D8 R	MOV numBytes, EAX													;store the number of bytes
+ 0000005A  A3 000001F1 R	MOV numBytes, EAX													;store the number of bytes
 
  0000005F			tryAgainBuddy:
 					INVOKE putstring, addr crlf										;skip to a new line
@@ -187,7 +193,7 @@ proj6b.asm						     Page 1 - 1
  0000008E  EB CF			JMP tryAgainBuddy												;if the key is invalid then jump back up
 				.ENDIF																;endif
 
- 00000090  A3 000001D4 R	MOV hexKey, EAX														;store the user entered key
+ 00000090  A3 000001ED R	MOV hexKey, EAX														;store the user entered key
 
 				INVOKE putstring, addr crlf											;skip to a new line
 				INVOKE putstring, addr crlf											;skip to a new line
@@ -208,14 +214,17 @@ proj6b.asm						     Page 1 - 1
 				INVOKE hexToCharacter, addr strHexChars, EAX, numBytes				;convert the hex to appropriate ascii
 				INVOKE putstring, addr strHexChars									;display the converted back string 
 
- 0000015A  33 C0		XOR EAX, EAX														;aid in debugging
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr crlf											;skip to a new line
+				INVOKE putstring, addr strPressEnter								;aid in debugging perss enter to continue message
+				INVOKE getstring, addr strPressEnter, 0								;wait for the user to press enter
 
 				;************************************* the instructions below calls for "normal termination"
 				INVOKE heapDestroyHarrison											;clears the memory used by heap allocharrion	
 				INVOKE ExitProcess,0						 
- 00000168			PUBLIC _start
+ 00000190			PUBLIC _start
 				END
-Microsoft (R) Macro Assembler Version 6.11		    11/30/19 00:33:59
+Microsoft (R) Macro Assembler Version 6.11		    11/30/19 13:52:59
 proj6b.asm						     Symbols 2 - 1
 
 
@@ -234,15 +243,15 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000002B6 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000168 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000002CF DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000190 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000168 Private
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000190 Private
   _start . . . . . . . . . . . .	L Near	 00000002 _TEXT	
   ??0000 . . . . . . . . . . . .	L Near	 0000004A _TEXT	
   ??0001 . . . . . . . . . . . .	L Near	 00000053 _TEXT	
@@ -273,19 +282,20 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000002 _TEXT	Public
-crlf . . . . . . . . . . . . . .	Byte	 000001D1 _DATA	
-hexKey . . . . . . . . . . . . .	DWord	 000001D4 _DATA	
-numBytes . . . . . . . . . . . .	DWord	 000001D8 _DATA	
-strAfter . . . . . . . . . . . .	Byte	 0000027B _DATA	
-strAsk4Key . . . . . . . . . . .	Byte	 000001DC _DATA	
-strAskSentence . . . . . . . . .	Byte	 00000201 _DATA	
-strChar  . . . . . . . . . . . .	Byte	 00000062 _DATA	
-strEncrypted . . . . . . . . . .	Byte	 00000251 _DATA	
-strHexChars  . . . . . . . . . .	Byte	 0000016D _DATA	
-strNormal  . . . . . . . . . . .	Byte	 00000227 _DATA	
+crlf . . . . . . . . . . . . . .	Byte	 000001EA _DATA	
+hexKey . . . . . . . . . . . . .	DWord	 000001ED _DATA	
+numBytes . . . . . . . . . . . .	DWord	 000001F1 _DATA	
+strAfter . . . . . . . . . . . .	Byte	 00000294 _DATA	
+strAsk4Key . . . . . . . . . . .	Byte	 000001F5 _DATA	
+strAskSentence . . . . . . . . .	Byte	 0000021A _DATA	
+strChar  . . . . . . . . . . . .	Byte	 0000007B _DATA	
+strEncrypted . . . . . . . . . .	Byte	 0000026A _DATA	
+strHexChars  . . . . . . . . . .	Byte	 00000186 _DATA	
+strNormal  . . . . . . . . . . .	Byte	 00000240 _DATA	
+strPressEnter  . . . . . . . . .	Byte	 00000062 _DATA	
 strProjInfo  . . . . . . . . . .	Byte	 00000000 _DATA	
-strString  . . . . . . . . . . .	Byte	 0000006C _DATA	
-strTranslates  . . . . . . . . .	Byte	 000002A5 _DATA	
+strString  . . . . . . . . . . .	Byte	 00000085 _DATA	
+strTranslates  . . . . . . . . .	Byte	 000002BE _DATA	
 tryAgainBuddy  . . . . . . . . .	L Near	 0000005F _TEXT	
 
 	   0 Warnings

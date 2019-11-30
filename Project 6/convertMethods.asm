@@ -179,7 +179,7 @@ LOCAL outVal:dword, inASCII:dword, numBytes:Byte
 
 	getBytes EAX								;get the number of bytes to see if it is bigger than 4 bytes
 	MOV numBytes, AL							;store the number of bytes for later calculation
-	.IF AL >= 10								;if theyre more than 4 bytes then 
+	.IF AL > 9									;if theyre more than 4 bytes then 
 		MOV EAX, -1								;move -1 into the output
 		JMP finished							;jump to return 
 	.ENDIF										;endif

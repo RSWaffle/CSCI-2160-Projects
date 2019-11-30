@@ -63,6 +63,8 @@ strProjInfo byte  10,13,9,
 "       Class: CSCI 2160-001",10,
 "        Date: 12/07/2019",10,
 "         Lab: Project 6b",0
+strPressEnter byte "Press ENTER to continue!",0
+
 strChar byte 10 dup (0)					;memory to hold a key the user types
 strString byte 256 dup (0),0			;hold a string that the user types in
 strHexChars byte 100 dup(0)				;holds converted string of characters
@@ -121,7 +123,10 @@ INVOKE encrypt32Bit, EBX, hexKey, numBytes							;call the encryption method to 
 INVOKE hexToCharacter, addr strHexChars, EAX, numBytes				;convert the hex to appropriate ascii
 INVOKE putstring, addr strHexChars									;display the converted back string 
 
-XOR EAX, EAX														;aid in debugging
+INVOKE putstring, addr crlf											;skip to a new line
+INVOKE putstring, addr crlf											;skip to a new line
+INVOKE putstring, addr strPressEnter								;aid in debugging perss enter to continue message
+INVOKE getstring, addr strPressEnter, 0								;wait for the user to press enter
 
 ;************************************* the instructions below calls for "normal termination"
 INVOKE heapDestroyHarrison											;clears the memory used by heap allocharrion	

@@ -13,9 +13,10 @@
 	ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
 	putstring  PROTO NEAR stdcall, lpStringToDisplay:dword
 	hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
+	charTo4HexDigits PROTO stdcall, lpSourceString:dword
 ;******************************************************************************************
 .DATA
-strChar	byte "ABCDEFG" ,0
+strChar	byte "ABCdeF05" ,0
 hexNums dword 1234ABCDh
 strHexChars byte 80 dup(?)	;holds converted string of characters
 
@@ -27,6 +28,8 @@ _start:
 
 INVOKE hexToCharacter, addr strHexChars, addr strChar, 8
 INVOKE putstring, addr strHexChars
+
+INVOKE charTo4HexDigits, addr strChar
 
 MOV EAX, 0
 

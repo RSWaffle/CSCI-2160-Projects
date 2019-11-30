@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 03:10:27
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 21:19:57
 proj6b.asm						     Page 1 - 1
 
 
@@ -17,12 +17,13 @@ proj6b.asm						     Page 1 - 1
 					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
 					putstring  PROTO NEAR stdcall, lpStringToDisplay:dword
 					hexToCharacter PROTO stdcall, lpDestination:dword, lpSource:dword, numBytes:dword
+					charTo4HexDigits PROTO stdcall, lpSourceString:dword
 				;******************************************************************************************
  00000000			.DATA
- 00000000 41 42 43 44 45	strChar	byte "ABCDEFG" ,0
-	   46 47 00
- 00000008 1234ABCD		hexNums dword 1234ABCDh
- 0000000C  00000050 [		strHexChars byte 80 dup(?)	;holds converted string of characters
+ 00000000 41 42 43 64 65	strChar	byte "ABCdeF05" ,0
+	   46 30 35 00
+ 00000009 1234ABCD		hexNums dword 1234ABCDh
+ 0000000D  00000050 [		strHexChars byte 80 dup(?)	;holds converted string of characters
 	    00
 	   ]
 
@@ -35,13 +36,15 @@ proj6b.asm						     Page 1 - 1
 				INVOKE hexToCharacter, addr strHexChars, addr strChar, 8
 				INVOKE putstring, addr strHexChars
 
- 0000001D  B8 00000000		MOV EAX, 0
+				INVOKE charTo4HexDigits, addr strChar
+
+ 00000027  B8 00000000		MOV EAX, 0
 
 				;************************************* the instructions below calls for "normal termination"	
 				INVOKE ExitProcess,0						 
- 00000029			PUBLIC _start
+ 00000033			PUBLIC _start
 				END
-Microsoft (R) Macro Assembler Version 6.11		    11/29/19 03:10:27
+Microsoft (R) Macro Assembler Version 6.11		    11/29/19 21:19:57
 proj6b.asm						     Symbols 2 - 1
 
 
@@ -53,17 +56,18 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000005C DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000029 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000005D DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000033 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000029 Private
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000033 Private
   _start . . . . . . . . . . . .	L Near	 00000002 _TEXT	
 ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+charTo4HexDigits . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 hexToCharacter . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 putstring  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
@@ -82,9 +86,9 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000002 _TEXT	Public
-hexNums  . . . . . . . . . . . .	DWord	 00000008 _DATA	
+hexNums  . . . . . . . . . . . .	DWord	 00000009 _DATA	
 strChar  . . . . . . . . . . . .	Byte	 00000000 _DATA	
-strHexChars  . . . . . . . . . .	Byte	 0000000C _DATA	
+strHexChars  . . . . . . . . . .	Byte	 0000000D _DATA	
 
 	   0 Warnings
 	   0 Errors

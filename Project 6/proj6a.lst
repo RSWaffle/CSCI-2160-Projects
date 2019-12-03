@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    12/02/19 23:02:08
+Microsoft (R) Macro Assembler Version 6.11		    12/03/19 02:08:20
 proj6a.asm						     Page 1 - 1
 
 
@@ -18,7 +18,9 @@ proj6a.asm						     Page 1 - 1
 					ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD  						;Executes "normal" termination
 				;******************************************************************************************
  00000000			.DATA
- 00000000 00000005		x dword 5
+ 00000000 00000004		x dword 4
+ 00000004 00000000		dVal dword ?
+ 00000008 00000000		temp dword ?
 				;******************************************************************************************
  00000000			.CODE
 
@@ -26,12 +28,15 @@ proj6a.asm						     Page 1 - 1
  00000000
  00000000  B8 00000000			MOV EAX, 0
  00000005  BA 00000000			MOV EDX, 0
- 0000000A 0000000A		main PROC
+ 0000000A  33 C9			XOR ECX, ECX
+ 0000000C 0000000C		main PROC
 
- 0000000A  FF 35 00000000 R		PUSH x
- 00000010  E8 00000003			call fun
- 00000015  83 C4 04			ADD esp, 4
- 00000018			main ENDP
+ 0000000C  FF 35 00000000 R		PUSH x
+ 00000012  89 25 00000008 R		MOV temp, ESP
+ 00000018  E8 00000008			call fun
+ 0000001D  83 C4 04			ADD esp, 4
+ 00000020  E9 000000CD			JMP finish
+ 00000025			main ENDP
 
 
 
@@ -40,7 +45,7 @@ proj6a.asm						     Page 1 - 1
 				******************************************************************************
 				*Name: fun	                                                                 *
 				*Purpose:                                                                    *
-				*	  A recursive equation for fun(n-1) + 2*fun(n-2)+3*fun(n-3), for n>2     *
+				*	  A recursive equation for fun(n-1) + 2(fun(n-2))+ 3(fun(n-3)), for n>2     *
 				*		 					possible array to track the results	     		 *
 				*Date Created: 11/26/2019                                                    *
 				*Date Modified: 11/26/2019                                                   *
@@ -48,44 +53,107 @@ proj6a.asm						     Page 1 - 1
 				*                                                                            *
 				*@param inVal:dword                                                          *
 				*****************************************************************************%
- 00000018			fun PROC stdcall
- 00000018  55				PUSH EBP 							;preserve the old stack frame
- 00000019  8B EC			MOV EBP, ESP						;set a new stack frame
+ 00000025			fun PROC stdcall
+ 00000025  55				PUSH EBP 							;preserve the old stack frame
+ 00000026  8B EC			MOV EBP, ESP						;set a new stack frame
+ 00000028  89 2D 00000008 R		MOV temp, EBP
 					
  = DWORD PTR [EBP + 8]			@n EQU DWORD PTR [EBP + 8]			;point @n to ebp + 8 so we don't have to reference it all the time
- 0000001B  FF 75 08			PUSH @n								;preserve the value @n points to
+
 					
 					.IF @n == 1							;if @n is equal to 1
- 00000024  B8 00000002				MOV EAX, 2						;move 2 into the output
- 00000029  EB 2E				JMP Done						;jump to done section
+ 00000034  B8 00000002				MOV EAX, 2						;move 2 into the output
+
+ 00000039  E9 000000A5				JMP Done						;jump to done section
 					.ELSEIF @n == 0						;if @n is equal to 0
- 00000033  B8 00000001				MOV EAX, 1						;move 1 into the output
- 00000038  EB 1F				JMP Done						;jump to done
+ 00000046  B8 00000001				MOV EAX, 1						;move 1 into the output
+
+ 0000004B  E9 00000093				JMP Done						;jump to done
 					.ELSEIF @n == 2						;if @n is equal to 2
- 00000042  B8 00000007				MOV EAX, 7						;move 7 into the output	
- 00000047  EB 10				JMP Done						;jump to the done section
+ 00000058  B8 00000007				MOV EAX, 7						;move 7 into the output	
+
+ 0000005D  E9 00000081				JMP Done						;jump to the done section
 					.ENDIF								;end if
+
+ 00000062  8B 5D 08			MOV EBX, @n
+ 00000065  4B				DEC EBX
+ 00000066  53				PUSH EBX
+ 00000067  41				INC ECX
+ 00000068  E8 FFFFFFB8			CALL fun
+ 0000006D  83 C4 04			ADD ESP, 4
 					
- 00000049  8B 5D 08			MOV EBX, @n
- 0000004C  4B				DEC EBX
- 0000004D  53				PUSH EBX
- 0000004E  E8 FFFFFFC5			CALL fun
- 00000053  83 C4 04			ADD ESP, 4
- 00000056  03 45 08			ADD EAX, @n
-				 
+					.WHILE	ECX != 1
+ 00000072  49					DEC ECX
+ 00000073  EB 6E				JMP Done
+						
+					.ENDW
+					
+					.IF ECX == 1 && EDX == 1
+					
+ 00000084  03 C0				ADD EAX, EAX
+ 00000086  EB 5B				JMP Done
+						
+					.ENDIF
+					
+					.IF ECX == 1 && EDX == 2
+					
+ 00000092  8B D0				MOV EDX, EAX
+ 00000094  03 C0				ADD EAX, EAX
+ 00000096  03 C2				ADD EAX, EDX
+						
+ 00000098  EB 49				JMP Done
+						
+					.ENDIF
+					
+ 0000009A  01 05 00000004 R		ADD dVal, EAX
+					
+ 000000A0  B9 00000000			MOV ECX, 0
+ 000000A5  BA 00000001			MOV EDX, 1
+ 000000AA  8B 5D 08			MOV EBX, @n
+ 000000AD  4B				DEC EBX
+ 000000AE  4B				DEC EBX
+ 000000AF  53				PUSH EBX
+ 000000B0  E8 FFFFFF70			CALL fun
+ 000000B5  83 C4 04			ADD ESP, 4
 
+ 000000B8  01 05 00000004 R		ADD dVal, EAX
+					
+ 000000BE  B9 00000000			MOV ECX, 0
 
- 00000059			Done:
- 00000059  5B				POP EBX
- 0000005A  5D				POP EBP
- 0000005B  C3				RET
- 0000005C			fun ENDP
- 0000005C				
-				;************************************* the instructions below calls for "normal termination"	
+ 000000C3  8B 5D 08			MOV EBX, @n
+ 000000C6  4B				DEC EBX
+ 000000C7  4B				DEC EBX
+ 000000C8  4B				DEC EBX
+ 000000C9  53				PUSH EBX
+ 000000CA  E8 FFFFFF56			CALL fun
+ 000000CF  83 C4 04			ADD ESP, 4
+					
+ 000000D2  8B D0			MOV EDX, EAX
+ 000000D4  03 C0			ADD EAX, EAX
+ 000000D6  03 C2			ADD EAX, EDX
+					
+ 000000D8  01 05 00000004 R		ADD dVal, EAX
+					
+ 000000DE  BA 00000002			MOV EDX, 2
+ 000000E3			Done:
+					.IF EDX == 2
+					
+ 000000E8  A1 00000004 R			MOV EAX, dVal
+ 000000ED  03 C0				ADD EAX,EAX
+ 000000EF  48					DEC EAX	
+					.ENDIF
+
+					
+ 000000F0  5D				POP EBP
+ 000000F1  C3				RET
+ 000000F2			fun ENDP
+					
+ 000000F2			finish:
+ 000000F2			;************************************* the instructions below calls for "normal termination"	
 				INVOKE ExitProcess,0						 
- 00000063			PUBLIC _start
+ 000000F9			PUBLIC _start
 				END
-Microsoft (R) Macro Assembler Version 6.11		    12/02/19 23:02:08
+Microsoft (R) Macro Assembler Version 6.11		    12/03/19 02:08:20
 proj6a.asm						     Symbols 2 - 1
 
 
@@ -97,20 +165,20 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000004 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000063 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000F9 DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000A Private
-$$$$$$00004  . . . . . . . . . .	P Near	 0000005C _TEXT	Length= 00000007 Private
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000C Private
+$$$$$$00004  . . . . . . . . . .	P Near	 000000F2 _TEXT	Length= 00000007 Private
 ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-fun  . . . . . . . . . . . . . .	P Near	 00000018 _TEXT	Length= 00000044 Public STDCALL
-  Done . . . . . . . . . . . . .	L Near	 00000059 _TEXT	
-main . . . . . . . . . . . . . .	P Near	 0000000A _TEXT	Length= 0000000E Public
+fun  . . . . . . . . . . . . . .	P Near	 00000025 _TEXT	Length= 000000D7 Public STDCALL
+  Done . . . . . . . . . . . . .	L Near	 000000E3 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 0000000C _TEXT	Length= 00000019 Public
 
 
 Symbols:
@@ -128,6 +196,9 @@ Symbols:
 @n . . . . . . . . . . . . . . .	Text   	 DWORD PTR [EBP + 8]
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 _start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+dVal . . . . . . . . . . . . . .	DWord	 00000004 _DATA	
+finish . . . . . . . . . . . . .	L Near	 000000F2 _TEXT	
+temp . . . . . . . . . . . . . .	DWord	 00000008 _DATA	
 x  . . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
 
 	   0 Warnings

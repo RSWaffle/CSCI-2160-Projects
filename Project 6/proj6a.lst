@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    12/05/19 13:51:34
+Microsoft (R) Macro Assembler Version 6.11		    12/12/19 12:10:41
 proj6a.asm						     Page 1 - 1
 
 
@@ -37,67 +37,64 @@ proj6a.asm						     Page 1 - 1
  00000000			fun PROC stdcall
  00000000  55				PUSH EBP 							;preserve the old stack frame
  00000001  8B EC			MOV EBP, ESP						;set a new stack frame
+					
+ 00000003  53				PUSH EBX
+ 00000004  52				PUSH EDX
 
  = DWORD PTR [EBP + 8]			@n EQU DWORD PTR [EBP + 8]			;point @n to ebp + 8 so we don't have to reference it all the time
 
 					.IF @n == 1							;if @n is equal to 1
- 00000009  B8 00000002				MOV EAX, 2						;move 2 into the output
- 0000000E  EB 76				JMP Done						;jump to done section
+ 0000000B  B8 00000002				MOV EAX, 2						;move 2 into the output
+ 00000010  EB 66				JMP Done						;jump to done section
 					.ELSEIF @n == 0						;if @n is equal to 0
- 00000018  B8 00000001				MOV EAX, 1						;move 1 into the output
- 0000001D  EB 67				JMP Done						;jump to done
+ 0000001A  B8 00000001				MOV EAX, 1						;move 1 into the output
+ 0000001F  EB 57				JMP Done						;jump to done
 					.ELSEIF @n == 2						;if @n is equal to 2
- 00000027  B8 00000007				MOV EAX, 7						;move 7 into the output	
- 0000002C  EB 58				JMP Done						;jump to the done section
+ 00000029  B8 00000007				MOV EAX, 7						;move 7 into the output	
+ 0000002E  EB 48				JMP Done						;jump to the done section
 					.ENDIF								;end if
 
- 0000002E  8B 5D 08			MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
- 00000031  4B				DEC EBX								;decrement to get n-1
- 00000032  53				PUSH EBX							;push n-1 onto the stack so we can push it through the function again
- 00000033  41				INC ECX								;increment ECX so we can track how many times we need to return later
- 00000034  E8 FFFFFFC7			CALL fun							;call our function again
- 00000039  83 C4 04			ADD ESP, 4							;eventually return back to this point and add back the number of bytes that we pushed onto the stack
+ 00000030  8B 5D 08			MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
+ 00000033  4B				DEC EBX								;decrement to get n-1
+ 00000034  53				PUSH EBX							;push n-1 onto the stack so we can push it through the function again
+ 00000035  E8 FFFFFFC6			CALL fun							;call our function again
+ 0000003A  83 C4 04			ADD ESP, 4							;eventually return back to this point and add back the number of bytes that we pushed onto the stack
 
-					.WHILE	ECX != 1					;while ECX is not equal to 1
- 0000003E  49					DEC ECX							;decrement so the loop eventually stops
- 0000003F  EB 45				JMP Done						;jump to done so we can return the required number of times to restore ebp from the base call
-					.ENDW								;end while
+ 0000003D  A3 00000000 R		MOV dVal, EAX						;add to the temp variable dVal the number that was returned from the first function call
 
- 00000046  01 05 00000000 R		ADD dVal, EAX						;add to the temp variable dVal the number that was returned from the first function call
+ 00000042  8B 5D 08			MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
+ 00000045  4B				DEC EBX								;decrement to get n-1
+ 00000046  4B				DEC EBX								;decrement to get n-2
+ 00000047  53				PUSH EBX							;push n-2 onto the stack so we can push it to the next call
+ 00000048  E8 FFFFFFB3			CALL fun							;call our function again
+ 0000004D  83 C4 04			ADD ESP, 4							;eventually return back to this point, add back the number of bytes that we used 
+ 00000050  03 C0			ADD EAX, EAX						;add EAX to EAX to simulate 2 * f(n-2)
+ 00000052  01 05 00000000 R		ADD dVal, EAX						;add to our temp dVal variable, the resulting value in EAX
 
- 0000004C  33 C9			XOR ECX, ECX						;reset ECX
- 0000004E  8B 5D 08			MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
- 00000051  4B				DEC EBX								;decrement to get n-1
- 00000052  4B				DEC EBX								;decrement to get n-2
- 00000053  53				PUSH EBX							;push n-2 onto the stack so we can push it to the next call
- 00000054  E8 FFFFFFA7			CALL fun							;call our function again
- 00000059  83 C4 04			ADD ESP, 4							;eventually return back to this point, add back the number of bytes that we used 
- 0000005C  03 C0			ADD EAX, EAX						;add EAX to EAX to simulate 2 * f(n-2)
- 0000005E  01 05 00000000 R		ADD dVal, EAX						;add to our temp dVal variable, the resulting value in EAX
-
- 00000064  33 C9			XOR ECX, ECX						;reset ECX
- 00000066  8B 5D 08			MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
- 00000069  4B				DEC EBX								;decrement to get n-1
- 0000006A  4B				DEC EBX								;decrement to get n-2
- 0000006B  4B				DEC EBX								;decrement to get n-3
- 0000006C  53				PUSH EBX							;push n-3 onto the stack so we can push it to the next call
- 0000006D  E8 FFFFFF8E			CALL fun							;call our function again
- 00000072  83 C4 04			ADD ESP, 4							;eventually return back to this point, add back the number of bytes that we used 
+ 00000058  8B 5D 08			MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
+ 0000005B  4B				DEC EBX								;decrement to get n-1
+ 0000005C  4B				DEC EBX								;decrement to get n-2
+ 0000005D  4B				DEC EBX								;decrement to get n-3
+ 0000005E  53				PUSH EBX							;push n-3 onto the stack so we can push it to the next call
+ 0000005F  E8 FFFFFF9C			CALL fun							;call our function again
+ 00000064  83 C4 04			ADD ESP, 4							;eventually return back to this point, add back the number of bytes that we used 
 					
- 00000075  8B D0			MOV EDX, EAX						;moves into EDX EAX so we can store it for a bit
- 00000077  03 C0			ADD EAX, EAX						;Add the two EAX registers together to get 2 * f(n-3)
- 00000079  03 C2			ADD EAX, EDX						;add into EAX, EDX which will get us 3 * f(n-3)
- 0000007B  01 05 00000000 R		ADD dVal, EAX						;add the resulting EAX value into dVal
- 00000081  A1 00000000 R		MOV EAX, dVal						;move the final dVal value into EAX for output
+ 00000067  8B D0			MOV EDX, EAX						;moves into EDX EAX so we can store it for a bit
+ 00000069  03 C0			ADD EAX, EAX						;Add the two EAX registers together to get 2 * f(n-3)
+ 0000006B  03 C2			ADD EAX, EDX						;add into EAX, EDX which will get us 3 * f(n-3)
+ 0000006D  01 05 00000000 R		ADD dVal, EAX						;add the resulting EAX value into dVal
+ 00000073  A1 00000000 R		MOV EAX, dVal						;move the final dVal value into EAX for output
 
- 00000086			Done:
- 00000086  5D				POP EBP								;restore EBP
- 00000087  C3				RET									;return to where I was called. 
- 00000088			fun ENDP
+ 00000078			Done:
+ 00000078  5A				POP EDX
+ 00000079  5B				POP EBX
+ 0000007A  5D				POP EBP								;restore EBP
+ 0000007B  C3				RET									;return to where I was called. 
+ 0000007C			fun ENDP
 
 				;************************************* the instructions below calls for "normal termination"
 				END
-Microsoft (R) Macro Assembler Version 6.11		    12/05/19 13:51:34
+Microsoft (R) Macro Assembler Version 6.11		    12/12/19 12:10:41
 proj6a.asm						     Symbols 2 - 1
 
 
@@ -110,7 +107,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00000100 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000004 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000088 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000007C DWord	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
@@ -118,8 +115,8 @@ Procedures,  parameters and locals:
                 N a m e                 Type     Value    Attr
 
 ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-fun  . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000088 Public STDCALL
-  Done . . . . . . . . . . . . .	L Near	 00000086 _TEXT	
+fun  . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000007C Public STDCALL
+  Done . . . . . . . . . . . . .	L Near	 00000078 _TEXT	
 
 
 Symbols:

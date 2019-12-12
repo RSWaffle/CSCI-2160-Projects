@@ -33,6 +33,9 @@ COMMENT%
 fun PROC stdcall
 	PUSH EBP 							;preserve the old stack frame
 	MOV EBP, ESP						;set a new stack frame
+	
+	PUSH EBX
+	PUSH EDX
 
 	@n EQU DWORD PTR [EBP + 8]			;point @n to ebp + 8 so we don't have to reference it all the time
 
@@ -50,18 +53,11 @@ fun PROC stdcall
 	MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
 	DEC EBX								;decrement to get n-1
 	PUSH EBX							;push n-1 onto the stack so we can push it through the function again
-	INC ECX								;increment ECX so we can track how many times we need to return later
 	CALL fun							;call our function again
 	ADD ESP, 4							;eventually return back to this point and add back the number of bytes that we pushed onto the stack
 
-	.WHILE	ECX != 1					;while ECX is not equal to 1
-		DEC ECX							;decrement so the loop eventually stops
-		JMP Done						;jump to done so we can return the required number of times to restore ebp from the base call
-	.ENDW								;end while
+	MOV dVal, EAX						;add to the temp variable dVal the number that was returned from the first function call
 
-	ADD dVal, EAX						;add to the temp variable dVal the number that was returned from the first function call
-
-	XOR ECX, ECX						;reset ECX
 	MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
 	DEC EBX								;decrement to get n-1
 	DEC EBX								;decrement to get n-2
@@ -71,7 +67,6 @@ fun PROC stdcall
 	ADD EAX, EAX						;add EAX to EAX to simulate 2 * f(n-2)
 	ADD dVal, EAX						;add to our temp dVal variable, the resulting value in EAX
 
-	XOR ECX, ECX						;reset ECX
 	MOV EBX, @n							;moves the value passed in into EBX so we can prepare it to pass 
 	DEC EBX								;decrement to get n-1
 	DEC EBX								;decrement to get n-2
@@ -87,6 +82,8 @@ fun PROC stdcall
 	MOV EAX, dVal						;move the final dVal value into EAX for output
 
 Done:
+	POP EDX
+	POP EBX
 	POP EBP								;restore EBP
 	RET									;return to where I was called. 
 fun ENDP
